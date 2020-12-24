@@ -1,0 +1,47 @@
+@startuml "Inkplate 6 Arduino Library"
+
+package "Inkplate6-Arduino" <<rectangle>> {
+
+  package "Arduino" <<frame>> {
+    class Print
+    class Wire
+  }
+
+  package "Adafruit-GFX" <<folder>> {
+    abstract class Adafruit_GFX
+    Print         <|-- Adafruit_GFX
+  }
+
+  package "Include" <<folder>> {
+    together group2 {
+      abstract class Graphics
+      abstract class Image
+      abstract class Shapes
+    }
+
+    together group1 {
+     class NetworkClient
+     class MCP
+     class System
+    }
+
+    group1 -[hidden]- group2
+    Adafruit_GFX  <|-- Image
+    NetworkClient <|-- Image
+    Image         <|-- Graphics
+    Shapes        <|-- Graphics
+    MCP           <|-- System
+    Wire          <..  MCP
+    NetworkClient <|-- System
+  }
+
+  package "Src" <<folder>> {
+    class Inkplate
+    Graphics      <|-- Inkplate
+    System        <|-- Inkplate
+  }
+
+  group1 -[hidden]-> Inkplate
+}
+
+@enduml

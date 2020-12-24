@@ -1,0 +1,12 @@
+{
+  "name":       "tools",
+  "frameworks": "espidf",
+  "platforms":  "espressif32",
+
+  "export": {
+    "include": [
+      "src/*.hpp",
+      "src/*.h"
+    ]
+  }
+}

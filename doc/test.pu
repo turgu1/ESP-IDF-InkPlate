@@ -1,0 +1,37 @@
+@startuml "ESP-IDF-InkPlate-Port"
+package "InkPlate Low Level" <<folder>> {
+  abstract class NonCopyable
+
+  class Wire << (S,#FF7700) Singleton >>
+  Wire : setup()
+  Wire : begin_transmission(addr)
+  Wire : read()
+  Wire : write(val)
+  Wire : end_transmission()
+  Wire : request_from(addr, size)
+
+  class MCP << (S,#FF7700) Singleton >>
+
+  class EInk << (S,#FF7700) Singleton >>
+  EInk : WIDTH
+  EInk : HEIGHT
+  EInk : typedef Bitmap1Bit
+  EInk : typedef Bitmap3Bit
+  EInk : setup()
+  EInk : update(Bitmap1bit &)
+  EInk : update(Bitmap3bit &)
+  EInk : partial_update(Bitmap1bit &)
+  EInk : partial_update(Bitmap3bit &)
+  EInk : clear_bitmap(Bitmap1bit &)
+  EInk : clear_bitmap(Bitmap3bit &)
+  EInk : clean()
+  EInk : read_power_good()
+  EInk : read_temperature()
+
+  NonCopyable <|-- Wire
+  NonCopyable <|-- MCP
+  NonCopyable <|-- EInk
+  Wire o-- MCP
+  MCP o-- EInk
+}
+@enduml

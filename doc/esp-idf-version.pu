@@ -1,0 +1,115 @@
+@startuml "Inkplate ESP-IDF Library"
+
+package "Inkplate-ESP-IDF" <<rectangle>> {
+
+  package "ESP-IDF Framework" <<rectangle>> {
+  }
+
+  package "Graphical" <<folder>> {
+    class Print    
+    abstract class Adafruit_GFX
+    together group2 {
+      abstract class Graphics
+      abstract class Image
+      class Shapes
+    }
+    Print         <|-- Adafruit_GFX
+  }
+
+  package "ESP-IDF Services" <<folder>> {
+    class NetworkClient
+    class SDCard  << (S,#FF7700) Singleton >>
+    class Wire     << (S,#FF7700) Singleton >>
+  }
+
+  "ESP-IDF Framework" <.. "ESP-IDF Services"
+
+  package "Drivers" <<folder>> {
+
+    together {
+      class MCP23017 << (S,#FF7700) Singleton >>
+      class TPS65186 << (S,#FF7700) Singleton >>
+    }
+    together {
+      class TouchScreen   << (S,#FF7700) Singleton >>
+      class TouchKeys << (S,#FF7700) Singleton >>
+    }
+
+    together {
+      abstract class EInk
+
+      package "EInkKind" <<folder>> {
+        class EInk6      << (S,#FF7700) Singleton >>
+        class EInk6Plus  << (S,#FF7700) Singleton >>
+        class EInk10     << (S,#FF7700) Singleton >>
+        EInk6  -[hidden]-> EInk10
+        EInk10 -[hidden]-> EInk6Plus
+      }
+    }
+    ' MCP23017 -[hidden]-> TouchKeys  
+
+    EInk -[hidden]> TouchKeys
+    TouchKeys -[hidden]- TouchScreen
+
+    Wire      <.. MCP23017
+    Wire      <.. TPS65186
+    TPS65186  <.. EInk
+    MCP23017  <.. EInk
+    MCP23017  <.. TouchKeys
+    MCP23017  <.. TouchScreen
+    EInk     <|-- EInkKind
+
+  }
+
+  "EInkKind" -right[hidden] EInk
+
+  package "InkPlate" <<folder>> {
+
+    together group1 {
+      class InkPlatePlatform   << (S,#FF7700) Singleton >>
+      class Inkplate << (S,#FF7700) Singleton >>
+    }
+
+    Graphics           <|-- Inkplate
+    InkPlatePlatform    <.. Inkplate
+    Adafruit_GFX       <|-- Image
+    Image              <|-- Graphics
+    Shapes             <|-- Graphics
+    Drivers             <.. InkPlatePlatform
+    "ESP-IDF Services"  <.. InkPlatePlatform
+
+    ' EInkKind            <.. InkPlatePlatform
+
+    ' EInk                <.. Inkplate
+  }
+
+  "Drivers" -left[hidden]- "Inkplate"
+
+  package "User App" <<folder>> {
+    class MainApp
+  }
+
+  Inkplate --o MainApp
+
+    package "Bitmaps" <<folder>> {
+      abstract class Bitmap
+      abstract class Bitmap1Bit
+      abstract class Bitmap3Bit
+      class Bitmap1BitX
+      class Bitmap3BitX
+      Bitmap <|-- Bitmap1Bit
+      Bitmap <|-- Bitmap3Bit
+      Bitmap1Bit <|-- Bitmap1BitX
+      Bitmap3Bit <|-- Bitmap3BitX
+    }
+
+    ' Bitmaps <|-- EInkKind
+    ' Bitmaps -right[hidden]- EInkKind
+    Bitmap1Bit --o Graphics
+    Graphical -left[hidden]- Bitmaps
+    ' Inkplate -left[hidden]- Graphical
+    ' Inkplate ..> EInk 
+
+}
+
+@enduml
