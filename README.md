@@ -1,6 +1,6 @@
 # ESP-IDF-InkPlate
 
-A porting effort for the e-Radionica InkPlate software that can be find [here](https://github.com/e-radionicacom/Inkplate-Arduino-library) to the ESP-IDF framework.
+A porting effort to the ESP-IDF framework for the e-Radionica InkPlate software that can be find [here](https://github.com/e-radionicacom/Inkplate-Arduino-library).
 
 --> Work in progress. Not ready yet. <--
 
