@@ -24,12 +24,13 @@
 #include <cstdlib>
 #include <cstdio>
 #include <string>
-#include <cmath>
+#include <math.h>
 
-#include "print.h"
+#include "print.hpp"
+
+#include <cstdarg>
 
 extern "C" {
-    #include "stdarg.h"
     #include "time.h"
 }
 
@@ -49,7 +50,7 @@ size_t Print::write(const uint8_t *buffer, size_t size)
 //undefined reference to `Print::printf(char const*, ...)
 // I just want to use Adafruit_GFX print function but not
 // overload ESP-IDF owns means to do printf
-/* size_t Print::printf(const char *format, ...)
+size_t Print::printf(const char *format, ...)
 {
     char loc_buf[64];
     char * temp = loc_buf;
@@ -77,14 +78,9 @@ size_t Print::write(const uint8_t *buffer, size_t size)
         free(temp);
     }
     return len;
-} */
-
-size_t Print::print(const __FlashStringHelper *ifsh)
-{
-    return print(reinterpret_cast<const char *>(ifsh));
 }
 
-size_t Print::print(const String &s)
+size_t Print::print(const std::string &s)
 {
     return write(s.c_str(), s.length());
 }
@@ -144,13 +140,6 @@ size_t Print::print(double n, int digits)
     return printFloat(n, digits);
 }
 
-size_t Print::println(const __FlashStringHelper *ifsh)
-{
-    size_t n = print(ifsh);
-    n += println();
-    return n;
-}
-
 size_t Print::print(const Printable& x)
 {
     return x.printTo(*this);
@@ -175,7 +164,7 @@ size_t Print::println(void)
     return print("\r\n");
 }
 
-size_t Print::println(const String &s)
+size_t Print::println(const std::string &s)
 {
     size_t n = print(s);
     n += println();

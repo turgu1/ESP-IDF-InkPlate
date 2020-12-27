@@ -21,13 +21,16 @@ Distributed as-is; no warranty is given.
 Image *_imagePtrJpeg = nullptr;
 Image *_imagePtrPng  = nullptr;
 
-Image::Image(int16_t w, int16_t h) : Adafruit_GFX(w, h)
+Image::Image(int16_t w, int16_t h) : Adafruit_GFX(w, h), e_ink_width(w), e_ink_height(h)
 {
     _imagePtrJpeg = this;
     _imagePtrPng  = this;
+
+    pixelBuffer  = new uint8_t[pixelBufferSize = (e_ink_width * 4 + 5)];
+    ditherBuffer = new uint8_t[ditherBufferSize = (2 * e_ink_width + 20)];
 }
 
-bool Image::drawImage(const String path, int x, int y, bool dither, bool invert)
+bool Image::drawImage(const std::string path, int x, int y, bool dither, bool invert)
 {
     return drawImage(path.c_str(), x, y, dither, invert);
 };
@@ -57,16 +60,16 @@ bool Image::drawImage(const char * path, int x, int y, bool dither, bool invert)
 
 bool Image::drawImage(const uint8_t *buf, int x, int y, int16_t w, int16_t h, uint8_t c, uint8_t bg)
 {
-    if (getDisplayMode() == INKPLATE_1BIT && bg == 0xFF)
+    if (getDisplayMode() == DisplayMode::INKPLATE_1BIT && bg == 0xFF)
         drawBitmap(x, y, buf, w, h, c);
-    else if (getDisplayMode() == INKPLATE_1BIT && bg != 0xFF)
+    else if (getDisplayMode() == DisplayMode::INKPLATE_1BIT && bg != 0xFF)
         drawBitmap(x, y, buf, w, h, c, bg);
-    else if (getDisplayMode() == INKPLATE_3BIT)
+    else if (getDisplayMode() == DisplayMode::INKPLATE_3BIT)
         drawBitmap3Bit(x, y, buf, w, h);
     return 1;
 }
 
-bool Image::drawImage(const String path, const Format& format, const int x, const int y, const bool dither, const bool invert)
+bool Image::drawImage(const std::string path, const Format& format, const int x, const int y, const bool dither, const bool invert)
 {
     return drawImage(path.c_str(), format, x, y, dither, invert);
 };
@@ -114,7 +117,7 @@ bool Image::drawImage(const char* path, const Format& format, const Position& po
 
 void Image::drawBitmap3Bit(int16_t _x, int16_t _y, const unsigned char *_p, int16_t _w, int16_t _h)
 {
-    if (getDisplayMode() != INKPLATE_3BIT)
+    if (getDisplayMode() != DisplayMode::INKPLATE_3BIT)
         return;
     uint8_t _rem = _w & 1;
     int i, j;

@@ -17,6 +17,8 @@ Distributed as-is; no warranty is given.
 #ifndef __INKPLATE_H__
 #define __INKPLATE_H__
 
+#include "defines.hpp"
+
 #include "graphics.hpp"
 #include "inkplate_platform.hpp"
 #include "network_client.hpp"
@@ -25,25 +27,19 @@ class Inkplate : public Graphics
 {
   private:
     NetworkClient network_client;
-  public:
-    Inkplate(uint8_t mode);
 
-    void begin(void);
-    void clearDisplay();
-    void display();
-    void preloadScreen();
-    void partialUpdate(bool);
-    void clean();
-    void einkOn();
-    void einkOff();
+  public:
+
+    Inkplate(DisplayMode mode);
+
+    void begin(void)       { inkplate_platform.setup(); }
+
     uint8_t readPowerGood();
 
-    bool joinAP(const char *ssid, const char *pass) {
-        return network_client.joinAP(ssid, pass);
-    }
-
-    void disconnect()  { network_client.disconnect(); }
-    bool isConnected() { return network_client.isConnected(); }
+    inline bool joinAP(const char * ssid, const char * pass) { return network_client.joinAP(ssid, pass); }
+    inline void disconnect()  { network_client.disconnect();         }
+    inline bool isConnected() { return network_client.isConnected(); }
+    inline int _getRotation() { return Graphics::getRotation();     };
 };
 
 #endif

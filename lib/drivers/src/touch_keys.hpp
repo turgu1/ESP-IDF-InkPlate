@@ -2,15 +2,14 @@
 #define __TOUCH_KEYS_HPP__
 
 #include "non_copyable.hpp"
-#include "mcp.hpp"
+#include "mcp23017.hpp"
 
 class TouchKeys : NonCopyable 
 {
   public:
     enum class Key : uint8_t { KEY_0, KEY_1, KEY_2 };
 
-    static inline TouchKeys & get_singleton() noexcept { return singleton; }
-
+    TouchKeys(MCP23017 & _mcp) : mcp(_mcp) {}
     bool setup();
 
     /**
@@ -32,19 +31,12 @@ class TouchKeys : NonCopyable
 
   private:
     static constexpr char const * TAG = "TouchKeys";
-    static TouchKeys singleton;
-    TouchKeys();
+    MCP23017 & mcp;
 
-    const MCP::Pin TOUCH_0 = MCP::Pin::IOPIN_10;
-    const MCP::Pin TOUCH_1 = MCP::Pin::IOPIN_11;
-    const MCP::Pin TOUCH_2 = MCP::Pin::IOPIN_12;
+    const MCP23017::Pin TOUCH_0 = MCP23017::Pin::IOPIN_10;
+    const MCP23017::Pin TOUCH_1 = MCP23017::Pin::IOPIN_11;
+    const MCP23017::Pin TOUCH_2 = MCP23017::Pin::IOPIN_12;
 
 };
-
-#ifdef __TOUCH_KEYS__
-  TouchKeys & touch_keys = TouchKeys::get_singleton();
-#else
-  extern TouchKeys & touch_keys;
-#endif
 
 #endif

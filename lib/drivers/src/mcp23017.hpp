@@ -1,9 +1,9 @@
 /*
-MCP.h
-Inkplate 6 ESP-IDF
+mcp23017.hpp
+Inkplate ESP-IDF
 
 Modified by Guy Turcotte 
-November 12, 2020
+December 26, 2020
 
 from the Arduino Library:
 
@@ -44,10 +44,10 @@ public:
     }
 };
 
-class MCP : NonCopyable
+class MCP23017 : NonCopyable
 {
   private:
-    static constexpr char const * TAG = "MCP";
+    static constexpr char const * TAG = "MCP23017";
     enum class Reg : uint8_t {
       IODIRA   = 0x00,
       IODIRB   = 0x01,
@@ -73,32 +73,30 @@ class MCP : NonCopyable
       OLATB    = 0x15 
     };
 
-    static const uint8_t MCP_ADDRESS = 0x20;
+    const uint8_t mcp_address;
     enum_array<Reg, uint8_t, 22> registers;
  
     // Adjust Register, adding offset p
     inline Reg R(Reg r, uint8_t p) { return (Reg)((uint8_t)r + p); }
 
-    static MCP singleton;
-    MCP() { std::fill(registers.begin(), registers.end(), 0); }; // Not instanciable
-
-    void read_all_registers();
-    
-    void   read_registers(Reg first_reg, uint8_t count);
-    uint8_t read_register(Reg reg);
+    void   read_all_registers();
+    void       read_registers(Reg first_reg, uint8_t count);
+    uint8_t     read_register(Reg reg);
     
     void update_all_registers();
-    
-    void   update_register(Reg reg,       uint8_t  value);
-    void  update_registers(Reg first_reg, uint8_t  count);
+    void      update_register(Reg reg,       uint8_t  value);
+    void     update_registers(Reg first_reg, uint8_t  count);
 
   public:
-    static inline MCP & get_singleton() noexcept { return singleton; }
 
-    enum class PinMode : uint8_t { INPUT,    INPUT_PULLUP, OUTPUT };
-    enum class IntMode : uint8_t { CHANGE,   FALLING,      RISING };
-    enum class IntPort : uint8_t { INTPORTA, INTPORTB             };
-    enum class SignalLevel { LOW, HIGH };
+    MCP23017(uint8_t address) : mcp_address(address) { 
+      std::fill(registers.begin(), registers.end(), 0); 
+    }
+
+    enum class PinMode     : uint8_t { INPUT,    INPUT_PULLUP, OUTPUT };
+    enum class IntMode     : uint8_t { CHANGE,   FALLING,      RISING };
+    enum class IntPort     : uint8_t { INTPORTA, INTPORTB             };
+    enum class SignalLevel : uint8_t { LOW,      HIGH                 };
 
     enum class Pin : uint8_t {
       IOPIN_0,
@@ -130,23 +128,15 @@ class MCP : NonCopyable
     void        digital_write(Pin pin, SignalLevel state);
     SignalLevel  digital_read(Pin pin);
 
-    void set_int_output(IntPort intPort, bool mirroring, bool openDrain, SignalLevel polarity);
-    void    set_int_pin(Pin pin, IntMode mode);
-    void remove_int_pin(Pin pin);
+    void       set_int_output(IntPort intPort, bool mirroring, bool openDrain, SignalLevel polarity);
+    void          set_int_pin(Pin pin, IntMode mode);
+    void       remove_int_pin(Pin pin);
 
-    uint16_t       get_int();
-    uint16_t get_int_state();
+    uint16_t          get_int();
+    uint16_t    get_int_state();
 
-    void     set_ports(uint16_t values);
-    uint16_t get_ports();
+    void            set_ports(uint16_t values);
+    uint16_t        get_ports();
 };
-
-// Singleton
-
-#if __MCP__
-  MCP & mcp = MCP::get_singleton();
-#else
-  extern MCP & mcp;
-#endif
 
 #endif

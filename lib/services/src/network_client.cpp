@@ -14,11 +14,13 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#include "NetworkClient.h"
+#define __NETWORK_CLIENT__ 1
+#include "network_client.hpp"
 
 bool 
 NetworkClient::joinAP(const char * ssid, const char * pass)
 {
+  return true;
 }
 
 void 
@@ -29,6 +31,7 @@ NetworkClient::disconnect()
 bool 
 NetworkClient::isConnected()
 {
+  return true;
 }
 
 

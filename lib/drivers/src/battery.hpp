@@ -2,29 +2,21 @@
 #define __BATTERY_HPP__
 
 #include "non_copyable.hpp"
-#include "mcp.hpp"
+#include "mcp23017.hpp"
 
 class Battery : NonCopyable
 {
   public:
-    static inline Battery & get_singleton() noexcept { return singleton; }
-
+    Battery(MCP23017 & _mcp) : mcp(_mcp) {}
     bool setup();
 
     double read_level();
 
   private:
     static constexpr char const * TAG = "Battery";
-    static Battery singleton;
-    Battery() {}
+    MCP23017 & mcp;
 
-    const MCP::Pin BATTERY_SWITCH = MCP::Pin::IOPIN_9;
+    const MCP23017::Pin BATTERY_SWITCH = MCP23017::Pin::IOPIN_9;
 };
-
-#ifdef __BATTERY__
-  Battery & battery = Battery::get_singleton();
-#else
-  extern Battery & battery;
-#endif
 
 #endif

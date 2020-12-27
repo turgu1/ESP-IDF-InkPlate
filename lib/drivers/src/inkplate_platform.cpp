@@ -4,10 +4,10 @@
 #include "logging.hpp"
 
 #include "wire.hpp"
-#include "mcp.hpp"
+#include "mcp23017.hpp"
 #include "esp.hpp"
 #include "eink.hpp"
-#include "eink6.hpp"
+#include "eink_6.hpp"
 #include "touch_keys.hpp"
 #include "battery.hpp"
 #include "sd_card.hpp"

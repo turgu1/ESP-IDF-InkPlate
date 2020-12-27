@@ -2,59 +2,27 @@
 #define __EINK_HPP__
 
 #include "logging.hpp"
-
-class Bitmap 
-{
-  protected:
-    static constexpr char const * TAG = "Bitmap";
-    const int32_t data_size;
-    const int16_t width, height, line_size;
-    const uint8_t init_value;
-
-  public:
-    Bitmap(int16_t w, int16_t h, int32_t s, uint8_t i) : 
-      data_size(s), width(w), height(h), line_size(s / h), init_value(i) {}
-
-    inline int16_t       get_width() { return width;      }
-    inline int16_t      get_height() { return height;     }
-    inline int32_t   get_data_size() { return data_size;  }
-    inline int16_t   get_line_size() { return line_size;  }
-    inline uint8_t  get_init_value() { return init_value; }
-    
-    void              clear() {
-      // ESP_LOGD(TAG, "Clear: %08x, with: %02x, size: %d", (int)get_data(), (int)get_init_value(), (int)get_data_size());
-      memset(get_data(), get_init_value(), get_data_size()); 
-    } 
-
-    virtual uint8_t * get_data() = 0;
-};
-
-class Bitmap1Bit : public Bitmap 
-{
-  public:
-    Bitmap1Bit(int16_t w, int16_t h, int32_t s) : Bitmap(w, h, s, 0) {}
-};
-
-class Bitmap3Bit : public Bitmap 
-{
-  public:
-    Bitmap3Bit(int16_t w, int16_t h, int32_t s) : Bitmap(w, h, s, (uint8_t) 0x77) {}
-};
+#include "frame_buffer.hpp"
+#include "mcp23017.hpp"
+#include "wire.hpp"
 
 class EInk
 {
   public:
-
     enum class PanelState  { OFF, ON };
 
     inline PanelState get_panel_state() { return panel_state; }
     inline bool        is_initialized() { return initialized; }
 
-    virtual inline Bitmap1Bit * new_bitmap1bit() = 0;
-    virtual inline Bitmap3Bit * new_bitmap3bit() = 0;
+    virtual inline FrameBuffer1Bit * new_frame_buffer_1bit() = 0;
+    virtual inline FrameBuffer3Bit * new_frame_buffer_3bit() = 0;
 
     virtual inline int16_t get_width()  = 0;
     virtual inline int16_t get_height() = 0;
+
+    inline void preload_screen(FrameBuffer1Bit & frame_buffer) {
+        memcpy(d_memory_new->get_data(), frame_buffer.get_data(), frame_buffer.get_data_size());
+    }
 
     // All the following methods are protecting the I2C device interface trough
     // the Wire::enter() and Wire::leave() methods. These are implementing a
@@ -66,28 +34,97 @@ class EInk
 
     virtual bool setup() = 0;
 
-    inline void update(Bitmap1Bit & bitmap) { update_1bit(bitmap); }
-    inline void update(Bitmap3Bit & bitmap) { update_3bit(bitmap); }
+    virtual inline void update(FrameBuffer1Bit & frame_buffer) = 0;
+    virtual inline void update(FrameBuffer3Bit & frame_buffer) = 0;
 
-    virtual void partial_update(Bitmap1Bit & bitmap) = 0;
-
-    virtual void clean() = 0;
+    virtual void partial_update(FrameBuffer1Bit & frame_buffer, bool force = false) = 0;
 
     int8_t read_temperature();
 
+    void    turn_off();
+    void    turn_on();
+    uint8_t read_power_good();
+
   protected:                     
     
-    EInk() : 
+    EInk(MCP23017 & mcp) : 
+      mcp_int(mcp),
       panel_state(PanelState::OFF), 
       initialized(false),
       partial_allowed(false) {}
+
+    static const uint8_t PWRMGR_ADDRESS = 0x48;
+    static const uint8_t PWR_GOOD_OK    = 0b11111010;
+
+    MCP23017 & mcp_int;
 
     PanelState panel_state;
     bool       initialized;
     bool       partial_allowed;
 
-    virtual void update_1bit(Bitmap1Bit & bitmap) = 0;
-    virtual void update_3bit(Bitmap3Bit & bitmap) = 0;
+    static const uint32_t PIN_LUT[256];
+
+    void     vscan_start();
+    void     hscan_start(uint32_t d);
+    void       vscan_end();
+    void    pins_z_state();
+    void pins_as_outputs();
+
+    inline void      allow_partial() { partial_allowed = true;  }
+    inline void      block_partial() { partial_allowed = false; }
+    inline bool is_partial_allowed() { return partial_allowed;  }
+
+    inline void  set_panel_state(PanelState s) { panel_state = s; }
+
+    static const uint32_t CL   = 0x01;
+    static const uint32_t CKV  = 0x01;
+    static const uint32_t SPH  = 0x02;
+    static const uint32_t LE   = 0x04;
+
+    static const uint32_t DATA = 0x0E8C0030;
+
+    uint8_t         * p_buffer;
+    FrameBuffer1Bit * d_memory_new;
+
+    const MCP23017::Pin OE             = MCP23017::Pin::IOPIN_0;
+    const MCP23017::Pin GMOD           = MCP23017::Pin::IOPIN_1;
+    const MCP23017::Pin SPV            = MCP23017::Pin::IOPIN_2;
+
+    const MCP23017::Pin WAKEUP         = MCP23017::Pin::IOPIN_3;
+    const MCP23017::Pin PWRUP          = MCP23017::Pin::IOPIN_4;
+    const MCP23017::Pin VCOM           = MCP23017::Pin::IOPIN_5;
+    
+    const MCP23017::Pin GPIO0_ENABLE   = MCP23017::Pin::IOPIN_8;
+  
+    inline void cl_set()       { GPIO.out_w1ts = CL; }
+    inline void cl_clear()     { GPIO.out_w1tc = CL; }
+
+    inline void ckv_set()      { GPIO.out1_w1ts.val = CKV; }
+    inline void ckv_clear()    { GPIO.out1_w1tc.val = CKV; }
+
+    inline void sph_set()      { GPIO.out1_w1ts.val = SPH; }
+    inline void sph_clear()    { GPIO.out1_w1tc.val = SPH; }
+
+    inline void le_set()       { GPIO.out_w1ts = LE; }
+    inline void le_clear()     { GPIO.out_w1tc = LE; }
+
+    inline void oe_set()       { mcp_int.digital_write(OE,     MCP23017::SignalLevel::HIGH); }
+    inline void oe_clear()     { mcp_int.digital_write(OE,     MCP23017::SignalLevel::LOW ); }
+
+    inline void gmod_set()     { mcp_int.digital_write(GMOD,   MCP23017::SignalLevel::HIGH); }
+    inline void gmod_clear()   { mcp_int.digital_write(GMOD,   MCP23017::SignalLevel::LOW ); }
+
+    inline void spv_set()      { mcp_int.digital_write(SPV,    MCP23017::SignalLevel::HIGH); }
+    inline void spv_clear()    { mcp_int.digital_write(SPV,    MCP23017::SignalLevel::LOW ); }
+
+    inline void wakeup_set()   { mcp_int.digital_write(WAKEUP, MCP23017::SignalLevel::HIGH); }
+    inline void wakeup_clear() { mcp_int.digital_write(WAKEUP, MCP23017::SignalLevel::LOW ); }
+
+    inline void pwrup_set()    { mcp_int.digital_write(PWRUP,  MCP23017::SignalLevel::HIGH); }
+    inline void pwrup_clear()  { mcp_int.digital_write(PWRUP,  MCP23017::SignalLevel::LOW ); }
+
+    inline void vcom_set()     { mcp_int.digital_write(VCOM,   MCP23017::SignalLevel::HIGH); }
+    inline void vcom_clear()   { mcp_int.digital_write(VCOM,   MCP23017::SignalLevel::LOW ); }
 };
 
 #endif

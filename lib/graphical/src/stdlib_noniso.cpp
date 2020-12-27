@@ -1,5 +1,5 @@
 /*
- core_esp8266_noniso.c - nonstandard (but usefull) conversion functions
+ core_esp8266_noniso.cpp - nonstandard (but usefull) conversion functions
 
  Copyright (c) 2014 Ivan Grokhotkov. All rights reserved.
  This file is part of the esp8266 core for Arduino environment.
@@ -26,7 +26,8 @@
 #include <cstring>
 #include <stdbool.h>
 #include <cstdint>
-#include <cmath>
+#include <math.h>
+
 #include "stdlib_noniso.hpp"
 
 void reverse(char* begin, char* end) {

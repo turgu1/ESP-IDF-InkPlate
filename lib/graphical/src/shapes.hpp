@@ -1,5 +1,5 @@
 /*
-shapes.h
+shapes.hpp
 Inkplate 6 Arduino library
 David Zovko, Borna Biro, Denis Vajak, Zvonimir Haramustek @ e-radionica.com
 September 24, 2020
@@ -17,6 +17,7 @@ Distributed as-is; no warranty is given.
 #ifndef __SHAPES_HPP__
 #define __SHAPES_HPP__
 
+#include "defines.hpp"
 #include "adafruit_gfx.hpp"
 
 #define maxVer 100
@@ -29,45 +30,43 @@ class Shapes : virtual public Adafruit_GFX
 
     virtual void drawPixel(int16_t x, int16_t y, uint16_t color) = 0;
 
-    virtual void selectDisplayMode(uint8_t _mode) = 0;
-    virtual uint8_t getDisplayMode() = 0;
+    virtual void selectDisplayMode(DisplayMode mode) = 0;
+    virtual DisplayMode getDisplayMode() = 0;
 
-    void drawElipse(int rx, int ry, int xc, int yc, int c);
-    void fillElipse(int rx, int ry, int xc, int yc, int c);
-    void drawPolygon(int *x, int *y, int n, int color);
-    void fillPolygon(int *x, int *y, int n, int color);
-    void drawThickLine(int x1, int y1, int x2, int y2, int color, float thickness);
+    void       drawElipse(int rx, int ry, int xc, int yc, int c);
+    void       fillElipse(int rx, int ry, int xc, int yc, int c);
+    void      drawPolygon(int *x, int *y, int  n, int color);
+    void      fillPolygon(int *x, int *y, int  n, int color);
+    void    drawThickLine(int x1, int y1, int x2, int y2, int color, float thickness);
     void drawGradientLine(int x1, int y1, int x2, int y2, int color1, int color2, float thickness = -1);
 
   private:
-    struct EdgeBucket
-    {
-        int ymax;
+    struct EdgeBucket {
+        int   ymax;
         float xofymin;
         float slopeinverse;
     };
 
-    struct edgeTableTuple
-    {
+    struct edgeTableTuple {
         int countEdgeBucket;
         EdgeBucket buckets[maxVer];
     };
 
-    void initedgeTable();
-    void insertionSort(edgeTableTuple *ett);
-    void storeEdgeInTuple(edgeTableTuple *receiver, int ym, int xm, float slopInv);
-    void storeEdgeInTable(int x1, int y1, int x2, int y2);
-    void removeEdgeByYmax(edgeTableTuple *tup, int yy);
+    void     initedgeTable();
+    void     insertionSort(edgeTableTuple *ett);
+    void  storeEdgeInTuple(edgeTableTuple *receiver, int ym, int xm, float slopInv);
+    void  storeEdgeInTable(int x1, int y1, int x2, int y2);
+    void  removeEdgeByYmax(edgeTableTuple *tup, int yy);
     void updatexbyslopeinv(edgeTableTuple *tup);
-    void scanlineFill(uint8_t c);
+    void      scanlineFill(uint8_t c);
 
-    virtual void startWrite(void) = 0;
-    virtual void writePixel(int16_t x, int16_t y, uint16_t color) = 0;
-    virtual void writeFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) = 0;
+    virtual void     startWrite(void) = 0;
+    virtual void     writePixel(int16_t x, int16_t y, uint16_t color) = 0;
+    virtual void  writeFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) = 0;
     virtual void writeFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) = 0;
     virtual void writeFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) = 0;
-    virtual void writeLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color) = 0;
-    virtual void endWrite(void) = 0;
+    virtual void      writeLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color) = 0;
+    virtual void       endWrite(void) = 0;
 
     edgeTableTuple *edgeTable, activeEdgeTuple;
 };

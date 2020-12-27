@@ -1,5 +1,5 @@
 /*
- Print.h - Base class that provides print() and println()
+ print.hpp - Base class that provides print() and println()
  Copyright (c) 2008 David A. Mellis.  All right reserved.
 
  This library is free software; you can redistribute it and/or
@@ -22,7 +22,9 @@
 
 #include <cstdint>
 #include <cstddef>
-#include "wstring.hpp"
+#include <string>
+#include <cstring>
+
 #include "printable.hpp"
 
 #define DEC 10
@@ -72,9 +74,8 @@ public:
         return write((const uint8_t *) buffer, size);
     }
 
-    //size_t printf(const char * format, ...)  __attribute__ ((format (printf, 2, 3)));
-    size_t print(const __FlashStringHelper *);
-    size_t print(const String &);
+    size_t printf(const char * format, ...)  __attribute__ ((format (printf, 2, 3)));
+    size_t print(const std::string &);
     size_t print(const char[]);
     size_t print(char);
     size_t print(unsigned char, int = DEC);
@@ -86,8 +87,7 @@ public:
     size_t print(const Printable&);
     size_t print(struct tm * timeinfo, const char * format = NULL);
 
-    size_t println(const __FlashStringHelper *);
-    size_t println(const String &s);
+    size_t println(const std::string &s);
     size_t println(const char[]);
     size_t println(char);
     size_t println(unsigned char, int = DEC);

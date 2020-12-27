@@ -517,7 +517,7 @@ static JRESULT mcu_load (
     d = jd->dcv[cmp];           /* DC value of previous block */
     if (b) {                /* If there is any difference from previous block */
       e = bitext(jd, b);          /* Extract data bits */
-      if (e < 0) return 0 - e;      /* Err: input */
+      if (e < 0) return (JRESULT)(0 - e);      /* Err: input */
       b = 1 << (b - 1);         /* MSB position */
       if (!(e & b)) e -= (b << 1) - 1;  /* Restore sign if needed */
       d += e;               /* Get current value */
@@ -543,7 +543,7 @@ static JRESULT mcu_load (
       }
       if (b &= 0x0F) {          /* Bit length */
         d = bitext(jd, b);        /* Extract data bits */
-        if (d < 0) return 0 - d;    /* Err: input device */
+        if (d < 0) return (JRESULT)(0 - d);    /* Err: input device */
         b = 1 << (b - 1);       /* MSB position */
         if (!(d & b)) d -= (b << 1) - 1;/* Restore negative value if needed */
         z = ZIG(i);           /* Zigzag-order to raster-order converted index */
@@ -1007,7 +1007,7 @@ JRESULT jd_decomp (
 / Mar 16, 2019 R0.01c Supprted stdint.h.
 /----------------------------------------------------------------------------*/
 
-#include "tjpgd.h"
+#include "tjpgd.hpp"
 
 
 /*-----------------------------------------------*/
@@ -1138,7 +1138,7 @@ static void* alloc_pool ( /* Pointer to allocated memory block (NULL:no memory a
 /* Create de-quantization and prescaling tables with a DQT segment       */
 /*-----------------------------------------------------------------------*/
 
-static int create_qt_tbl (  /* 0:OK, !0:Failed */
+static JRESULT create_qt_tbl (  /* 0:OK, !0:Failed */
   JDEC* jd,       /* Pointer to the decompressor object */
   const uint8_t* data,  /* Pointer to the quantizer tables */
   uint16_t ndata      /* Size of input data */
@@ -1155,7 +1155,7 @@ static int create_qt_tbl (  /* 0:OK, !0:Failed */
     d = *data++;              /* Get table property */
     if (d & 0xF0) return JDR_FMT1;      /* Err: not 8-bit resolution */
     i = d & 3;                /* Get table ID */
-    pb = alloc_pool(jd, 64 * sizeof (int32_t));/* Allocate a memory block for the table */
+    pb = (int32_t *) alloc_pool(jd, 64 * sizeof (int32_t));/* Allocate a memory block for the table */
     if (!pb) return JDR_MEM1;       /* Err: not enough memory */
     jd->qttbl[i] = pb;            /* Register the table */
     for (i = 0; i < 64; i++) {        /* Load the table */
@@ -1174,7 +1174,7 @@ static int create_qt_tbl (  /* 0:OK, !0:Failed */
 /* Create huffman code tables with a DHT segment                         */
 /*-----------------------------------------------------------------------*/
 
-static int create_huffman_tbl ( /* 0:OK, !0:Failed */
+static JRESULT create_huffman_tbl ( /* 0:OK, !0:Failed */
   JDEC* jd,         /* Pointer to the decompressor object */
   const uint8_t* data,    /* Pointer to the packed huffman tables */
   uint16_t ndata        /* Size of input data */
@@ -1191,13 +1191,13 @@ static int create_huffman_tbl ( /* 0:OK, !0:Failed */
     d = *data++;            /* Get table number and class */
     if (d & 0xEE) return JDR_FMT1;    /* Err: invalid class/number */
     cls = d >> 4; num = d & 0x0F;   /* class = dc(0)/ac(1), table number = 0/1 */
-    pb = alloc_pool(jd, 16);      /* Allocate a memory block for the bit distribution table */
+    pb = (uint8_t *) alloc_pool(jd, 16);      /* Allocate a memory block for the bit distribution table */
     if (!pb) return JDR_MEM1;     /* Err: not enough memory */
     jd->huffbits[num][cls] = pb;
     for (np = i = 0; i < 16; i++) {   /* Load number of patterns for 1 to 16-bit code */
       np += (pb[i] = *data++);    /* Get sum of code words for each code */
     }
-    ph = alloc_pool(jd, (uint16_t)(np * sizeof (uint16_t)));/* Allocate a memory block for the code word table */
+    ph = (uint16_t *) alloc_pool(jd, (uint16_t)(np * sizeof (uint16_t)));/* Allocate a memory block for the code word table */
     if (!ph) return JDR_MEM1;     /* Err: not enough memory */
     jd->huffcode[num][cls] = ph;
     hc = 0;
@@ -1209,7 +1209,7 @@ static int create_huffman_tbl ( /* 0:OK, !0:Failed */
 
     if (ndata < np) return JDR_FMT1;  /* Err: wrong data size */
     ndata -= np;
-    pd = alloc_pool(jd, np);      /* Allocate a memory block for the decoded data */
+    pd = (uint8_t *)  alloc_pool(jd, np);      /* Allocate a memory block for the decoded data */
     if (!pd) return JDR_MEM1;     /* Err: not enough memory */
     jd->huffdata[num][cls] = pd;
     for (i = 0; i < np; i++) {      /* Load decoded data corresponds to each code ward */
@@ -1452,7 +1452,7 @@ static void block_idct (
 /*-----------------------------------------------------------------------*/
 
 static JRESULT mcu_load (
-  JDEC* jd    /* Pointer to the decompressor object */
+  JDEC * jd    /* Pointer to the decompressor object */
 )
 {
   int32_t *tmp = (int32_t*)jd->workbuf; /* Block working buffer for de-quantize and IDCT */
@@ -1477,11 +1477,11 @@ static JRESULT mcu_load (
     hc = jd->huffcode[id][0];
     hd = jd->huffdata[id][0];
     b = huffext(jd, hb, hc, hd);      /* Extract a huffman coded data (bit length) */
-    if (b < 0) return 0 - b;        /* Err: invalid code or input */
+    if (b < 0) return (JRESULT)(0 - b);        /* Err: invalid code or input */
     d = jd->dcv[cmp];           /* DC value of previous block */
     if (b) {                /* If there is any difference from previous block */
       e = bitext(jd, b);          /* Extract data bits */
-      if (e < 0) return 0 - e;      /* Err: input */
+      if (e < 0) return (JRESULT)(0 - e);      /* Err: input */
       b = 1 << (b - 1);         /* MSB position */
       if (!(e & b)) e -= (b << 1) - 1;  /* Restore sign if needed */
       d += e;               /* Get current value */
@@ -1499,7 +1499,7 @@ static JRESULT mcu_load (
     do {
       b = huffext(jd, hb, hc, hd);    /* Extract a huffman coded value (zero runs and bit length) */
       if (b == 0) break;          /* EOB? */
-      if (b < 0) return 0 - b;      /* Err: invalid code or input error */
+      if (b < 0) return (JRESULT)(0 - b);      /* Err: invalid code or input error */
       z = (uint16_t)b >> 4;       /* Number of leading zero elements */
       if (z) {
         i += z;             /* Skip zero elements */
@@ -1507,7 +1507,7 @@ static JRESULT mcu_load (
       }
       if (b &= 0x0F) {          /* Bit length */
         d = bitext(jd, b);        /* Extract data bits */
-        if (d < 0) return 0 - d;    /* Err: input device */
+        if (d < 0) return (JRESULT)(0 - d);    /* Err: input device */
         b = 1 << (b - 1);       /* MSB position */
         if (!(d & b)) d -= (b << 1) - 1;/* Restore negative value if needed */
         z = ZIG(i);           /* Zigzag-order to raster-order converted index */
@@ -1775,7 +1775,7 @@ JRESULT jd_prepare (
   }
   for (i = 0; i < 4; jd->qttbl[i++] = 0) ;
 
-  jd->inbuf = seg = alloc_pool(jd, JD_SZBUF);   /* Allocate stream input buffer */
+  jd->inbuf = seg = (uint8_t *) alloc_pool(jd, JD_SZBUF);   /* Allocate stream input buffer */
   if (!seg) return JDR_MEM1;
 
   if (jd->infunc(jd, seg, 2) != 2) return JDR_INP;/* Check SOI marker */

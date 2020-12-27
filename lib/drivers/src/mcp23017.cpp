@@ -1,9 +1,9 @@
 /*
-Mcp.cpp
-Inkplate 6 ESP-IDF
+mcp23017.cpp
+Inkplate ESP-IDF
 
 Modified by Guy Turcotte 
-November 12, 2020
+December 26, 2020
 
 from the Arduino Library:
 
@@ -21,18 +21,17 @@ Distributed as-is; no warranty is given.
 */
 
 #define __MCP__ 1
-#include "mcp.hpp"
+#include "mcp23017.hpp"
 
 #include "logging.hpp"
 
 #include "wire.hpp"
 #include "driver/gpio.h"
 
-MCP MCP::singleton;
-
 // LOW LEVEL:
 
-void MCP::test()
+void 
+MCP23017::test()
 {
   printf("Registers before read:\n");
   for (auto reg : registers) {
@@ -41,7 +40,7 @@ void MCP::test()
   printf("\n");
   fflush(stdout);
 
-  wire.begin_transmission(MCP_ADDRESS);
+  wire.begin_transmission(mcp_address);
   wire.end_transmission();
 
   read_all_registers();
@@ -54,9 +53,10 @@ void MCP::test()
   fflush(stdout);
 }
 
-bool MCP::setup()
+bool 
+MCP23017::setup()
 {
-  wire.begin_transmission(MCP_ADDRESS);
+  wire.begin_transmission(mcp_address);
   wire.end_transmission();
     
   read_all_registers();
@@ -67,43 +67,47 @@ bool MCP::setup()
   return true;
 }
 
-void MCP::read_all_registers()
+void 
+MCP23017::read_all_registers()
 {
-  wire.begin_transmission(MCP_ADDRESS);
+  wire.begin_transmission(mcp_address);
   wire.write(0x00);
   wire.end_transmission();
-  wire.request_from(MCP_ADDRESS, (uint8_t) 22);
+  wire.request_from(mcp_address, (uint8_t) 22);
   for (auto reg : registers) {
     reg = wire.read();
   }
 }
 
-void MCP::read_registers(Reg first_reg, uint8_t count)
+void 
+MCP23017::read_registers(Reg first_reg, uint8_t count)
 {
-  wire.begin_transmission(MCP_ADDRESS);
+  wire.begin_transmission(mcp_address);
   wire.write((int8_t)first_reg);
   wire.end_transmission();
 
-  wire.request_from(MCP_ADDRESS, count);
+  wire.request_from(mcp_address, count);
   for (int i = 0; i < count; ++i) {
     registers[R(first_reg, i)] = wire.read();
   }
 }
 
-uint8_t MCP::read_register(Reg reg)
+uint8_t 
+MCP23017::read_register(Reg reg)
 {
-  wire.begin_transmission(MCP_ADDRESS);
+  wire.begin_transmission(mcp_address);
   wire.write((int8_t)reg);
   wire.end_transmission();
-  wire.request_from(MCP_ADDRESS, (uint8_t) 1);
+  wire.request_from(mcp_address, (uint8_t) 1);
   registers[reg] = wire.read();
 
   return registers[reg];
 }
 
-void MCP::update_all_registers()
+void 
+MCP23017::update_all_registers()
 {
-  wire.begin_transmission(MCP_ADDRESS);
+  wire.begin_transmission(mcp_address);
   wire.write(0x00);
   for (auto reg : registers) {
     wire.write(reg);
@@ -111,17 +115,19 @@ void MCP::update_all_registers()
   wire.end_transmission();
 }
 
-void MCP::update_register(Reg reg, uint8_t value)
+void 
+MCP23017::update_register(Reg reg, uint8_t value)
 {
-  wire.begin_transmission(MCP_ADDRESS);
+  wire.begin_transmission(mcp_address);
   wire.write((int8_t)reg);
   wire.write(value);
   wire.end_transmission();
 }
 
-void MCP::update_registers(Reg first_reg, uint8_t count)
+void 
+MCP23017::update_registers(Reg first_reg, uint8_t count)
 {
-  wire.begin_transmission(MCP_ADDRESS);
+  wire.begin_transmission(mcp_address);
   wire.write((int8_t)first_reg);
   for (int i = 0; i < count; ++i) {
     wire.write(registers[R(first_reg, i)]);
@@ -131,7 +137,8 @@ void MCP::update_registers(Reg first_reg, uint8_t count)
 
 // HIGH LEVEL:
 
-void MCP::set_direction(Pin pin, PinMode mode)
+void
+ MCP23017::set_direction(Pin pin, PinMode mode)
 {
   uint8_t port = ((uint8_t)pin >> 3) & 1;
   uint8_t p    =  (uint8_t)pin & 7;
@@ -160,7 +167,8 @@ void MCP::set_direction(Pin pin, PinMode mode)
   }
 }
 
-void MCP::digital_write(Pin pin, SignalLevel state)
+void 
+MCP23017::digital_write(Pin pin, SignalLevel state)
 {
   uint8_t port = ((uint8_t)pin >> 3) & 1;
   uint8_t p    =  (uint8_t)pin & 7;
@@ -171,7 +179,8 @@ void MCP::digital_write(Pin pin, SignalLevel state)
   update_register(R(Reg::GPIOA, port), registers[R(Reg::GPIOA, port)]);
 }
 
-MCP::SignalLevel MCP::digital_read(Pin pin)
+MCP23017::SignalLevel 
+MCP23017::digital_read(Pin pin)
 {
   uint8_t port = ((uint8_t)pin >> 3) & 1;
   uint8_t p    =  (uint8_t)pin & 7;
@@ -180,7 +189,8 @@ MCP::SignalLevel MCP::digital_read(Pin pin)
   return (r & (1 << p)) ? SignalLevel::HIGH : SignalLevel::LOW;
 }
 
-void MCP::set_int_output(IntPort intPort, bool mirroring, bool openDrain, SignalLevel polarity)
+void 
+MCP23017::set_int_output(IntPort intPort, bool mirroring, bool openDrain, SignalLevel polarity)
 {
   Reg reg = intPort == IntPort::INTPORTA ? Reg::IOCONA : Reg::IOCONB;
 
@@ -191,7 +201,8 @@ void MCP::set_int_output(IntPort intPort, bool mirroring, bool openDrain, Signal
   update_register(reg, registers[reg]);
 }
 
-void MCP::set_int_pin(Pin pin, IntMode mode)
+void 
+MCP23017::set_int_pin(Pin pin, IntMode mode)
 {
   uint8_t port = ((uint8_t)pin >> 3) & 1;
   uint8_t p    =  (uint8_t)pin & 7;
@@ -215,7 +226,8 @@ void MCP::set_int_pin(Pin pin, IntMode mode)
   update_registers(Reg::GPINTENA, 6);
 }
 
-void MCP::remove_int_pin(Pin pin)
+void 
+MCP23017::remove_int_pin(Pin pin)
 {
   uint8_t port = ((uint8_t)pin >> 3) & 1;
   uint8_t p    =  (uint8_t)pin & 7;
@@ -223,26 +235,30 @@ void MCP::remove_int_pin(Pin pin)
   update_registers(Reg::GPINTENA, 2);
 }
 
-uint16_t MCP::get_int()
+uint16_t 
+MCP23017::get_int()
 {
   read_registers(Reg::INTFA, 2);
   return ((registers[Reg::INTFB] << 8) | registers[Reg::INTFA]);
 }
 
-uint16_t MCP::get_int_state()
+uint16_t 
+MCP23017::get_int_state()
 {
   read_registers(Reg::INTCAPA, 2);
   return ((registers[Reg::INTCAPB] << 8) | registers[Reg::INTCAPA]);
 }
 
-void MCP::set_ports(uint16_t values)
+void 
+MCP23017::set_ports(uint16_t values)
 {
   registers[Reg::GPIOA] = values & 0xff;
   registers[Reg::GPIOB] = (values >> 8) & 0xff;
   update_registers(Reg::GPIOA, 2);
 }
 
-uint16_t MCP::get_ports()
+uint16_t 
+MCP23017::get_ports()
 {
   read_registers(Reg::GPIOA, 2);
   return ((registers[Reg::GPIOB] << 8) | (registers[Reg::GPIOA]));

@@ -1,5 +1,6 @@
 /*
-InkPlatePlatform.h
+inkplate_platform.hpp
+
 Inkplate 6 Arduino library
 David Zovko, Borna Biro, Denis Vajak, Zvonimir Haramustek @ e-radionica.com
 September 24, 2020
@@ -21,28 +22,60 @@ Distributed as-is; no warranty is given.
 
 #include "non_copyable.hpp"
 
+#include "mcp23017.hpp"
+#include "battery.hpp"
+#include "touch_keys.hpp"
 #include "eink.hpp"
 #include "eink_6.hpp"
 #include "eink_10.hpp"
 
+#if __INKPLATE_PLATFORM__
+  MCP23017  mcp_int(0x20);
+  Battery   battery(mcp_int);
+  TouchKeys touch_keys(mcp_int);
+
+  #if defined(INKPLATE_6)
+    EInk6     e_ink(mcp_int);
+  #elif defined(INKPLATE_10)
+    MCP23017  mcp_ext(0x22);
+    EInk10    e_ink(mcp_int);
+  #else
+    #error "One of INKPLATE_6, INKPLATE_10 must be defined."
+  #endif
+#else
+  extern MCP23017  mcp_int;
+  extern Battery   battery;
+  extern TouchKeys touch_keys;
+
+  #if defined(INKPLATE_6)
+    extern EInk6     e_ink;
+  #elif defined(INKPLATE_10)
+    extern MCP23017  mcp_ext;
+    extern EInk10    e_ink;
+  #else
+    #error "One of INKPLATE_6, INKPLATE_10 must be defined."
+  #endif
+#endif
+
 class InkPlatePlatform : NonCopyable
 {
-private:
-  static constexpr char const * TAG = "InkPlatePlatform";
+  private:
+    static constexpr char const * TAG = "InkPlatePlatform";
 
-  static InkPlatePlatform singleton;
-  InkPlatePlatform() {};
+    static InkPlatePlatform singleton;
+    InkPlatePlatform() {};
 
   public:
     static inline InkPlatePlatform & get_singleton() noexcept { return singleton; }
 
     /**
-     * @brief Setup the InkPlate-6 Controller
+     * @brief Setup the InkPlate Devices
      * 
-     * This method initialize the SD-Card access, the e-Ink display and the touchkeys 
+     * This method initialize the SD-Card, the e-Ink display, battery status, and the touchkeys 
      * capabilities.
      * 
-     * @return true 
+     * @return true - All devices ready
+     * @return false - Some device not initialized properly
      */
     bool setup();
 
@@ -51,28 +84,9 @@ private:
 };
 
 #if __INKPLATE_PLATFORM__
-
   InkPlatePlatform & inkplate_platform = InkPlatePlatform::get_singleton();
-
-  #if defined(INKPLATE_6)
-    EInk6 & e_ink = EInk6::get_singleton();
-  #elif defined(INKPLATE_10)
-    EInk10 & e_ink = EInk10::get_singleton();
-  #else
-    #error "One of INKPLATE_6, INKPLATE_10 must be defined."
-  #endif
-
 #else
-
   extern InkPlatePlatform & inkplate_platform;
-
-  #if defined(INKPLATE_6)
-    extern EInk6 & e_ink;
-  #elif defined(INKPLATE_10)
-    extern EInk10 & e_ink;
-  #else
-    #error "One of INKPLATE_6, INKPLATE_10 must be defined."
-  #endif
 #endif
 
 #endif

@@ -14,20 +14,9 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
+#include <math.h>
+
 #include "shapes.hpp"
-
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef _swap_int16_t
-#define _swap_int16_t(a, b)                                                                                            \
-    {                                                                                                                  \
-        int16_t t = a;                                                                                                 \
-        a = b;                                                                                                         \
-        b = t;                                                                                                         \
-    }
-#endif
 
 void Shapes::drawElipse(int rx, int ry, int xc, int yc, int c)
 {

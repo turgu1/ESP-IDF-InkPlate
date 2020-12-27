@@ -28,7 +28,7 @@ extern "C"
     typedef unsigned long uint32_t;
     typedef long int32_t;
 #else
-#include "stdint.h"
+#include <cstdint>
 #endif
 
     /* Error code */

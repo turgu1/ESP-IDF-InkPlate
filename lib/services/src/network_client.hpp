@@ -19,18 +19,6 @@ Distributed as-is; no warranty is given.
 
 #include <cstdint>
 
-struct bitmapHeader
-{
-    uint16_t signature;
-    uint32_t fileSize;
-    uint32_t startRAW;
-    uint32_t dibHeaderSize;
-    uint32_t width;
-    uint32_t height;
-    uint16_t color;
-    uint32_t compression;
-};
-
 class NetworkClient
 {
   public:
@@ -38,11 +26,17 @@ class NetworkClient
     void disconnect();
     bool isConnected();
 
-    uint8_t *downloadFile(const char *url, int32_t *defaultLen);
+    uint8_t * downloadFile(const char * url, int32_t * defaultLen);
     //uint8_t *downloadFile(WiFiClient *url, int32_t len);
 
   private:
     static constexpr char const * TAG = "NetworkClient";
 };
+
+#if __NETWORK_CLIENT__
+  NetworkClient network_client;
+#else
+  extern NetworkClient network_client;
+#endif
 
 #endif

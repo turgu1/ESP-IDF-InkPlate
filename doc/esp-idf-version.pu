@@ -91,22 +91,22 @@ package "Inkplate-ESP-IDF" <<rectangle>> {
 
   Inkplate --o MainApp
 
-    package "Bitmaps" <<folder>> {
-      abstract class Bitmap
-      abstract class Bitmap1Bit
-      abstract class Bitmap3Bit
-      class Bitmap1BitX
-      class Bitmap3BitX
-      Bitmap <|-- Bitmap1Bit
-      Bitmap <|-- Bitmap3Bit
-      Bitmap1Bit <|-- Bitmap1BitX
-      Bitmap3Bit <|-- Bitmap3BitX
+    package "FrameBuffers" <<folder>> {
+      abstract class FrameBuffer
+      abstract class FrameBuffer1Bit
+      abstract class FrameBuffer3Bit
+      class FrameBuffer1BitX
+      class FrameBuffer3BitX
+      FrameBuffer <|-- FrameBuffer1Bit
+      FrameBuffer <|-- FrameBuffer3Bit
+      FrameBuffer1Bit <|-- FrameBuffer1BitX
+      FrameBuffer3Bit <|-- FrameBuffer3BitX
     }
 
-    ' Bitmaps <|-- EInkKind
-    ' Bitmaps -right[hidden]- EInkKind
-    Bitmap1Bit --o Graphics
-    Graphical -left[hidden]- Bitmaps
+    ' FrameBuffers <|-- EInkKind
+    ' FrameBuffers -right[hidden]- EInkKind
+    FrameBuffer1Bit --o Graphics
+    Graphical -left[hidden]- FrameBuffers
     ' Inkplate -left[hidden]- Graphical
     ' Inkplate ..> EInk 
 

@@ -15,6 +15,9 @@ Distributed as-is; no warranty is given.
 */
 
 #include "image.hpp"
+#include "network_client.hpp"
+
+#include <cstdio>
 
 bool Image::legalBmp(bitmapHeader *bmpHeader)
 {
@@ -23,47 +26,47 @@ bool Image::legalBmp(bitmapHeader *bmpHeader)
             bmpHeader->color == 24 || bmpHeader->color == 32);
 }
 
-void Image::readBmpHeaderSd(SdFile *_f, bitmapHeader *_h)
+void Image::readBmpHeaderFromFile(FILE * f, bitmapHeader * h)
 {
     uint8_t header[55];
 
-    _f->rewind();
-    _f->read(header, 55);
+    rewind(f);
+    fread(header, 55, 1, f);
 
-    uint16_t color = READ16(header + 28);
-    uint32_t totalColors = READ32(header + 46);
+    uint16_t color       = read16(header + 28);
+    uint32_t totalColors = read32(header + 46);
 
     if (color <= 8)
     {
         if (!totalColors)
             totalColors = (1ULL << color);
 
-        uint8_t *buff = (uint8_t *)ps_malloc(totalColors * 4 + 100);
+        uint8_t * buff = new uint8_t[totalColors * 4 + 100];
 
-        _f->rewind();
-        _f->read(buff, totalColors * 4 + 100);
+        rewind(f);
+        fread(buff, totalColors * 4 + 100, 1, f);
 
-        readBmpHeader(buff, _h);
+        readBmpHeader(buff, h);
         free(buff);
     }
     else
     {
-        readBmpHeader(header, _h);
+        readBmpHeader(header, h);
     }
 }
 
 void Image::readBmpHeader(uint8_t *buf, bitmapHeader *_h)
 {
-    _h->signature = READ16(buf + 0);
-    _h->fileSize = READ32(buf + 2);
-    _h->startRAW = READ32(buf + 10);
-    _h->dibHeaderSize = READ32(buf + 14);
-    _h->width = READ32(buf + 18);
-    _h->height = READ32(buf + 22);
-    _h->color = READ16(buf + 28);
-    _h->compression = READ32(buf + 30);
+    _h->signature     = read16(buf +  0);
+    _h->fileSize      = read32(buf +  2);
+    _h->startRAW      = read32(buf + 10);
+    _h->dibHeaderSize = read32(buf + 14);
+    _h->width         = read32(buf + 18);
+    _h->height        = read32(buf + 22);
+    _h->color         = read16(buf + 28);
+    _h->compression   = read32(buf + 30);
 
-    uint32_t totalColors = READ32(buf + 46);
+    uint32_t totalColors = read32(buf + 46);
 
     uint8_t paletteRGB[1024];
 
@@ -77,32 +80,32 @@ void Image::readBmpHeader(uint8_t *buf, bitmapHeader *_h)
 
         for (int i = 0; i < totalColors; ++i)
         {
-            uint32_t c = READ32(paletteRGB + (i << 2));
+            uint32_t c = read32(paletteRGB + (i << 2));
 
             uint8_t r = (c & 0xFF000000) >> 24;
             uint8_t g = (c & 0x00FF0000) >> 16;
             uint8_t b = (c & 0x0000FF00) >> 8;
 
-            palette[i >> 1] |= RGB3BIT(r, g, b) << (i & 1 ? 0 : 4);
-            ditherPalette[i] = RGB8BIT(r, g, b);
+            palette[i >> 1] |= rgb3Bit(r, g, b) << (i & 1 ? 0 : 4);
+            ditherPalette[i] = rgb8Bit(r, g, b);
         }
     }
 };
 
-bool Image::drawBitmapFromSd(const char *fileName, int x, int y, bool dither, bool invert)
+bool Image::drawBitmapFromFile(const char *fileName, int x, int y, bool dither, bool invert)
 {
-    SdFile dat;
-    if (dat.open(fileName, O_RDONLY))
-        return drawBitmapFromSd(&dat, x, y, dither, invert);
+    FILE * dat = fopen(fileName, "r");
+    if (dat)
+        return drawBitmapFromFile(dat, x, y, dither, invert);
     else
         return 0;
 }
 
-bool Image::drawBitmapFromSd(SdFile *p, int x, int y, bool dither, bool invert)
+bool Image::drawBitmapFromFile(FILE * p, int x, int y, bool dither, bool invert)
 {
     bitmapHeader bmpHeader;
 
-    readBmpHeaderSd(p, &bmpHeader);
+    readBmpHeaderFromFile(p, &bmpHeader);
 
     if (!legalBmp(&bmpHeader))
         return 0;
@@ -110,13 +113,14 @@ bool Image::drawBitmapFromSd(SdFile *p, int x, int y, bool dither, bool invert)
     int16_t w = bmpHeader.width, h = bmpHeader.height;
     int8_t c = bmpHeader.color;
 
-    p->seekSet(bmpHeader.startRAW);
+    fseek(p, bmpHeader.startRAW, SEEK_SET);
     if (dither)
-        memset(ditherBuffer, 0, sizeof ditherBuffer);
+        memset(ditherBuffer, 0, ditherBufferSize);
+        
     for (int i = 0; i < h; ++i)
     {
-        int16_t n = ROWSIZE(w, c);
-        p->read(pixelBuffer, n);
+        int16_t n = rowSize(w, c);
+        fread(pixelBuffer, n, 1, p);
         displayBmpLine(x, y + bmpHeader.height - i - 1, &bmpHeader, dither, invert);
     }
     return 1;
@@ -125,19 +129,8 @@ bool Image::drawBitmapFromSd(SdFile *p, int x, int y, bool dither, bool invert)
 bool Image::drawBitmapFromWeb(const char *url, int x, int y, bool dither, bool invert)
 {
     bool ret = 0;
-    int32_t defaultLen = E_INK_WIDTH * E_INK_HEIGHT * 4 + 150;
-    uint8_t *buf = downloadFile(url, &defaultLen);
-
-    ret = drawBitmapFromBuffer(buf, x, y, dither, invert);
-    free(buf);
-
-    return ret;
-}
-
-bool Image::drawBitmapFromWeb(WiFiClient *s, int x, int y, int32_t len, bool dither, bool invert)
-{
-    bool ret = 0;
-    uint8_t *buf = downloadFile(s, len);
+    int32_t defaultLen = e_ink_width * e_ink_height * 4 + 150;
+    uint8_t *buf = network_client.downloadFile(url, &defaultLen);
 
     ret = drawBitmapFromBuffer(buf, x, y, dither, invert);
     free(buf);
@@ -155,14 +148,14 @@ bool Image::drawBitmapFromBuffer(uint8_t *buf, int x, int y, bool dither, bool i
         return 0;
 
     if (dither)
-        memset(ditherBuffer, 0, sizeof ditherBuffer);
+        memset(ditherBuffer, 0, ditherBufferSize);
 
     uint8_t *bufferPtr = buf + bmpHeader.startRAW;
     for (int i = 0; i < bmpHeader.height; ++i)
     {
-        memcpy(pixelBuffer, bufferPtr, ROWSIZE(bmpHeader.width, bmpHeader.color));
+        memcpy(pixelBuffer, bufferPtr, rowSize(bmpHeader.width, bmpHeader.color));
         displayBmpLine(x, y + bmpHeader.height - i - 1, &bmpHeader, dither, invert);
-        bufferPtr += ROWSIZE(bmpHeader.width, bmpHeader.color);
+        bufferPtr += rowSize(bmpHeader.width, bmpHeader.color);
     }
 
     return 1;
@@ -192,7 +185,7 @@ void Image::displayBmpLine(int16_t x, int16_t y, bitmapHeader *bmpHeader, bool d
                 val = palette[px >> 1] & (px & 1 ? 0x0F : 0xF0) >> (px & 1 ? 0 : 4);
             if (invert)
                 val = 7 - val;
-            if (getDisplayMode() == INKPLATE_1BIT)
+            if (getDisplayMode() == DisplayMode::INKPLATE_1BIT)
                 val = (~val >> 2) & 1;
 
             writePixel(x + j, y, val);
@@ -208,7 +201,7 @@ void Image::displayBmpLine(int16_t x, int16_t y, bitmapHeader *bmpHeader, bool d
                 val = palette[px >> 1] & (px & 1 ? 0x0F : 0xF0) >> (px & 1 ? 0 : 4);
             if (invert)
                 val = 7 - val;
-            if (getDisplayMode() == INKPLATE_1BIT)
+            if (getDisplayMode() == DisplayMode::INKPLATE_1BIT)
                 val = (~val >> 2) & 1;
 
             writePixel(x + j, y, val);
@@ -224,12 +217,12 @@ void Image::displayBmpLine(int16_t x, int16_t y, bitmapHeader *bmpHeader, bool d
             uint8_t val;
 
             if (dither)
-                val = ditherGetPixelBmp(RGB8BIT(r, g, b), j, w, 0);
+                val = ditherGetPixelBmp(rgb8Bit(r, g, b), j, w, 0);
             else
-                val = RGB3BIT(r, g, b);
+                val = rgb3Bit(r, g, b);
             if (invert)
                 val = 7 - val;
-            if (getDisplayMode() == INKPLATE_1BIT)
+            if (getDisplayMode() == DisplayMode::INKPLATE_1BIT)
                 val = (~val >> 2) & 1;
 
             writePixel(x + j, y, val);
@@ -243,12 +236,12 @@ void Image::displayBmpLine(int16_t x, int16_t y, bitmapHeader *bmpHeader, bool d
             uint8_t val;
 
             if (dither)
-                val = ditherGetPixelBmp(RGB8BIT(r, g, b), j, w, 0);
+                val = ditherGetPixelBmp(rgb8Bit(r, g, b), j, w, 0);
             else
-                val = RGB3BIT(r, g, b);
+                val = rgb3Bit(r, g, b);
             if (invert)
                 val = 7 - val;
-            if (getDisplayMode() == INKPLATE_1BIT)
+            if (getDisplayMode() == DisplayMode::INKPLATE_1BIT)
                 val = (~val >> 2) & 1;
 
             writePixel(x + j, y, val);
@@ -262,12 +255,12 @@ void Image::displayBmpLine(int16_t x, int16_t y, bitmapHeader *bmpHeader, bool d
             uint8_t val;
 
             if (dither)
-                val = ditherGetPixelBmp(RGB8BIT(r, g, b), j, w, 0);
+                val = ditherGetPixelBmp(rgb8Bit(r, g, b), j, w, 0);
             else
-                val = RGB3BIT(r, g, b);
+                val = rgb3Bit(r, g, b);
             if (invert)
                 val = 7 - val;
-            if (getDisplayMode() == INKPLATE_1BIT)
+            if (getDisplayMode() == DisplayMode::INKPLATE_1BIT)
                 val = (~val >> 2) & 1;
 
             writePixel(x + j, y, val);

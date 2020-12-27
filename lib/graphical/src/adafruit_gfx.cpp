@@ -32,13 +32,15 @@ POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "adafruit_gfx.hpp"
-#include "glcd_font.cpp"
+#include "glcd_font.hpp"
 
 #ifdef __AVR__
 #include <avr/pgmspace.h>
 #elif defined(ESP8266) || defined(ESP32)
 #include <pgmspace.h>
 #endif
+
+#include <algorithm>
 
 // Many (but maybe not all) non-AVR board installs define macros
 // for compatibility with existing PROGMEM-reading AVR code.
@@ -87,19 +89,6 @@ inline uint8_t *pgm_read_bitmap_ptr(const GFXfont *gfxFont) {
 #endif //__AVR__
 }
 
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef _swap_int16_t
-#define _swap_int16_t(a, b)                                                    \
-  {                                                                            \
-    int16_t t = a;                                                             \
-    a = b;                                                                     \
-    b = t;                                                                     \
-  }
-#endif
-
 /**************************************************************************/
 /*!
    @brief    Instatiate a GFX context for graphics! Can only be done by a
@@ -137,13 +126,13 @@ void Adafruit_GFX::writeLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
 #endif
   int16_t steep = abs(y1 - y0) > abs(x1 - x0);
   if (steep) {
-    _swap_int16_t(x0, y0);
-    _swap_int16_t(x1, y1);
+    std::swap(x0, y0);
+    std::swap(x1, y1);
   }
 
   if (x0 > x1) {
-    _swap_int16_t(x0, x1);
-    _swap_int16_t(y0, y1);
+    std::swap(x0, x1);
+    std::swap(y0, y1);
   }
 
   int16_t dx, dy;
@@ -333,11 +322,11 @@ void Adafruit_GFX::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
   // Update in subclasses if desired!
   if (x0 == x1) {
     if (y0 > y1)
-      _swap_int16_t(y0, y1);
+      std::swap(y0, y1);
     drawFastVLine(x0, y0, y1 - y0 + 1, color);
   } else if (y0 == y1) {
     if (x0 > x1)
-      _swap_int16_t(x0, x1);
+      std::swap(x0, x1);
     drawFastHLine(x0, y0, x1 - x0 + 1, color);
   } else {
     startWrite();
@@ -624,16 +613,16 @@ void Adafruit_GFX::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
 
   // Sort coordinates by Y order (y2 >= y1 >= y0)
   if (y0 > y1) {
-    _swap_int16_t(y0, y1);
-    _swap_int16_t(x0, x1);
+    std::swap(y0, y1);
+    std::swap(x0, x1);
   }
   if (y1 > y2) {
-    _swap_int16_t(y2, y1);
-    _swap_int16_t(x2, x1);
+    std::swap(y2, y1);
+    std::swap(x2, x1);
   }
   if (y0 > y1) {
-    _swap_int16_t(y0, y1);
-    _swap_int16_t(x0, x1);
+    std::swap(y0, y1);
+    std::swap(x0, x1);
   }
 
   startWrite();
@@ -677,7 +666,7 @@ void Adafruit_GFX::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
     b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
     */
     if (a > b)
-      _swap_int16_t(a, b);
+      std::swap(a, b);
     writeFastHLine(a, y, b - a + 1, color);
   }
 
@@ -695,7 +684,7 @@ void Adafruit_GFX::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
     b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
     */
     if (a > b)
-      _swap_int16_t(a, b);
+      std::swap(a, b);
     writeFastHLine(a, y, b - a + 1, color);
   }
   endWrite();
@@ -1470,7 +1459,7 @@ void Adafruit_GFX::getTextBounds(const char *str, int16_t x, int16_t y,
 /*!
     @brief    Helper to determine size of a string with current font/size. Pass
    string and a cursor position, returns UL corner and W,H.
-    @param    str    The ascii string to measure (as an arduino String() class)
+    @param    str    The ascii string to measure
     @param    x      The current cursor X
     @param    y      The current cursor Y
     @param    x1     The boundary X coordinate, set by function
@@ -1479,48 +1468,11 @@ void Adafruit_GFX::getTextBounds(const char *str, int16_t x, int16_t y,
     @param    h      The boundary height, set by function
 */
 /**************************************************************************/
-void Adafruit_GFX::getTextBounds(const String &str, int16_t x, int16_t y,
+void Adafruit_GFX::getTextBounds(const std::string &str, int16_t x, int16_t y,
                                  int16_t *x1, int16_t *y1, uint16_t *w,
                                  uint16_t *h) {
   if (str.length() != 0) {
     getTextBounds(const_cast<char *>(str.c_str()), x, y, x1, y1, w, h);
-  }
-}
-
-/**************************************************************************/
-/*!
-    @brief    Helper to determine size of a PROGMEM string with current
-   font/size. Pass string and a cursor position, returns UL corner and W,H.
-    @param    str     The flash-memory ascii string to measure
-    @param    x       The current cursor X
-    @param    y       The current cursor Y
-    @param    x1      The boundary X coordinate, set by function
-    @param    y1      The boundary Y coordinate, set by function
-    @param    w      The boundary width, set by function
-    @param    h      The boundary height, set by function
-*/
-/**************************************************************************/
-void Adafruit_GFX::getTextBounds(const __FlashStringHelper *str, int16_t x,
-                                 int16_t y, int16_t *x1, int16_t *y1,
-                                 uint16_t *w, uint16_t *h) {
-  uint8_t *s = (uint8_t *)str, c;
-
-  *x1 = x;
-  *y1 = y;
-  *w = *h = 0;
-
-  int16_t minx = _width, miny = _height, maxx = -1, maxy = -1;
-
-  while ((c = pgm_read_byte(s++)))
-    charBounds(c, &x, &y, &minx, &miny, &maxx, &maxy);
-
-  if (maxx >= minx) {
-    *x1 = minx;
-    *w = maxx - minx + 1;
-  }
-  if (maxy >= miny) {
-    *y1 = miny;
-    *h = maxy - miny + 1;
   }
 }
 
@@ -1675,7 +1627,7 @@ void Adafruit_GFX_Button::drawButton(bool inverted) {
     text = _fillcolor;
   }
 
-  uint8_t r = min(_w, _h) / 4; // Corner radius
+  uint8_t r = std::min(_w, _h) / 4; // Corner radius
   _gfx->fillRoundRect(_x1, _y1, _w, _h, r, fill);
   _gfx->drawRoundRect(_x1, _y1, _w, _h, r, outline);
 

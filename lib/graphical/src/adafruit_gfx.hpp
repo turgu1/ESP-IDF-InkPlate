@@ -1,6 +1,8 @@
 #ifndef __ADAFRUIT_GFX_HPP__
 #define __ADAFRUIT_GFX_HPP__
 
+#include <string>
+
 #include "print.hpp"
 #include "gfx_font.hpp"
 
@@ -78,10 +80,8 @@ class Adafruit_GFX : public Print
     void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, uint8_t *mask, int16_t w, int16_t h);
     void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size);
     void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size_x, uint8_t size_y);
-    void getTextBounds(const char *string, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
-    void getTextBounds(const __FlashStringHelper *s, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w,
-                       uint16_t *h);
-    void getTextBounds(const String &str, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
+    void getTextBounds(const char * str, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
+    void getTextBounds(const std::string &str, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
     void setTextSize(uint8_t s);
     void setTextSize(uint8_t sx, uint8_t sy);
     void setFont(const GFXfont *f = NULL);

@@ -9,6 +9,8 @@ https://github.com/Bodmer/TJpg_Decoder
 
 #include "tjpg_decoder.hpp"
 
+#include <cstring>
+
 // Create a class instance to be used by the sketch (defined as extern in header)
 TJpg_Decoder TJpgDec;
 
@@ -94,7 +96,7 @@ uint16_t TJpg_Decoder::jd_input(JDEC *jdec, uint8_t *buf, uint16_t len)
 
         // If buf is valid then copy len bytes to buffer
         if (buf)
-            memcpy_P(buf, (const uint8_t *)(thisPtr->array_data + thisPtr->array_index), len);
+            memcpy(buf, (const uint8_t *)(thisPtr->array_data + thisPtr->array_index), len);
 
         // Move pointer
         thisPtr->array_index += len;

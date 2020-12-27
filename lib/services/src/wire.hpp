@@ -5,10 +5,9 @@
 #ifndef __WIRE_HPP__
 #define __WIRE_HPP__
 
-#include <cstdint>
+#include <cinttypes>
 
 #include "non_copyable.hpp"
-
 #include "driver/i2c.h"
 
 class Wire : NonCopyable
@@ -16,6 +15,8 @@ class Wire : NonCopyable
   private:
     static constexpr char const * TAG = "Wire";
 
+    static SemaphoreHandle_t mutex;
+    static StaticSemaphore_t mutex_buffer;
     static const uint8_t BUFFER_LENGTH = 30;
     
     bool    initialized;
@@ -27,7 +28,7 @@ class Wire : NonCopyable
     uint8_t index;
 
     Wire() : 
-      initialized(false), 
+     initialized(false), 
       size_to_read(0),
       index(0)
       {}
@@ -43,6 +44,9 @@ class Wire : NonCopyable
     void       write(uint8_t val);
     uint8_t    read();
     esp_err_t  request_from(uint8_t addr, uint8_t size);
+
+    inline static void enter() { xSemaphoreTake(mutex, portMAX_DELAY); }
+    inline static void leave() { xSemaphoreGive(mutex); }
 };
 
 #if __WIRE__

@@ -2,17 +2,13 @@
 #include "touch_keys.hpp"
 #include "wire.hpp"
 
-TouchKeys TouchKeys::singleton;
-
-TouchKeys::TouchKeys() {}
-
 bool
 TouchKeys::setup() 
 {
   Wire::enter();
-  mcp.set_direction(TOUCH_0, MCP::PinMode::INPUT);
-  mcp.set_direction(TOUCH_1, MCP::PinMode::INPUT);
-  mcp.set_direction(TOUCH_2, MCP::PinMode::INPUT);
+  mcp.set_direction(TOUCH_0, MCP23017::PinMode::INPUT);
+  mcp.set_direction(TOUCH_1, MCP23017::PinMode::INPUT);
+  mcp.set_direction(TOUCH_2, MCP23017::PinMode::INPUT);
 
   // Prepare the MCP device to allow for interrupts
   // coming from any of the touchkeys. Interrupts will be raised
@@ -20,11 +16,11 @@ TouchKeys::setup()
   // must be programmed as per the ESP-IDF documentation to get
   // some interrupts.
 
-  mcp.set_int_pin(TOUCH_0, MCP::IntMode::RISING);
-  mcp.set_int_pin(TOUCH_1, MCP::IntMode::RISING);
-  mcp.set_int_pin(TOUCH_2, MCP::IntMode::RISING);
+  mcp.set_int_pin(TOUCH_0, MCP23017::IntMode::RISING);
+  mcp.set_int_pin(TOUCH_1, MCP23017::IntMode::RISING);
+  mcp.set_int_pin(TOUCH_2, MCP23017::IntMode::RISING);
 
-  mcp.set_int_output(MCP::IntPort::INTPORTB, false, false, MCP::SignalLevel::HIGH);
+  mcp.set_int_output(MCP23017::IntPort::INTPORTB, false, false, MCP23017::SignalLevel::HIGH);
   Wire::leave();  
 
   return true;
@@ -43,8 +39,8 @@ uint8_t
 TouchKeys::read_key(Key key)
 {
   Wire::enter();
-  MCP::SignalLevel value = mcp.digital_read((MCP::Pin)(((uint8_t)key & 3) + 10)); // Not clean
+  MCP23017::SignalLevel value = mcp.digital_read((MCP23017::Pin)(((uint8_t)key & 3) + 10)); // Not clean
   Wire::leave();
 
-  return value == MCP::SignalLevel::HIGH ? 1 : 0;
+  return value == MCP23017::SignalLevel::HIGH ? 1 : 0;
 }
