@@ -46,7 +46,7 @@ Distributed as-is; no warranty is given.
 class EInk10 : public EInk, NonCopyable
 {
   public:
-    EInk10(MCP23017 & mcp) : EInk(mcp)
+    EInk10(MCP23017 & mcp_i, MCP23017 & mcp_e) : EInk(mcp_i), mcp_ext(mcp_e)
       { }  // Private constructor
 
     static const uint16_t WIDTH  = 1200; // In pixels
@@ -58,7 +58,6 @@ class EInk10 : public EInk, NonCopyable
 
     inline int16_t  get_width() { return WIDTH;  }
     inline int16_t get_height() { return HEIGHT; }
-
 
     inline PanelState get_panel_state() { return panel_state; }
     inline bool        is_initialized() { return initialized; }
@@ -86,6 +85,8 @@ class EInk10 : public EInk, NonCopyable
   private:
     static constexpr char const * TAG = "EInk10";
 
+    MCP23017 & mcp_ext;
+    
     class FrameBuffer1BitX : public FrameBuffer1Bit {
       private:
         uint8_t data[BITMAP_SIZE_1BIT];

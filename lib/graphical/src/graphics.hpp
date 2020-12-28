@@ -51,8 +51,8 @@ class Graphics : public Shapes, public Image
     void           setRotation(uint8_t r);
     uint8_t        getRotation();
     void             drawPixel(int16_t x, int16_t y, uint16_t color) override;
-    void     selectDisplayMode(DisplayMode _mode);
-    void        setDisplayMode(DisplayMode _mode) { display_mode = _mode; }
+    void     selectDisplayMode(DisplayMode mode);
+    void        setDisplayMode(DisplayMode mode) { display_mode = mode; }
     DisplayMode getDisplayMode() { return display_mode; }
         
     void          clearDisplay();
@@ -82,8 +82,6 @@ class Graphics : public Shapes, public Image
     void writeFastHLine(int16_t  x, int16_t  y, int16_t  w,  uint16_t color) override;
     void      writeLine(int16_t x0, int16_t y0, int16_t  x1, int16_t  y1, uint16_t color) override;
     void       endWrite(void) override;
-
-    DisplayMode _displayMode = DisplayMode::INKPLATE_1BIT;
 };
 
 #endif

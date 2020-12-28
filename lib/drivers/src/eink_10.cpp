@@ -3,7 +3,7 @@ eink.cpp
 Inkplate 10 ESP-IDF
 
 Modified by Guy Turcotte 
-December 23, 2020
+December 27, 2020
 
 from the Arduino Library:
 
@@ -20,7 +20,7 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#ifdef INKPLATE_10
+#if defined(INKPLATE_10)
 
 #define __EINK10__ 1
 #include "eink_10.hpp"
@@ -38,12 +38,6 @@ const uint8_t EInk10::WAVEFORM_3BIT[8][8] = {
   {0, 2, 1, 1, 2, 2, 1, 0}, {1, 2, 2, 1, 2, 2, 1, 0},
   {0, 2, 1, 2, 2, 2, 1, 0}, {2, 2, 2, 2, 2, 2, 1, 0}, 
   {0, 0, 0, 0, 2, 1, 2, 0}, {0, 0, 2, 2, 2, 2, 2, 0}};
-
-// {
-//   {0, 0, 0, 0, 1, 1, 1, 0}, {1, 2, 2, 2, 1, 1, 1, 0}, 
-//   {0, 1, 2, 1, 1, 2, 1, 0}, {0, 2, 1, 2, 1, 2, 1, 0}, 
-//   {0, 0, 0, 1, 1, 1, 2, 0}, {2, 1, 1, 1, 2, 1, 2, 0},
-//   {1, 1, 1, 2, 1, 2, 2, 0}, {0, 0, 0, 0, 0, 0, 2, 0} };
 
 const uint8_t EInk10::LUT2[16] = {
   0xAA, 0xA9, 0xA6, 0xA5, 0x9A, 0x99, 0x96, 0x95,
@@ -100,6 +94,21 @@ EInk10::setup()
 
   wakeup_clear();
 
+  // Set all pins of seconds I/O expander to outputs, low.
+  // For some reason, it draw more current in deep sleep when pins are set as inputs...
+  for (int i = 0; i < 15; i++) {
+    mcp_ext.set_direction((MCP23017::Pin) i, MCP23017::PinMode::OUTPUT);
+    mcp_ext.digital_write((MCP23017::Pin) i, MCP23017::SignalLevel::LOW);
+  }
+
+  // For same reason, unused pins of first I/O expander have to be also set as outputs, low.
+  mcp_int.set_direction(MCP23017::Pin::IOPIN_13, MCP23017::PinMode::OUTPUT);
+  mcp_int.set_direction(MCP23017::Pin::IOPIN_14, MCP23017::PinMode::OUTPUT);  
+  mcp_int.set_direction(MCP23017::Pin::IOPIN_15, MCP23017::PinMode::OUTPUT);  
+  mcp_int.digital_write(MCP23017::Pin::IOPIN_13, MCP23017::SignalLevel::LOW);
+  mcp_int.digital_write(MCP23017::Pin::IOPIN_14, MCP23017::SignalLevel::LOW);
+  mcp_int.digital_write(MCP23017::Pin::IOPIN_15, MCP23017::SignalLevel::LOW);
+
   // CONTROL PINS
   gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_2,  GPIO_MODE_OUTPUT);
@@ -121,24 +130,36 @@ EInk10::setup()
   gpio_set_direction(GPIO_NUM_27, GPIO_MODE_OUTPUT); // D7
 
   d_memory_new = new_frame_buffer_1bit();
-  p_buffer     = (uint8_t *)    ESP::ps_malloc(120000);
+  p_buffer     = (uint8_t *) malloc(BITMAP_SIZE_1BIT * 2);
 
+  GLUT  = (uint32_t *) malloc(256 * 8 * sizeof(uint32_t));
+  GLUT2 = (uint32_t *) malloc(256 * 8 * sizeof(uint32_t));
+  
   ESP_LOGD(TAG, "Memory allocation for bitmap buffers.");
   ESP_LOGD(TAG, "d_memory_new: %08x p_buffer: %08x.", (unsigned int)d_memory_new, (unsigned int)p_buffer);
 
   if ((d_memory_new == nullptr) || 
-      (p_buffer     == nullptr)) {
-    do {
-      ESP_LOGE(TAG, "Unable to complete buffers allocation");
-      ESP::delay(10000);
-    } while (true);
+      (p_buffer     == nullptr) ||
+      (GLUT         == nullptr) ||
+      (GLUT2        == nullptr)) {
+    return false;
   }
 
   Wire::leave();
 
   d_memory_new->clear();
+  memset(p_buffer, 0, BITMAP_SIZE_1BIT * 2);
 
-  memset(p_buffer,     0, 120000);
+  for (int i = 0; i < 8; ++i) {
+    for (uint32_t j = 0; j < 256; ++j) {
+      uint8_t z = (WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i]);
+      GLUT[i * 256 + j] = ((z & 0b00000011) << 4) | (((z & 0b00001100) >> 2) << 18) |
+                          (((z & 0b00010000) >> 4) << 23) | (((z & 0b11100000) >> 5) << 25);
+      z = ((WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i])) << 4;
+      GLUT2[i * 256 + j] = ((z & 0b00000011) << 4) | (((z & 0b00001100) >> 2) << 18) |
+                           (((z & 0b00010000) >> 4) << 23) | (((z & 0b11100000) >> 5) << 25);
+    }
+  }
 
   initialized = true;
 
@@ -148,104 +169,53 @@ EInk10::setup()
 void
 EInk10::update(FrameBuffer1Bit & frame_buffer)
 {
-  ESP_LOGD(TAG, "update_1bit...");
+  ESP_LOGD(TAG, "1bit Update...");
  
   const uint8_t * ptr;
-  uint32_t        send;
   uint8_t         dram;
 
   Wire::enter();
 
   turn_on();
 
-  clean_fast(0,  1);
-  clean_fast(1, 21);
-  clean_fast(2,  1);
-  clean_fast(0, 12);
-  clean_fast(2,  1);
-  clean_fast(1, 21);
-  clean_fast(2,  1);
-  clean_fast(0, 12);
+  clean_fast(0, 10);
+  clean_fast(1, 10);
+  clean_fast(0, 10);
+  clean_fast(1, 10);
 
   uint8_t * data = frame_buffer.get_data();
 
-  for (int8_t k = 0; k < 4; k++) {
+  for (int k = 0; k < 5; k++) {
+
     ptr = &data[BITMAP_SIZE_1BIT - 1];
+
     vscan_start();
 
-    for (uint16_t i = 0; i < HEIGHT; i++) {
-      dram = *ptr--;
-      send = PIN_LUT[LUTB[dram >> 4]];
-      hscan_start(send);
-      send = PIN_LUT[LUTB[dram & 0x0F]];
-      GPIO.out_w1ts = CL | send;
+    for (int i = 0; i < HEIGHT; i++) {
+
+      dram = ~(*ptr--);
+
+      hscan_start(PIN_LUT[LUTW[(dram >> 4) & 0x0F]]);
+      GPIO.out_w1ts = CL | PIN_LUT[LUTW[dram & 0x0F]];
       GPIO.out_w1tc = CL | DATA;
 
-      for (uint16_t j = 0; j < LINE_SIZE_1BIT - 1; j++) {
-        dram = *ptr--;
-        send = PIN_LUT[LUTB[dram >> 4]];
-        GPIO.out_w1ts = CL | send;
+      for (int j = 0; j < (LINE_SIZE_1BIT - 1); j++) {
+        dram = ~(*ptr--);
+        GPIO.out_w1ts = CL | PIN_LUT[LUTW[(dram >> 4) & 0x0F]];
         GPIO.out_w1tc = CL | DATA;
-        send = PIN_LUT[LUTB[dram & 0x0F]];
-        GPIO.out_w1ts = CL | send;
+        GPIO.out_w1ts = CL | PIN_LUT[LUTW[dram & 0x0F]];
         GPIO.out_w1tc = CL | DATA;
       }
 
-      GPIO.out_w1ts = CL | send;
-      GPIO.out_w1tc = CL | DATA;
+      GPIO.out_w1ts = CL;
+      GPIO.out_w1tc = CL| DATA;
       vscan_end();
     }
     ESP::delay_microseconds(230);
   }
 
-  ptr = &data[BITMAP_SIZE_1BIT - 1];
-  vscan_start();
- 
-  for (uint16_t i = 0; i < HEIGHT; i++) {
-    dram = *ptr--;
-    send = PIN_LUT[LUT2[dram >> 4]];
-    hscan_start(send);
-    send = PIN_LUT[LUT2[dram & 0x0F]];
-    GPIO.out_w1ts = CL | send;
-    GPIO.out_w1tc = CL | DATA;
-    
-    for (uint16_t j = 0; j < LINE_SIZE_1BIT - 1; j++) {
-      dram = *ptr--;
-      send = PIN_LUT[LUT2[dram >> 4]];
-      GPIO.out_w1ts = CL | send;
-      GPIO.out_w1tc = CL | DATA;
-      send = PIN_LUT[LUT2[dram & 0x0F]];
-      GPIO.out_w1ts = CL | send;
-      GPIO.out_w1tc = CL | DATA;
-    }
-
-    GPIO.out_w1ts = CL | send;
-    GPIO.out_w1tc = CL | DATA;
-    vscan_end();
-  }
-  ESP::delay_microseconds(230);
-
-  vscan_start();
-
-  send = PIN_LUT[0];
-  for (uint16_t i = 0; i < HEIGHT; i++) {
-    hscan_start(send);
-    GPIO.out_w1ts = CL | send;
-    GPIO.out_w1tc = CL | DATA;
-
-    for (int j = 0; j < LINE_SIZE_1BIT - 1; j++) {
-      GPIO.out_w1ts = CL | send;
-      GPIO.out_w1tc = CL | DATA;
-      GPIO.out_w1ts = CL | send;
-      GPIO.out_w1tc = CL | DATA;
-    }
-
-    GPIO.out_w1ts = CL | send;
-    GPIO.out_w1tc = CL | DATA;
-    vscan_end();
-  }
-
-  ESP::delay_microseconds(230);
+  clean_fast(2, 2);
+  clean_fast(3, 1);
 
   vscan_start();
   turn_off();
@@ -256,91 +226,48 @@ EInk10::update(FrameBuffer1Bit & frame_buffer)
   partial_allowed = true;
 }
 
-void
+void IRAM_ATTR
 EInk10::update(FrameBuffer3Bit & frame_buffer)
 {
-  ESP_LOGD(TAG, "Update_3bit...");
+  ESP_LOGD(TAG, "3bit Update...");
 
   Wire::enter();
   turn_on();
 
-  clean_fast(0,  1);
-  clean_fast(1, 21);
-  clean_fast(2,  1);
-  clean_fast(0, 12);
-  clean_fast(2,  1);
-  clean_fast(1, 21);
-  clean_fast(2,  1);
-  clean_fast(0, 12);
+  clean_fast(0, 10);
+  clean_fast(1, 10);
+  clean_fast(0, 10);
+  clean_fast(1, 10);
 
   uint8_t * data = frame_buffer.get_data();
 
   for (int k = 0; k < 8; k++) {
 
     const uint8_t * dp = &data[BITMAP_SIZE_3BIT - 1];
-    uint32_t send;
-    uint8_t  pix1;
-    uint8_t  pix2;
-    uint8_t  pix3;
-    uint8_t  pix4;
-    uint8_t  pixel;
-    uint8_t  pixel2;
 
     vscan_start();
 
     for (int i = 0; i < HEIGHT; i++) {
-      pixel  = 0;
-      pixel2 = 0;
-      pix1   = *(dp--);
-      pix2   = *(dp--);
-      pix3   = *(dp--);
-      pix4   = *(dp--);
 
-      pixel  |= (WAVEFORM_3BIT[ pix1       & 0x07][k] << 6) | 
-                (WAVEFORM_3BIT[(pix1 >> 4) & 0x07][k] << 4) |
-                (WAVEFORM_3BIT[ pix2       & 0x07][k] << 2) | 
-                (WAVEFORM_3BIT[(pix2 >> 4) & 0x07][k] << 0);
+      hscan_start((GLUT2[k * 256 + (*(dp - 1))] | GLUT[k * 256 + (*(dp - 2))]));
+      dp -= 2;
 
-      pixel2 |= (WAVEFORM_3BIT[ pix3       & 0x07][k] << 6) | 
-                (WAVEFORM_3BIT[(pix3 >> 4) & 0x07][k] << 4) |
-                (WAVEFORM_3BIT[ pix4       & 0x07][k] << 2) |
-                (WAVEFORM_3BIT[(pix4 >> 4) & 0x07][k] << 0);
-
-      send = PIN_LUT[pixel];
-      hscan_start(send);
-      send = PIN_LUT[pixel2];
-      GPIO.out_w1ts = CL | send;
+      GPIO.out_w1ts = CL | (GLUT2[k * 256 + (*(dp - 1))] | GLUT[k * 256 + (*(dp - 2))]);
       GPIO.out_w1tc = CL | DATA;
+      dp -= 2;
 
-      for (int j = 0; j < (LINE_SIZE_3BIT >> 2) - 1; j++) {
-        pixel  = 0;
-        pixel2 = 0;
-        pix1   = *(dp--);
-        pix2   = *(dp--);
-        pix3   = *(dp--);
-        pix4   = *(dp--);
-
-        pixel  |= (WAVEFORM_3BIT[ pix1       & 0x07][k] << 6) | 
-                  (WAVEFORM_3BIT[(pix1 >> 4) & 0x07][k] << 4) |
-                  (WAVEFORM_3BIT[ pix2       & 0x07][k] << 2) | 
-                  (WAVEFORM_3BIT[(pix2 >> 4) & 0x07][k] << 0);
-
-        pixel2 |= (WAVEFORM_3BIT[ pix3       & 0x07][k] << 6) | 
-                  (WAVEFORM_3BIT[(pix3 >> 4) & 0x07][k] << 4) |
-                  (WAVEFORM_3BIT[ pix4       & 0x07][k] << 2) | 
-                  (WAVEFORM_3BIT[(pix4 >> 4) & 0x07][k] << 0);
-
-        send = PIN_LUT[pixel];
-        GPIO.out_w1ts = CL | send;
-        GPIO.out_w1tc = CL | DATA;
-
-        send = PIN_LUT[pixel2];
-        GPIO.out_w1ts = CL | send;
-        GPIO.out_w1tc = CL | DATA;
+      for (int j = 0; j < ((WIDTH / 8) - 1); j++) {
+          GPIO.out_w1ts = CL | (GLUT2[k * 256 + (*(dp - 1))] | GLUT[k * 256 + (*(dp - 2))]);
+          GPIO.out_w1tc = CL | DATA;
+          dp -= 2;
+          GPIO.out_w1ts = CL | (GLUT2[k * 256 + (*(dp - 1))] | GLUT[k * 256 + (*(dp - 2))]);
+          GPIO.out_w1tc = CL | DATA;
+          dp -= 2;
       }
 
-      GPIO.out_w1ts = CL | send;
+      GPIO.out_w1ts = CL;
       GPIO.out_w1tc = CL | DATA;
+
       vscan_end();
     }
 
@@ -366,8 +293,7 @@ EInk10::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 
   ESP_LOGD(TAG, "Partial update...");
 
-  uint32_t send;
-  uint32_t n   = 119999;
+  uint32_t n   = BITMAP_SIZE_1BIT * 2 - 1;
   uint32_t pos = BITMAP_SIZE_1BIT - 1;
   uint8_t  diffw, diffb;
 
@@ -388,13 +314,13 @@ EInk10::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 
   for (int k = 0; k < 5; k++) {
     vscan_start();
-    n = 119999;
+    n = BITMAP_SIZE_1BIT * 2 - 1;
 
     for (int i = 0; i < HEIGHT; i++) {
-      send = PIN_LUT[p_buffer[n--]];
+      uint32_t send = PIN_LUT[p_buffer[n--]];
       hscan_start(send);
 
-      for (int j = 0; j < 199; j++) {
+      for (int j = 0; j < ((WIDTH / 4) - 1); j++) {
         send = PIN_LUT[p_buffer[n--]];
         GPIO.out_w1ts = send | CL;
         GPIO.out_w1tc = DATA | CL;

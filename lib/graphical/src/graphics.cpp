@@ -129,11 +129,11 @@ void Graphics::endWrite()
 
 void Graphics::selectDisplayMode(DisplayMode mode)
 {
-    if (mode != _displayMode)
+    if (mode != display_mode)
     {
-        _displayMode = mode;
+        display_mode = mode;
 
-        if (_displayMode == DisplayMode::INKPLATE_1BIT)
+        if (display_mode == DisplayMode::INKPLATE_1BIT)
           _partial->clear();
         else
           DMemory4Bit->clear();
@@ -144,7 +144,7 @@ void Graphics::selectDisplayMode(DisplayMode mode)
 
 void Graphics::clearDisplay()
 {
-  if (_displayMode == DisplayMode::INKPLATE_1BIT)
+  if (display_mode == DisplayMode::INKPLATE_1BIT)
     _partial->clear();
   else
     DMemory4Bit->clear();
@@ -152,22 +152,26 @@ void Graphics::clearDisplay()
 
 void Graphics::display()
 {
-  if (_displayMode == DisplayMode::INKPLATE_1BIT)
+  if (display_mode == DisplayMode::INKPLATE_1BIT) {
+    ESP_LOGD(TAG, "Update 1Bit frame buffer");
     e_ink.update(*_partial);
-  else
+  }
+  else {
+    ESP_LOGD(TAG, "Update 3Bit frame buffer");
     e_ink.update(*DMemory4Bit);
+  }
 }
 
 void Graphics::preloadScreen()
 {
-  if (_displayMode == DisplayMode::INKPLATE_1BIT) {
+  if (display_mode == DisplayMode::INKPLATE_1BIT) {
     e_ink.preload_screen(*_partial);
   }
 }
 
 void Graphics::partialUpdate(bool _forced)
 {
-  if (_displayMode == DisplayMode::INKPLATE_1BIT) {
+  if (display_mode == DisplayMode::INKPLATE_1BIT) {
     e_ink.partial_update(*_partial, _forced);
   }
 }
@@ -207,15 +211,15 @@ void Graphics::writePixel(int16_t x0, int16_t y0, uint16_t color)
     {
         int x = x0 >> 3;
         int x_sub = x0 & 7;
-        uint8_t temp = _partial->get_data()[100 * y0 + x];
-        _partial->get_data()[100 * y0 + x] = (~pixelMaskLUT[x_sub] & temp) | (color ? pixelMaskLUT[x_sub] : 0);
+        uint8_t * p = &_partial->get_data()[_partial->get_line_size() * y0 + x];
+        *p = (~pixelMaskLUT[x_sub] & *p) | (color ? pixelMaskLUT[x_sub] : 0);
     }
     else
     {
         color &= 7;
         int x = x0 >> 1;
         int x_sub = x0 & 1;
-        uint8_t temp = DMemory4Bit->get_data()[400 * y0 + x];
-        DMemory4Bit->get_data()[400 * y0 + x] = (pixelMaskGLUT[x_sub] & temp) | (x_sub ? color : color << 4);
+        uint8_t * p = &DMemory4Bit->get_data()[DMemory4Bit->get_line_size() * y0 + x];
+        *p = (pixelMaskGLUT[x_sub] & *p) | (x_sub ? color : color << 4);
     }
 }

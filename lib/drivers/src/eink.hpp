@@ -85,6 +85,8 @@ class EInk
 
     uint8_t         * p_buffer;
     FrameBuffer1Bit * d_memory_new;
+    uint32_t        * GLUT;
+    uint32_t        * GLUT2;
 
     const MCP23017::Pin OE             = MCP23017::Pin::IOPIN_0;
     const MCP23017::Pin GMOD           = MCP23017::Pin::IOPIN_1;

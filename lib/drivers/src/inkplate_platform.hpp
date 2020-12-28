@@ -38,7 +38,7 @@ Distributed as-is; no warranty is given.
     EInk6     e_ink(mcp_int);
   #elif defined(INKPLATE_10)
     MCP23017  mcp_ext(0x22);
-    EInk10    e_ink(mcp_int);
+    EInk10    e_ink(mcp_int, mcp_ext);
   #else
     #error "One of INKPLATE_6, INKPLATE_10 must be defined."
   #endif
