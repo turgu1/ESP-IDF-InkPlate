@@ -33,7 +33,7 @@ Inkplate display(DisplayMode::INKPLATE_1BIT); // Create an object on Inkplate li
 uint16_t w;
 uint16_t h;
 
-void wait_a_bit() { vTaskDelay(10000 / portTICK_PERIOD_MS); }
+void delay(int msec) { vTaskDelay(msec / portTICK_PERIOD_MS); }
 
 static const char * TAG = "Main";
 
@@ -75,7 +75,7 @@ void mainTask(void * param)
 
     for (;;) {
       ESP_LOGI(TAG, "Completed...");
-      wait_a_bit();
+      delay(10000);
     }
 }
 

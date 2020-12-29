@@ -24,31 +24,34 @@
    23 July 2020 by e-radionica.com
 */
 
-#include "Inkplate.h"            //Include Inkplate library to the sketch
-#include "WiFi.h"                //Include library for WiFi
-Inkplate display(INKPLATE_1BIT); // Create an object on Inkplate library and also set library into 1 Bit mode (BW)
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "logging.hpp"
 
-const char *ssid = "e-radionica.com"; // Your WiFi SSID
-const char *password = "croduino";    // Your WiFi password
+#include "secur.hpp"
 
-void setup()
+#include "inkplate.hpp"            //Include Inkplate library to the sketch
+Inkplate display(DisplayMode::INKPLATE_1BIT); // Create an object on Inkplate library and also set library into 1 Bit mode (BW)
+
+static const char * TAG = "VariPassGraph";
+
+const char *ssid     = YOUR_SSID;      // Your WiFi SSID
+const char *password = YOUR_PASSWORD;  // Your WiFi password
+
+void delay(int msec) { vTaskDelay(msec / portTICK_PERIOD_MS); }
+
+void mainTask(void * param)
 {
-    display.begin();        // Init Inkplate library (you should call this function ONLY ONCE)
-    display.clearDisplay(); // Clear frame buffer of display
-    display.display();      // Put clear image on display
+  display.begin();        // Init Inkplate library (you should call this function ONLY ONCE)
+  display.clearDisplay(); // Clear frame buffer of display
+  display.display();      // Put clear image on display
 
-    display.print("Connecting to WiFi...");
-    display.partialUpdate();
+  display.print("Connecting to WiFi...");
+  display.partialUpdate();
 
-    // Connect to the WiFi network.
-    WiFi.mode(WIFI_MODE_STA);
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        delay(500);
-        display.print(".");
-        display.partialUpdate();
-    }
+  // Connect to the WiFi network.
+  if (display.joinAP(ssid, password)) {
+
     display.println("\nWiFi OK! Downloading...");
     display.partialUpdate();
 
@@ -61,18 +64,35 @@ void setup()
     //  height - Height of the generated graph, here set to half the Inkplate's height.
     //  eink   - Should be set to true to generate a BW 1 bit bitmap better suitable for Inkplate.
     // For more detailed explanation and more parameters, please visit the docs page: https://varipass.org/docs/
+    
     if (!display.drawBitmapFromWeb("https://api.varipass.org/?action=sgraph&id=kbg3eQfA&width=400&height=300&eink=true",
-                                   200, 150))
+                                  200, 150))
     {
         display.println("Image open error");
         display.partialUpdate();
     }
     display.partialUpdate();
 
-    WiFi.mode(WIFI_OFF);
+    display.disconnect();
+  }
+
+  for (;;) {
+    ESP_LOGI(TAG, "Completed...");
+    delai(10000);
+  }
 }
 
-void loop()
-{
-    // Nothing...
-}
+
+#define STACK_SIZE 10000
+
+extern "C" {
+
+  void app_main()
+  {
+    TaskHandle_t xHandle = NULL;
+
+    xTaskCreate(peripheral_task, "mainTask", STACK_SIZE, (void *) 1, tskIDLE_PRIORITY, &xHandle);
+    configASSERT(xHandle);
+  }
+
+} // extern "C"

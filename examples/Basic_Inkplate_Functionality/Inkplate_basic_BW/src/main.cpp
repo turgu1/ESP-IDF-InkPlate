@@ -49,7 +49,7 @@ int random(int a, int b)
   return (a + (r * b) / RAND_MAX);
 }
 
-void wait_a_bit() { vTaskDelay(5000 / portTICK_PERIOD_MS); }
+void delay(int msec) { vTaskDelay(msec / portTICK_PERIOD_MS); }
 
 void mainTask(void * params) 
 {
@@ -81,7 +81,7 @@ void mainTask(void * params)
   #endif
 
   display.display(); // Write hello message
-  wait_a_bit();
+  delay(5000);
 
   for (;;) { 
     display.setRotation(0);
@@ -99,7 +99,7 @@ void mainTask(void * params)
                                         // since Inkplate is in BW mode)
     display.display(); // Send image to display. You need to call this one each time you want to transfer frame buffer
                        // to the screen.
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -111,7 +111,7 @@ void mainTask(void * params)
     }
     displayCurrentAction("Drawing 600 random pixels");
     display.display(); // Write everything from frame buffer to screen
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -123,7 +123,7 @@ void mainTask(void * params)
     display.drawLine(w - 1, 0, 0, h - 1, BLACK); // with those. Arguments are: start X, start Y, ending X, ending Y, color.
     displayCurrentAction("Drawing two diagonal lines");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -135,7 +135,7 @@ void mainTask(void * params)
     }
     displayCurrentAction("Drawing 50 random lines");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -148,7 +148,7 @@ void mainTask(void * params)
     }
     displayCurrentAction("Drawing 50 random lines");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -157,7 +157,7 @@ void mainTask(void * params)
     display.drawFastHLine(100, 100, w - 200, BLACK); // Arguments are: starting X, starting Y, length, color
     displayCurrentAction("Drawing one horizontal line");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -166,7 +166,7 @@ void mainTask(void * params)
     display.drawFastVLine(100, 100, h - 200, BLACK); // Arguments are: starting X, starting Y, length, color
     displayCurrentAction("Drawing one vertical line");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -182,7 +182,7 @@ void mainTask(void * params)
     }
     displayCurrentAction("Drawing a grid using horizontal and vertical lines");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -191,7 +191,7 @@ void mainTask(void * params)
     display.drawRect(200, 200, 400, 300, BLACK); // Arguments are: start X, start Y, size X, size Y, color
     displayCurrentAction("Drawing rectangle");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -203,7 +203,7 @@ void mainTask(void * params)
     }
     displayCurrentAction("Drawing many rectangles");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -212,7 +212,7 @@ void mainTask(void * params)
     display.fillRect(200, 200, 400, 300, BLACK); // Arguments are: start X, start Y, size X, size Y, color
     displayCurrentAction("Drawing black rectangle");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -224,7 +224,7 @@ void mainTask(void * params)
     }
     displayCurrentAction("Drawing many filled rectangles randomly");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -233,7 +233,7 @@ void mainTask(void * params)
     display.drawCircle(w / 2, h / 2, 75, BLACK); // Arguments are: start X, start Y, radius, color
     displayCurrentAction("Drawing a circle");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -245,7 +245,7 @@ void mainTask(void * params)
     }
     displayCurrentAction("Drawing many circles randomly");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -254,7 +254,7 @@ void mainTask(void * params)
     display.fillCircle(w / 2, h / 2, 75, BLACK); // Arguments are: start X, start Y, radius, color
     displayCurrentAction("Drawing black-filled circle");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -266,7 +266,7 @@ void mainTask(void * params)
     }
     displayCurrentAction("Drawing many filled circles randomly");
     display.display(); // To show stuff on screen, you always need to call display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -276,7 +276,7 @@ void mainTask(void * params)
                           BLACK); // Arguments are: start X, start Y, size X, size Y, radius, color
     displayCurrentAction("Drawing rectangle with rounded edges");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -288,7 +288,7 @@ void mainTask(void * params)
     }
     displayCurrentAction("Drawing many rounded edges rectangles");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -298,7 +298,7 @@ void mainTask(void * params)
                           BLACK); // Arguments are: start X, start Y, size X, size Y, radius, color
     displayCurrentAction("This is filled rectangle with rounded edges");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -310,7 +310,7 @@ void mainTask(void * params)
     }
     displayCurrentAction("Random rounded edge filled rectangles");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -318,7 +318,7 @@ void mainTask(void * params)
     display.clearDisplay();
     display.drawTriangle(250, 400, 550, 400, 400, 100, BLACK); // Arguments are: X1, Y1, X2, Y2, X3, Y3, color
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -326,7 +326,7 @@ void mainTask(void * params)
     display.fillTriangle(300, 350, 500, 350, 400, 150, BLACK); // Arguments are: X1, Y1, X2, Y2, X3, Y3, color
     displayCurrentAction("Drawing filled triangle inside exsisting one");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -337,7 +337,7 @@ void mainTask(void * params)
                       BLACK); // Arguments are: array variable name, start X, start Y, size X, size Y, color
     displayCurrentAction("Drawing e-radionica.com logo");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
     
@@ -357,7 +357,7 @@ void mainTask(void * params)
     }
     displayCurrentAction("Text in different sizes and shadings");
     display.display(); // To show stuff on screen, you always need to call display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -377,7 +377,7 @@ void mainTask(void * params)
     }
     display.display();
     display.setTextColor(BLACK, WHITE);
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -386,7 +386,7 @@ void mainTask(void * params)
     display.drawElipse(100, 200, w / 2, h / 2, BLACK);
     displayCurrentAction("Drawing an elipse");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -395,7 +395,7 @@ void mainTask(void * params)
     display.fillElipse(100, 200, w / 2, h / 2, BLACK);
     displayCurrentAction("Drawing a filled elipse");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -423,7 +423,7 @@ void mainTask(void * params)
     display.drawPolygon(xt, yt, n, BLACK);
     displayCurrentAction("Drawing a polygon");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -434,7 +434,7 @@ void mainTask(void * params)
     display.fillPolygon(xt, yt, n, BLACK);
     displayCurrentAction("Drawing a filled polygon");
     display.display();
-    wait_a_bit();
+    delay(5000);
 
     // -----
 
@@ -449,7 +449,7 @@ void mainTask(void * params)
           r); // Set rotation will sent rotation for the entire display, so you can use it sideways or upside-down
       display.print("INKPLATE6");
       display.display();
-      wait_a_bit();
+      delay(5000);
     }
     display.setTextColor(BLACK, WHITE);
 

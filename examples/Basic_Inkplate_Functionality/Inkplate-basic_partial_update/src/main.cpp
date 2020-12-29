@@ -37,7 +37,7 @@ static const char * TAG = "Main";
 int offset;
 int w, h;
 
-void wait_a_bit() { vTaskDelay(200 / portTICK_PERIOD_MS); }
+void delay(int msec) { vTaskDelay(msec / portTICK_PERIOD_MS); }
 
 // Variable that keeps count on how much screen has been partially updated
 int n = 0;
@@ -75,7 +75,7 @@ void mainTask(void * param)
     offset -= 20; // Move text into new position
     if (offset < 0)
         offset = w; // Text is scrolled till the end of the screen? Get it back on the start!
-    wait_a_bit();   // Delay between refreshes.
+    delay(200);   // Delay between refreshes.
   }
 }
 
