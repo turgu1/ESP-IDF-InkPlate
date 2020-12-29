@@ -25,9 +25,6 @@ Distributed as-is; no warranty is given.
 
 class Inkplate : public Graphics
 {
-  private:
-    NetworkClient network_client;
-
   public:
 
     Inkplate(DisplayMode mode);

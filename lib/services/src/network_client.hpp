@@ -1,5 +1,6 @@
 /*
-NetworkClient.h
+network_client.hpp
+
 Inkplate 6 Arduino library
 David Zovko, Borna Biro, Denis Vajak, Zvonimir Haramustek @ e-radionica.com
 September 24, 2020
@@ -22,15 +23,17 @@ Distributed as-is; no warranty is given.
 class NetworkClient
 {
   public:
-    bool joinAP(const char *ssid, const char *pass);
+    NetworkClient() : connected(false) {}
+
+    bool joinAP(const char * ssid, const char * pass);
     void disconnect();
-    bool isConnected();
+
+    inline bool isConnected() { return connected; }
 
     uint8_t * downloadFile(const char * url, int32_t * defaultLen);
-    //uint8_t *downloadFile(WiFiClient *url, int32_t len);
 
   private:
-    static constexpr char const * TAG = "NetworkClient";
+    bool connected;
 };
 
 #if __NETWORK_CLIENT__

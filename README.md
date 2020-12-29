@@ -4,7 +4,6 @@ A porting effort to the ESP-IDF framework for the e-Radionica InkPlate software 
 
 --> Work in progress. Not ready yet. <--
 
-Beware that these classes are **not** re-entrant. That means that it is not possible to use them in a multi-thread context without proper mutual exclusion access control. 
 
 This project is a working example. You can build it using PlatformIO. 
 
@@ -14,7 +13,7 @@ As you can expect, the ESP-IDF framework is quit different than the Arduino fram
 
 The code is also being transformed to be closer to C++ functionalities, targetting a stronger usage of the language elements that will sustain the author's software developement. A bit less C and more C++...
 
-The source code is divided in two major groups: the low-level device drivers group, under the `inkplate_platform` class, and the *mid-level* graphical group, under the `inkplate` class. The coupling between these groups is minimal: one can take the `inkplate-platform` and build on top of it without the graphical portion. The graphical group rely on the drivers. The coupling is light as it is done through aggregation instead of inheritence.
+The source code is divided in two major groups: the low-level device drivers group, under the `inkplate_platform` class, and the *mid-level* graphical group, under the `inkplate` class. The coupling between these groups is minimal: one can take the `inkplate-platform` and build on top of it without the graphical portion. As the graphical group rely on the drivers, it is inline with the Arduino counterpart. The coupling between the two groups is light as it is done through aggregation instead of inheritence.
 
 Here is a list of the changes being done:
 
@@ -25,9 +24,9 @@ Some of these changes have been done partially and will be completed in subseque
 - Give the overall drivers source code a transformation to use what is called *modern C++*, alligned with C++11 and beyond
 - All .h files are renamed .hpp
 - macro definitions (`#define`) are reduced to a bare minimum
-- `enum class` are used everywhere possible in the drivers group
-- source code filenames are all in lowercase
-- all driver and support files using the following naming conventions:
+- `enum class` are used everywhere possible in the drivers group. This reinforce source code documentation and compiler support for finding coding errors. 
+- source code filenames are all in lower_case. A lot easier visually to digg into the source folder.
+- all driver and support classes are using the following naming conventions:
   - class names are in ChamelCase
   - constants are in UPPER_CASE
   - variables and method names are in lower_case
@@ -38,9 +37,15 @@ Some of these changes have been done partially and will be completed in subseque
 - _swap...() definitions replaced with std::swap()
 - String replaced with std::string (No PROGMEM support required with the ESP32)
 
+### Wire class and multi-threading support
+
+A Wire class that mimics the equivalent Arduino class has been added to the library.
+
+Access control to the I2C interface has been added to allow for interrupt based devices access and multi-threading. In the library, all code sequences that require the use of I2C are calling class methods `Wire::enter()` and `Wire::leave()` to reserve and free the interface.
+
 ### defines.hpp
 
-The content is now at a bare minimum: DisplayMode enum class that defines both INKPLATE_1BIT and INKPLATE_3BIT modes. Also, BLACK and WHITE values for INKPLATE_1BIT mode.
+The content is now at a bare minimum: `DisplayMode` enum class that defines both `INKPLATE_1BIT` and `INKPLATE_3BIT` modes. Also, `BLACK` and `WHITE` color values for INKPLATE_1BIT mode.
 
 As the DisplayMode is an enum class, it is then required to access the values as follow:
 
@@ -58,11 +63,11 @@ The class is now the owner of the _partial and DMemory4Bit frame buffers. As suc
 
 They select the appropriate frame buffer and call the e_ink class methods.
 
-This change is mostly transparent for the user application.
+This change is transparent for the user application.
   
 ### SdCard
 
-- The module is used only to initialize the ESP-IDF drivers (SPI and FAT filesystem are used). The card can then be accessed through the standard C++/C capabilities. All filenames located on the card must be prefixed with `/sdcard/`.
+- The module is used only to initialize the ESP-IDF drivers (SPI and FAT filesystem are used). The card can then be accessed through the standard C++/C capabilities, as supplied through the ESP-IDF framework. All filenames located on the card must be prefixed with `/sdcard/`.
   
 ### Image (image.hpp, image.cpp)
 
@@ -75,7 +80,9 @@ This change is mostly transparent for the user application.
 This class is implementing a generic MCP23017 driver. It is instanciated in the inkplate_platform.hpp, depending on the type of Inkplate device:
 
 - as mcp_int (for all Inkplate devices) 
-- as mcp_ext (for the Inkplate-10, and Inkplate-6).
+- as mcp_ext (for the Inkplate-10, and Inkplate-6Plus).
+
+Each class that uses the MCPs are independant from each other in terms of initialzing and accessing the MCP. This is the case for EInk, Battery, TouchKeys, Backlight. They all uses `Wire::enter()` and `Wire::leave()` to reserve access to the I2C bus.
 
 ### battery, touch_keys (.hpp, .cpp)
 
@@ -87,8 +94,7 @@ This name reflect more what it is. This class will is currently under eavy chang
 
 ### FrameBuffer classes
 
-A hierarchy of frame buffer classes has been added. These allow for flexible adaptation to the different
-geometry of devices and pixel sizes.
+A hierarchy of frame buffer classes has been added. These allow for flexible adaptation to the different geometry of devices and pixel sizes.
 
 ## ESP-IDF configuration specifics for InkPlate devices
 

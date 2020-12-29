@@ -50,6 +50,7 @@ bool
 InkPlatePlatform::light_sleep(uint32_t minutes_to_sleep)
 {
   esp_err_t err;
+
   if ((err = esp_sleep_enable_timer_wakeup(minutes_to_sleep * 60e6)) != ESP_OK) {
     LOG_E("Unable to program Light Sleep wait time: %d", err);
   }
@@ -67,6 +68,7 @@ void
 InkPlatePlatform::deep_sleep()
 {
   esp_err_t err;
+  
   if ((err = esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER)) != ESP_OK) {
     LOG_E("Unable to disable Sleep wait time: %d", err);
   }
