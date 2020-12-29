@@ -28,6 +28,10 @@ Graphics::Graphics(int16_t w, int16_t h) :
   if ((_partial == nullptr) || (DMemory4Bit == nullptr)) {
     ESP_LOGE(TAG, "Unable to allocate PSRAM memory for buffers.");
   }
+  else {
+    _partial->clear();
+    DMemory4Bit->clear();
+  }
 };
 
 void Graphics::setRotation(uint8_t x)

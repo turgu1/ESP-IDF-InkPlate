@@ -29,14 +29,22 @@ class Inkplate : public Graphics
 
     Inkplate(DisplayMode mode);
 
-    void begin(void)       { inkplate_platform.setup(); }
+    void                      begin() { inkplate_platform.setup();   }
 
-    uint8_t readPowerGood();
+    inline void              einkOn() { e_ink.turn_on();             }
+    inline void             einkOff() { e_ink.turn_off();            }
 
-    inline bool joinAP(const char * ssid, const char * pass) { return network_client.joinAP(ssid, pass); }
-    inline void disconnect()  { network_client.disconnect();         }
+    inline PanelState getPanelState() { e_ink.get_panel_state();     }
+    inline double       readBattery() { return battery.read_level(); }
+
+    uint8_t           readPowerGood() { e_ink.read_power_good();     }
+
+    inline void  disconnect() { network_client.disconnect();         }
     inline bool isConnected() { return network_client.isConnected(); }
-    inline int _getRotation() { return Graphics::getRotation();     };
+    inline int _getRotation() { return Graphics::getRotation();      }
+
+    inline bool joinAP(const char * ssid, const char * pass) { 
+                return network_client.joinAP(ssid, pass); }
 };
 
 #endif
