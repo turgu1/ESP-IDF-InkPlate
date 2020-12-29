@@ -24,6 +24,12 @@
   "frameworks": "espidf",
   "platforms": "espressif32",
   "build": {
-    "flags": "-I include/**"
+    "flags": [
+      "-I include/drivers",
+      "-I include/graphical",
+      "-I include/services",
+      "-I include/tools",
+      "-I include/fonts"
+    ]
   }
 }
