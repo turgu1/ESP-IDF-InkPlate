@@ -211,18 +211,27 @@ static esp_err_t http_event_handler(esp_http_client_event_t * evt)
       //ESP_LOGI(TAG, "key = %s, value = %s", evt->header_key, evt->header_value);
       if (strcmp("Content-Length", evt->header_key) == 0) {
         buffer_size = atoi(evt->header_value);
-        if (buffer_size > 0) {
-          buffer_ptr = buffer = new uint8_t[buffer_size];
-        }
       }
       break;
     case HTTP_EVENT_ON_DATA:
       ESP_LOGI(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
       if (!esp_http_client_is_chunked_response(evt->client)) {
         //ESP_LOGI(TAG, "len = %d, %.*s", evt->data_len, evt->data_len, (char*)evt->data);
-        if ((buffer_ptr != nullptr) && ((buffer_ptr + evt->data_len) <= (buffer + buffer_size))) {
-          memcpy(buffer_ptr, evt->data, evt->data_len);
-          buffer_ptr += evt->data_len;
+        if ((buffer == nullptr) && (buffer_size > 0) {
+          buffer_ptr = buffer = (uint8_t *) malloc(buffer_size);
+        }
+        if (buffer_ptr != nullptr) {
+          if ((buffer_ptr + evt->data_len) <= (buffer + buffer_size)) {
+            memcpy(buffer_ptr, evt->data, evt->data_len);
+            buffer_ptr += evt->data_len;
+          }
+          else {
+            int size = (buffer + buffer_size) - buffer_ptr;
+            if ((size > 0) && (size <= evt->data_len)) {
+              memcpy(buffer_ptr, evt->data, size);
+              buffer_ptr += size;
+            }
+          }
         }
       }
 
@@ -244,7 +253,7 @@ NetworkClient::downloadFile(const char * url, int32_t * defaultLen)
   if (!connected) return nullptr;
 
   buffer = buffer_ptr = nullptr;
-  buffer_size = -1;
+  buffer_size = *defaultLen;
 
   esp_http_client_config_t config;
 
@@ -262,6 +271,8 @@ NetworkClient::downloadFile(const char * url, int32_t * defaultLen)
             esp_http_client_get_content_length(client));
   }
   esp_http_client_cleanup(client);
+
+  *defaultLen = buffer_size;
 
   return buffer;
 }
