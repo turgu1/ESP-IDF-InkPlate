@@ -217,7 +217,7 @@ static esp_err_t http_event_handler(esp_http_client_event_t * evt)
       ESP_LOGI(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
       if (!esp_http_client_is_chunked_response(evt->client)) {
         //ESP_LOGI(TAG, "len = %d, %.*s", evt->data_len, evt->data_len, (char*)evt->data);
-        if ((buffer == nullptr) && (buffer_size > 0) {
+        if ((buffer == nullptr) && (buffer_size > 0)) {
           buffer_ptr = buffer = (uint8_t *) malloc(buffer_size);
         }
         if (buffer_ptr != nullptr) {

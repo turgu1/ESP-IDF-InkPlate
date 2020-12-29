@@ -65,7 +65,7 @@ void mainTask(void * param)
     //  eink   - Should be set to true to generate a BW 1 bit bitmap better suitable for Inkplate.
     // For more detailed explanation and more parameters, please visit the docs page: https://varipass.org/docs/
     
-    if (!display.drawBitmapFromWeb("https://api.varipass.org/?action=sgraph&id=kbg3eQfA&width=400&height=300&eink=true",
+    if (!display.drawImage("https://api.varipass.org/?action=sgraph&id=kbg3eQfA&width=400&height=300&eink=true",
                                   200, 150))
     {
         display.println("Image open error");
@@ -78,7 +78,7 @@ void mainTask(void * param)
 
   for (;;) {
     ESP_LOGI(TAG, "Completed...");
-    delai(10000);
+    delay(10000);
   }
 }
 
@@ -91,7 +91,7 @@ extern "C" {
   {
     TaskHandle_t xHandle = NULL;
 
-    xTaskCreate(peripheral_task, "mainTask", STACK_SIZE, (void *) 1, tskIDLE_PRIORITY, &xHandle);
+    xTaskCreate(mainTask, "mainTask", STACK_SIZE, (void *) 1, tskIDLE_PRIORITY, &xHandle);
     configASSERT(xHandle);
   }
 
