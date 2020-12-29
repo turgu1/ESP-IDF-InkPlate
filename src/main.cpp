@@ -69,7 +69,7 @@ void mainTask(void * params)
   display.display(); // Write hello message
   wait_a_bit();
 
-  if (display.joinAP("tomate1", "sau$phy$1988")) {
+  if (display.joinAP(YOUR_SSID, YOUR_PASSWORD)) {
     int32_t size;
     network_client.downloadFile("https://api.varipass.org/?action=sgraph&id=kbg3eQfA&width=400&height=300&eink=true", &size);
   }
