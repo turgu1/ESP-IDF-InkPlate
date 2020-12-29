@@ -39,7 +39,9 @@ class Inkplate : public Graphics
 
     uint8_t readPowerGood() { return e_ink.read_power_good(); }
 
-    uint8_t readTouchPad(int c) { return touch_keys.read_key((TouchKeys::Key) c); }
+    int8_t readTemperature() { return e_ink.read_temperature(); }
+
+    uint8_t readTouchpad(int c) { return touch_keys.read_key((TouchKeys::Key) c); }
     
     inline void  disconnect() { network_client.disconnect(); }
     inline bool isConnected() { return network_client.isConnected(); }
@@ -47,6 +49,8 @@ class Inkplate : public Graphics
 
     inline bool joinAP(const char * ssid, const char * pass) { 
                 return network_client.joinAP(ssid, pass); }
+
+    bool sdCardInit() { return true; }
 };
 
 #endif
