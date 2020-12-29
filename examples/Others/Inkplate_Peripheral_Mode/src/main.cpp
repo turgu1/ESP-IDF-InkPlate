@@ -356,7 +356,7 @@ void peripheral_task(void * param)
                 if (b == '?')
                 {
                     std::cout << "#R("
-                              << display.getPanelState()
+                              << (int)display.getPanelState()
                               << ")*"
                               << std::endl << std::flush;
                 }

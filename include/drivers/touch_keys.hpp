@@ -17,7 +17,7 @@ class TouchKeys : NonCopyable
      * 
      * Read one of the three touchkeys.
      * 
-     * @param key touchkey number (0, 1 or 2)
+     * @param key touchkey  (KEY_0, KEY_1, or KEY_2)
      * @return uint8_t 1 if touched, 0 if not
      */
     uint8_t read_key(Key key);
