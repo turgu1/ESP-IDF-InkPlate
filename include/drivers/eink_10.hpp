@@ -79,8 +79,6 @@ class EInk10 : public EInk, NonCopyable
     void update(FrameBuffer3Bit & frame_buffer);
 
     void partial_update(FrameBuffer1Bit & frame_buffer, bool force = false);
-
-    int8_t  read_temperature();
     
   private:
     static constexpr char const * TAG = "EInk10";
@@ -106,8 +104,6 @@ class EInk10 : public EInk, NonCopyable
     };
 
     void clean_fast(uint8_t c, uint8_t rep);
-
-    uint8_t read_power_good();
 
     static const uint8_t  WAVEFORM_3BIT[8][8]; 
     static const uint8_t  LUT2[16];

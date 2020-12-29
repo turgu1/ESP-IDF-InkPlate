@@ -214,3 +214,50 @@ EInk::pins_as_outputs()
   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_27, GPIO_MODE_OUTPUT);
 }
+
+
+int8_t 
+EInk6::read_temperature()
+{
+  int8_t temp;
+  
+  if (get_panel_state() == PanelState::OFF) {
+    Wire::enter();
+    wakeup_set();
+    ESP::delay_microseconds(1800);
+    pwrup_set();
+    Wire::leave();
+
+    ESP::delay(5);
+  }
+
+  Wire::enter();
+  wire.begin_transmission(PWRMGR_ADDRESS);
+  wire.write(0x0D);
+  wire.write(0b10000000);
+  wire.end_transmission();
+  Wire::leave();
+
+  ESP::delay(5);
+
+  Wire::enter();
+  wire.begin_transmission(PWRMGR_ADDRESS);
+  wire.write(0x00);
+  wire.end_transmission();
+
+  wire.request_from(PWRMGR_ADDRESS, 1);
+  temp = wire.read();
+    
+  if (get_panel_state() == PanelState::OFF) {
+    pwrup_clear();
+    wakeup_clear();
+    Wire::leave();
+
+    ESP::delay(5);
+  }
+  else {
+    Wire::leave();
+  }
+
+  return temp;
+}

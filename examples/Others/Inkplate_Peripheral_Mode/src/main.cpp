@@ -67,7 +67,7 @@ void peripheral_task(void * param)
         {
             commandBuffer[i] = commandBuffer[i + 1];
         }
-        commandBuffer[BUFFER_SIZE - 1] = Serial.read();
+        commandBuffer[BUFFER_SIZE - 1] = c;
     }
     char *s = NULL;
     char *e = NULL;
