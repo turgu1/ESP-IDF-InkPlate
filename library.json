@@ -22,5 +22,8 @@
   ],
   "license": "GPL-3.0-or-later",
   "frameworks": "espidf",
-  "platforms": "espressif32"
+  "platforms": "espressif32",
+  "build": {
+    "includeDir": "include/*"
+  }
 }
