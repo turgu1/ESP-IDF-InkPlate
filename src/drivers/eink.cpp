@@ -217,7 +217,7 @@ EInk::pins_as_outputs()
 
 
 int8_t 
-EInk6::read_temperature()
+EInk::read_temperature()
 {
   int8_t temp;
   

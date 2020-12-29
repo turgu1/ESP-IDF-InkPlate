@@ -240,7 +240,7 @@ void peripheral_task(void * param)
                 r = display.sdCardInit();
                 if (r)
                 {
-                    r = display.drawBitmapFromFile(strTemp, x, y);
+                    r = display.drawImage(strTemp, x, y);
                     std::cout << "#H(" << r << ")*" << std::endl << std::flush;
 
                     // sprintf(temp, "display.drawBitmap(%d, %d, %s)\n", x, y, strTemp);
@@ -312,7 +312,7 @@ void peripheral_task(void * param)
                 if (b == '?')
                 {
                     std::cout << "#N(" 
-                              << display.readTemperature(), DEC) 
+                              << display.readTemperature()
                               << ")*"
                               << std::endl << std::flush;
                 }
