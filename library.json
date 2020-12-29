@@ -24,6 +24,6 @@
   "frameworks": "espidf",
   "platforms": "espressif32",
   "build": {
-    "flags": "-I include/*"
+    "flags": "-I include/**"
   }
 }
