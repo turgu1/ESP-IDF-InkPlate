@@ -10,6 +10,8 @@
 #include "inkplate.hpp"
 #include "network_client.hpp"
 
+#include "secur.hpp"
+
 Inkplate display(DisplayMode::INKPLATE_1BIT);
 
 static const char * TAG = "Main";
