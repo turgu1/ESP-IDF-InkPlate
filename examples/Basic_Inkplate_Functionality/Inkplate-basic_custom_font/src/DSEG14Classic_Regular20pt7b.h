@@ -1,4 +1,4 @@
-const uint8_t DSEG14Classic_Regular20pt7bBitmaps[] PROGMEM = {
+const uint8_t DSEG14Classic_Regular20pt7bBitmaps[] = {
   0x00, 0x00, 0xC0, 0x03, 0x80, 0x0E, 0x03, 0xF8, 0x0F, 0xE0, 0x3F, 0x80,
   0xFE, 0x03, 0xF8, 0x0F, 0xE0, 0x3F, 0x80, 0xFE, 0x03, 0xF8, 0x0F, 0xE0,
   0x3F, 0x80, 0xFE, 0x01, 0xB8, 0x06, 0xC0, 0x00, 0xFF, 0xE0, 0x18, 0x06,
@@ -660,7 +660,7 @@ const uint8_t DSEG14Classic_Regular20pt7bBitmaps[] PROGMEM = {
   0xEC, 0x3C, 0x3F, 0xE8, 0x3C, 0x3F, 0xEF, 0xFF, 0xF7, 0xDF, 0xFF, 0xFB,
   0x3F, 0xFF, 0xFC, 0x3F, 0xFF, 0xFC };
 
-const GFXglyph DSEG14Classic_Regular20pt7bGlyphs[] PROGMEM = {
+const GFXglyph DSEG14Classic_Regular20pt7bGlyphs[] = {
   {     0,   1,   1,   8,    0,    0 },   // 0x20 ' '
   {     1,   1,   1,  32,    0,    0 },   // 0x21 '!'
   {     2,  14,  17,  32,    4,  -36 },   // 0x22 '"'
@@ -757,7 +757,7 @@ const GFXglyph DSEG14Classic_Regular20pt7bGlyphs[] PROGMEM = {
   {  7764,  10,  26,  14,    1,  -25 },   // 0x7D '}'
   {  7797,  24,  39,  32,    4,  -38 } }; // 0x7E '~'
 
-const GFXfont DSEG14Classic_Regular20pt7b PROGMEM = {
+const GFXfont DSEG14Classic_Regular20pt7b = {
   (uint8_t  *)DSEG14Classic_Regular20pt7bBitmaps,
   (GFXglyph *)DSEG14Classic_Regular20pt7bGlyphs,
   0x20, 0x7E, 43 };

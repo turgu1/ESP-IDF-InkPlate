@@ -17,33 +17,76 @@
    15 July 2020 by e-radionica.com
 */
 
-#include "Inkplate.h" //Include Inkplate library to the sketch
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "logging.hpp"
+
+#include <iostream>
+#include <string>
+#include <math.h>
+
+#include "inkplate.hpp" //Include Inkplate library to the sketch
 #include "image.h"    //Include image file that holds gray image data. You can see it in next tab inside Arduino IDE.
-Inkplate display(INKPLATE_3BIT); // Create object on Inkplate library and set library to work in gray mode (3-bit)
+Inkplate display(DisplayMode::INKPLATE_3BIT); // Create object on Inkplate library and set library to work in gray mode (3-bit)
                                  // Other option is BW mode, which is demonstrated in next example
                                  // "Inkplate_basic_BW"
 
 #define DELAY_MS                                                                                                       \
-    5000 //Delay in milliseconds between screen refresh. Refreshing e-paper screens more often than 5s is not recommended \
-                      //Want to refresh faster? Use partial update! Find example in "Inkplate-basic_partial_update"
+    5000 //Delay in milliseconds between screen refresh. Refreshing e-paper screens more often than 5s is not recommended
+         //Want to refresh faster? Use partial update! Find example in "Inkplate-basic_partial_update"
 
-void setup()
+static const char * TAG = "Main";
+
+uint16_t w;
+uint16_t h;
+
+// Small function that will write on the screen what function is currently in demonstration.
+void displayCurrentAction(std::string text)
 {
-    display.begin();        // Init library (you should call this function ONLY ONCE)
-    display.clearDisplay(); // Clear any data that may have been in (software) frame buffer.
-                            //(NOTE! This does not clean image on screen, it only clears it in the frame buffer inside
-                            // ESP32).
-    display.display();      // Clear everything that has previously been on a screen
-    display.setTextColor(0, 7);
-    display.setCursor(150, 320);
-    display.setTextSize(4);
-    display.print("Welcome to Inkplate 6!");
-    display.display(); // Write hello message
-    delay(5000);       // Wait a little bit
+  display.setTextSize(2);
+  display.setCursor(2, h - 20);
+  display.print(text);
 }
 
-void loop()
+int random(int a, int b) 
 {
+  // a -> 0
+  // b -> RAND_MAX
+
+  long long r = std::rand();
+  return (a + (r * b) / RAND_MAX);
+}
+
+void wait_a_bit() { vTaskDelay(DELAY_MS / portTICK_PERIOD_MS); }
+
+void mainTask(void * params) 
+{
+  display.begin();        // Init library (you should call this function ONLY ONCE)
+  display.clearDisplay(); // Clear any data that may have been in (software) frame buffer.
+                          //(NOTE! This does not clean image on screen, it only clears it in the frame buffer inside
+                          // ESP32).
+  display.display();      // Clear everything that has previously been on a screen
+
+  w = display.width();
+  h = display.height();
+
+  ESP_LOGI(TAG, "Display size: width: %d, height: %d", w, h);
+
+  display.setTextColor(0, 7);
+  display.setCursor(150, h / 2);
+  display.setTextSize(4);
+  #if defined(INKPLATE_6)
+    display.print("Welcome to Inkplate 6!");
+  #else
+    display.print("Welcome to Inkplate 10!");
+  #endif
+  display.display(); // Write hello message
+  wait_a_bit();       // Wait a little bit
+
+  for (;;) {
+
+    display.setRotation(0);
+
     // Example will demostrate funcionality one by one. You always first set everything in the frame buffer and
     // afterwards you show it on the screen using display.display().
 
@@ -55,49 +98,49 @@ void loop()
                             // NOTE: you do not need displayCurrentAction function to use Inkplate!
     display.display(); // Send image to display. You need to call this one each time you want to transfer frame buffer
                        // to the screen.
-    delay(DELAY_MS);   // Wait a little bit
+    wait_a_bit();   // Wait a little bit
 
     // Now, let's draw some random pixels!
     display.clearDisplay(); // Clear everything that is inside frame buffer in ESP32
     for (int i = 0; i < 1000; i++)
     { // Write 1000 random colored pixels at random locations
-        display.drawPixel(random(0, 799), random(0, 599),
+        display.drawPixel(random(0, w - 1), random(0, h - 1),
                           random(0, 7)); // We are setting color of the pixels using numbers from 0 to 7,
     }                                    // where 0 mens black, 7 white and gray is in between
     displayCurrentAction("Drawing 600 random pixels in random colors");
     display.display(); // Write everything from frame buffer to screen
-    delay(DELAY_MS);   // Wait
+    wait_a_bit();   // Wait
 
     // Draw two diagonal lines accros screen
     display.clearDisplay();
     display.drawLine(
-        0, 0, 799, 599,
+        0, 0, w - 1, h - 1,
         0); // All of those drawing fuctions originate from Adafruit GFX library, so maybe you are already familiar
-    display.drawLine(799, 0, 0, 599, 0); // with those. Arguments are: start X, start Y, ending X, ending Y, color.
+    display.drawLine(w - 1, 0, 0, h - 1, 0); // with those. Arguments are: start X, start Y, ending X, ending Y, color.
     displayCurrentAction("Drawing two diagonal lines");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // And again, let's draw some random lines on screen!
     display.clearDisplay();
     for (int i = 0; i < 100; i++)
     {
-        display.drawLine(random(0, 799), random(0, 599), random(0, 799), random(0, 599), random(0, 7));
+        display.drawLine(random(0, w - 1), random(0, h - 1), random(0, w - 1), random(0, h - 1), random(0, 7));
     }
     displayCurrentAction("Drawing 50 random lines in random colors");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Let's draw some random thick lines on screen!
     display.clearDisplay();
     for (int i = 0; i < 100; i++)
     {
-        display.drawThickLine(random(0, 799), random(0, 599), random(0, 799), random(0, 599), random(0, 7),
+        display.drawThickLine(random(0, w - 1), random(0, h - 1), random(0, w - 1), random(0, h - 1), random(0, 7),
                               (float)random(1, 20));
     }
     displayCurrentAction("Drawing 50 random lines in random colors and thickness");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Let's draw some random gradient thick lines on screen!
     display.clearDisplay();
@@ -105,163 +148,163 @@ void loop()
     {
         int startColor = random(0, 7);
         int endColor = random(startColor, 7);
-        display.drawGradientLine(random(0, 799), random(0, 599), random(0, 799), random(0, 599), startColor, endColor,
+        display.drawGradientLine(random(0, w - 1), random(0, h - 1), random(0, w - 1), random(0, h - 1), startColor, endColor,
                                  (float)random(1, 20));
     }
     displayCurrentAction("Drawing 50 random gradient lines in random colors and thickness");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Now draw one horizontal...
     display.clearDisplay();
-    display.drawFastHLine(100, 100, 600, 0); // Arguments are: starting X, starting Y, length, color
+    display.drawFastHLine(100, 100, h - 200, 0); // Arguments are: starting X, starting Y, length, color
     displayCurrentAction("Drawing one horizontal line");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     //... and one vertical line
     display.clearDisplay();
-    display.drawFastVLine(100, 100, 400, 0); // Arguments are: starting X, starting Y, length, color
+    display.drawFastVLine(100, 100, w - 200, 0); // Arguments are: starting X, starting Y, length, color
     displayCurrentAction("Drawing one vertical line");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Now, let' make a grid using only horizontal and vertical lines in random colors!
     display.clearDisplay();
-    for (int i = 0; i < 800; i += 8)
+    for (int i = 0; i < w; i += 8)
     {
-        display.drawFastVLine(i, 0, 600, (i / 8) & 0x0F);
+        display.drawFastVLine(i, 0, h, (i / 8) & 0x0F);
     }
-    for (int i = 0; i < 600; i += 4)
+    for (int i = 0; i < h; i += 4)
     {
-        display.drawFastHLine(0, i, 800, (i / 8) & 0x0F);
+        display.drawFastHLine(0, i, w, (i / 8) & 0x0F);
     }
     displayCurrentAction("Drawing a grid using horizontal and vertical lines in different colors");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw rectangle at X = 200, Y = 200 and size of 400x300 pixels
     display.clearDisplay();
-    display.drawRect(200, 200, 400, 300, 0); // Arguments are: start X, start Y, size X, size Y, color
+    display.drawRect(200, 200, w / 2, h / 2, 0); // Arguments are: start X, start Y, size X, size Y, color
     displayCurrentAction("Drawing rectangle");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw rectangles on random location, size 100x150 pixels in random color
     display.clearDisplay();
     for (int i = 0; i < 50; i++)
     {
-        display.drawRect(random(0, 799), random(0, 599), 100, 150, random(0, 7));
+        display.drawRect(random(0, w - 1), random(0, h - 1), 100, 150, random(0, 7));
     }
     displayCurrentAction("Drawing many rectangles in random colors");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw filled black rectangle at X = 200, Y = 200, size of 400x300 pixels in gray color
     display.clearDisplay();
-    display.fillRect(200, 200, 400, 300, 4); // Arguments are: start X, start Y, size X, size Y, color
+    display.fillRect(200, 200, w / 2, h / 2, 4); // Arguments are: start X, start Y, size X, size Y, color
     displayCurrentAction("Drawing gray rectangle");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw filled random colored rectangles on random location, size of 30x30 pixels in radnom color
     display.clearDisplay();
     for (int i = 0; i < 50; i++)
     {
-        display.fillRect(random(0, 799), random(0, 599), 30, 30, random(0, 7));
+        display.fillRect(random(0, w - 1), random(0, h - 1), 30, 30, random(0, 7));
     }
     displayCurrentAction("Drawing many filled rectangles randomly in random colors");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw circle at center of a screen with radius of 75 pixels
     display.clearDisplay();
-    display.drawCircle(400, 300, 75, 0); // Arguments are: start X, start Y, radius, color
+    display.drawCircle(w / 2, h / 2, 75, 0); // Arguments are: start X, start Y, radius, color
     displayCurrentAction("Drawing a circle");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw some random colored circles at random location with radius of 25 pixels in random color
     display.clearDisplay();
     for (int i = 0; i < 40; i++)
     {
-        display.drawCircle(random(0, 799), random(0, 599), 25, random(0, 7));
+        display.drawCircle(random(0, w - 1), random(0, h - 1), 25, random(0, 7));
     }
     displayCurrentAction("Drawing many circles randomly in random colors");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw black filled circle at center of a screen with radius of 75 pixels
     display.clearDisplay();
-    display.fillCircle(400, 300, 75, 0); // Arguments are: start X, start Y, radius, color
+    display.fillCircle(w / 2, h / 2, 75, 0); // Arguments are: start X, start Y, radius, color
     displayCurrentAction("Drawing black-filled circle");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw some random colored filled circles at random location with radius of 15 pixels
     display.clearDisplay();
     for (int i = 0; i < 40; i++)
     {
-        display.fillCircle(random(0, 799), random(0, 599), 15, random(0, 7));
+        display.fillCircle(random(0, w - 1), random(0, h - 1), 15, random(0, 7));
     }
     displayCurrentAction("Drawing many filled circles randomly in random colors");
     display.display(); // To show stuff on screen, you always need to call display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw rounded rectangle at X = 200, Y = 200 and size of 400x300 pixels and radius of 10 pixels
     display.clearDisplay();
-    display.drawRoundRect(200, 200, 400, 300, 10, 0); // Arguments are: start X, start Y, size X, size Y, radius, color
+    display.drawRoundRect(200, 200, w / 2, h / 2, 10, 0); // Arguments are: start X, start Y, size X, size Y, radius, color
     displayCurrentAction("Drawing rectangle with rounded edges");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw rounded rectangles on random location, size 100x150 pixels, radius of 5 pixels in radnom color
     display.clearDisplay();
     for (int i = 0; i < 50; i++)
     {
-        display.drawRoundRect(random(0, 799), random(0, 599), 100, 150, 5, random(0, 7));
+        display.drawRoundRect(random(0, w - 1), random(0, h - 1), 100, 150, 5, random(0, 7));
     }
     displayCurrentAction("Drawing many rounded edges rectangles");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw filled random colored rectangle at X = 200, Y = 200, size of 400x300 pixels and radius of 10 pixels
     display.clearDisplay();
-    display.fillRoundRect(200, 200, 400, 300, 10, 0); // Arguments are: start X, start Y, size X, size Y, radius, color
+    display.fillRoundRect(200, 200, w / 2, h / 2, 10, 0); // Arguments are: start X, start Y, size X, size Y, radius, color
     displayCurrentAction("Drawing filled rectangle with rounded edges");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw filled random colored rectangle on random location, size of 30x30 pixels, radius of 3 pixels in radnom color
     display.clearDisplay();
     for (int i = 0; i < 50; i++)
     {
-        display.fillRoundRect(random(0, 799), random(0, 599), 30, 30, 3, random(0, 7));
+        display.fillRoundRect(random(0, w - 1), random(0, h - 1), 30, 30, 3, random(0, 7));
     }
     displayCurrentAction("Drawing many filled rectangle with rounded edges in random colors");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw simple triangle
     display.clearDisplay();
     display.drawTriangle(250, 400, 550, 400, 400, 100, 0); // Arguments are: X1, Y1, X2, Y2, X3, Y3, color
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Draw filled triangle inside simple triangle (so no display.clearDisplay() this time)
     display.fillTriangle(300, 350, 500, 350, 400, 150, 0); // Arguments are: X1, Y1, X2, Y2, X3, Y3, color
     displayCurrentAction("Drawing filled triangle inside exsisting one");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Display some grayscale image on screen. We are going to display e-radionica logo on display at location X = 100,
     // Y = 100 Image size is 500x332 pixels.
     display.clearDisplay();
-    display.drawImage(picture1, 100, 100, 500,
+    display.drawImage(picture1, (w / 2) - 250, (h / 2) - (332 / 2), 500,
                       332); // Arguments are: array variable name, start X, start Y,  size X, size Y
     displayCurrentAction("Drawing a bitmap image");
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Write some text on screen with different sizes and color
     display.clearDisplay();
@@ -272,11 +315,15 @@ void loop()
                             1); // textSize parameter starts at 0 and goes up to 10 (larger won't fit Inkplate 6 screen)
         display.setCursor(200, (i * i * 8)); // setCursor works as same as on LCD displays - sets "the cursor" at the
                                              // place you want to write someting next
-        display.print("INKPLATE6!");         // The actual text you want to show on e-paper as String
+        #if defined(INKPLATE_6)
+          display.print("INKPLATE 6!");
+        #else
+          display.print("INKPLATE 10!");
+        #endif
     }
     displayCurrentAction("Text in different sizes and shadings");
     display.display(); // To show stuff on screen, you always need to call display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Write same text on different location, but now invert colors (text is white, text background is black)
     display.setTextColor(7, 0); // First argument is text color, while second argument is background color. In
@@ -285,26 +332,31 @@ void loop()
     { // you are able to choose from 8 different colors (0-7)
         display.setTextSize(i + 1);
         display.setCursor(200, 300 + (i * i * 8));
-        display.print("INKPLATE6!");
+        #if defined(INKPLATE_6)
+          display.print("INKPLATE 6!");
+        #else
+          display.print("INKPLATE 10!");
+        #endif
     }
     display.display();
-    delay(DELAY_MS);
+    wait_a_bit();
+    display.setTextColor(0, 7);
 
     // Draws an elipse with x radius, y radius, center x, center y and color
     display.clearDisplay();
-    display.drawElipse(100, 200, 400, 300, 0);
+    display.drawElipse(100, 200, w / 2, h / 2, 0);
     displayCurrentAction("Drawing an elipse");
     display.display();
 
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Fills an elipse with x radius, y radius, center x, center y and color
     display.clearDisplay();
-    display.fillElipse(100, 200, 400, 300, 0);
+    display.fillElipse(100, 200, w / 2, h / 2, 0);
     displayCurrentAction("Drawing a filled elipse");
     display.display();
 
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Code block for generating random points and sorting them in a counter
     // clockwise direction.
@@ -319,7 +371,7 @@ void loop()
     int k;
     for (int i = 0; i < n - 1; ++i)
         for (int j = i + 1; j < n; ++j)
-            if (atan2(yt[j] - 300, xt[j] - 400) < atan2(yt[i] - 300, xt[i] - 400))
+            if (atan2(yt[j] - h / 2, xt[j] - w / 2) < atan2(yt[i] - h / 2, xt[i] - w / 2))
             {
                 k = xt[i], xt[i] = xt[j], xt[j] = k;
                 k = yt[i], yt[i] = yt[j], yt[j] = k;
@@ -331,7 +383,7 @@ void loop()
     displayCurrentAction("Drawing a polygon");
     display.display();
 
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Fills a polygon, from x and y coordinate arrays of n points in color c,
     // Points need to be counter clockwise sorted
@@ -341,32 +393,45 @@ void loop()
     displayCurrentAction("Drawing a filled polygon");
     display.display();
 
-    delay(DELAY_MS);
+    wait_a_bit();
 
     // Write text and rotate it by 90 deg. forever
-    int r = 0;
     display.setTextSize(8);
     display.setTextColor(7, 0);
-    while (true)
+    for (int r = 0; r < 4; r++)
     {
         display.setCursor(100, 100);
         display.clearDisplay();
         display.setRotation(
             r); // Set rotation will sent rotation for the entire display, so you can use it sideways or upside-down
-        display.print("INKPLATE6");
+        #if defined(INKPLATE_6)
+          display.print("INKPLATE 6!");
+        #else
+          display.print("INKPLATE 10!");
+        #endif
         display.display();
-        r++;
-        delay(DELAY_MS);
+        wait_a_bit();
     }
+    display.setTextColor(0, 7);
 
     // Did you know that you can change between BW and greyscale mode anytime?
-    // Just call Inkplate display(INKPLATE_1BIT) or Inkplate display(INKPLATE_3BIT)
+    // Just call Inkplate display(DisplayMode::INKPLATE_1BIT) or 
+    // Inkplate display(DisplayMode::INKPLATE_3BIT)
+  }
 }
 
-// Small function that will write on the screen what function is currently in demonstration.
-void displayCurrentAction(String text)
-{
-    display.setTextSize(2);
-    display.setCursor(2, 580);
-    display.print(text);
-}
+
+
+#define STACK_SIZE 10000
+
+extern "C" {
+
+  void app_main()
+  {
+    TaskHandle_t xHandle = NULL;
+
+    xTaskCreate(mainTask, "mainTask", STACK_SIZE, (void *) 1, tskIDLE_PRIORITY, &xHandle);
+    configASSERT(xHandle);
+  }
+
+} // extern "C"

@@ -59,15 +59,22 @@ void peripheral_task(void * param)
   display.begin();
   memset(commandBuffer, 0, BUFFER_SIZE);
 
+  display.clearDisplay();
+  display.display();
+
   for (;;) {
 
     if (int c = getchar())
     {
-        for (int i = 0; i < (BUFFER_SIZE - 1); i++)
-        {
-            commandBuffer[i] = commandBuffer[i + 1];
+        if (c != -1) {
+          // std::cout << "Got: " << c << std::endl << std::flush;
+
+          for (int i = 0; i < (BUFFER_SIZE - 1); i++)
+          {
+              commandBuffer[i] = commandBuffer[i + 1];
+          }
+          commandBuffer[BUFFER_SIZE - 1] = c;
         }
-        commandBuffer[BUFFER_SIZE - 1] = c;
     }
     char *s = NULL;
     char *e = NULL;
@@ -312,7 +319,7 @@ void peripheral_task(void * param)
                 if (b == '?')
                 {
                     std::cout << "#N(" 
-                              << display.readTemperature()
+                              << +display.readTemperature()
                               << ")*"
                               << std::endl << std::flush;
                 }
@@ -323,7 +330,7 @@ void peripheral_task(void * param)
                 if (c >= 0 && c <= 2)
                 {
                     std::cout << "#O("
-                              << display.readTouchpad(c)
+                              << +display.readTouchpad(c)
                               << ")*"
                               << std::endl << std::flush;
                 }
@@ -356,7 +363,7 @@ void peripheral_task(void * param)
                 if (b == '?')
                 {
                     std::cout << "#R("
-                              << display.getPanelState()
+                              << +display.getPanelState()
                               << ")*"
                               << std::endl << std::flush;
                 }

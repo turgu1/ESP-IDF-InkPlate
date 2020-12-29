@@ -24,7 +24,6 @@
 
 #include "inkplate.hpp"
 #include "logo.hpp"
-#include "image.hpp"
 
 Inkplate display(DisplayMode::INKPLATE_1BIT);
 
@@ -66,7 +65,6 @@ void mainTask(void * params)
   display.begin();
   display.clearDisplay();
   display.display();
-  display.setRotation(0);
 
   w = display.width();
   h = display.height();

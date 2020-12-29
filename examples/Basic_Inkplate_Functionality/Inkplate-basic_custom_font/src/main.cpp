@@ -19,40 +19,77 @@
    15 July 2020 by e-radionica.com
 */
 
-#include "Inkplate.h" //Include Inkplate library to the sketch
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "logging.hpp"
+
+#include "inkplate.hpp" //Include Inkplate library to the sketch
 
 #include "DSEG14Classic_Regular20pt7b.h" //Include second font
 #include "Not_Just_Groovy20pt7b.h"       //Include first .h font file to the sketch
 
-Inkplate display(INKPLATE_1BIT); // Create an object on Inkplate library and also set library into 1-bit mode (BW)
+Inkplate display(DisplayMode::INKPLATE_1BIT); // Create an object on Inkplate library and also set library into 1-bit mode (BW)
 
-void setup()
+uint16_t w;
+uint16_t h;
+
+void wait_a_bit() { vTaskDelay(10000 / portTICK_PERIOD_MS); }
+
+static const char * TAG = "Main";
+
+void mainTask(void * param)
 {
     display.begin();        // Init Inkplate library (you should call this function ONLY ONCE)
     display.clearDisplay(); // Clear frame buffer of display
     display.display();      // Put clear image on display
 
+    w = display.width();
+    h = display.height();
+
+    ESP_LOGI(TAG, "Display size: width: %d, height: %d", w, h);
+
     display.setFont(&Not_Just_Groovy20pt7b); // Select new font
     display.setTextSize(2);                  // Set font scaling to two (font will be 2 times bigger)
     display.setCursor(0, 60);                // Set print cursor on X = 0, Y = 60
-    display.println("Inkplate 6");           // Print some text
+    
+    #if defined(INKPLATE_6)
+      display.print("InkPlate 6");
+    #else
+      display.print("InkPlate 10");
+    #endif
+
     display.setTextSize(1);                  // Set font scaling to one (font is now original size)
     display.print("by e-radionica.com");     // Print text
 
     display.setFont(&DSEG14Classic_Regular20pt7b); // Select second font
-    display.setCursor(0, 250);                     // Set print position on X = 0, Y = 250
+    display.setCursor(0, h / 2 - 50);              // Set print position on X = 0, Y = h / 2 - 50
     display.println("Some old-school 14 segment"); // Print text
     display.println("display font on e-paper");
     display.print("display");
 
     display.setFont();                     // Use original 5x7 pixel fonts
-    display.setCursor(0, 550);             // Set new print position at X = 0, Y = 550
+    display.setCursor(0, h - 50);          // Set new print position at X = 0, Y = h - 50
     display.setTextSize(3);                // Set font scaling to three (font will be 3 times bigger)
     display.print("Classic 5x7 px fonts"); // Print text
     display.display();                     // Display everything on display
+
+    for (;;) {
+      ESP_LOGI(TAG, "Completed...");
+      wait_a_bit();
+    }
 }
 
-void loop()
-{
-    // Nothing...
-}
+
+#define STACK_SIZE 10000
+
+extern "C" {
+
+  void app_main()
+  {
+    TaskHandle_t xHandle = NULL;
+
+    xTaskCreate(mainTask, "mainTask", STACK_SIZE, (void *) 1, tskIDLE_PRIORITY, &xHandle);
+    configASSERT(xHandle);
+  }
+
+} // extern "C"
