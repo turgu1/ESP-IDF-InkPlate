@@ -43,9 +43,14 @@ void delay(int msec) { vTaskDelay(msec / portTICK_PERIOD_MS); }
 
 void mainTask(void * param)
 {
+  int w, h;
+
   display.begin();        // Init Inkplate library (you should call this function ONLY ONCE)
   display.clearDisplay(); // Clear frame buffer of display
   display.display();      // Put clear image on display
+
+  w = display.width();
+  h = display.height();
 
   display.print("Connecting to WiFi...");
   display.partialUpdate();
@@ -68,8 +73,8 @@ void mainTask(void * param)
     //  eink   - Should be set to true to generate a BW 1 bit bitmap better suitable for Inkplate.
     // For more detailed explanation and more parameters, please visit the docs page: https://varipass.org/docs/
     
-    if (!display.drawImage("https://api.varipass.org/?action=sgraph&id=kbg3eQfA&width=400&height=300&eink=true",
-                                  200, 150))
+    if (!display.drawBitmapFromWeb("https://api.varipass.org/?action=sgraph&id=kbg3eQfA&width=400&height=300&eink=true",
+                                   (w / 2) - 200, (h / 2) - 150))
     {
       ESP_LOGE(TAG, "Not able to retrieve and draw image from web address.");
       display.println("Image open error");

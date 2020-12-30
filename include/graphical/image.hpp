@@ -63,7 +63,7 @@ class Image : virtual public Adafruit_GFX
 
     virtual void        selectDisplayMode(DisplayMode _mode) = 0;
     virtual DisplayMode getDisplayMode() = 0;
-    virtual int16_t     width() = 0;
+    virtual int16_t     width()  = 0;
     virtual int16_t     height() = 0;
 
     bool drawImage(const char *path, int x, int y, bool dither = 1, bool invert = 0);
@@ -74,16 +74,16 @@ class Image : virtual public Adafruit_GFX
     bool drawImage(const char* path, const Format& format, const Position& position, const bool dither = 1, const bool invert = 0);	
 
     bool drawBitmapFromFile(const char *fileName, int x, int y, bool dither = 0, bool invert = 0);
+    bool   drawJpegFromFile(const char *fileName, int x, int y, bool dither = 0, bool invert = 0);
+    bool    drawPngFromFile(const char *fileName, int x, int y, bool dither = 0, bool invert = 0);
+
     bool drawBitmapFromFile(FILE *p, int x, int y, bool dither = 0, bool invert = 0);
+    bool   drawJpegFromFile(FILE *p, int x, int y, bool dither = 0, bool invert = 0);
+    bool    drawPngFromFile(FILE *p, int x, int y, bool dither = 0, bool invert = 0);
+
     bool  drawBitmapFromWeb(const char *url, int x, int y, bool dither = 0, bool invert = 0);
-
-    bool drawJpegFromFile(const char *fileName, int x, int y, bool dither = 0, bool invert = 0);
-    bool drawJpegFromFile(FILE *p, int x, int y, bool dither = 0, bool invert = 0);
-    bool  drawJpegFromWeb(const char *url, int x, int y, bool dither = 0, bool invert = 0);
-
-    bool drawPngFromFile(const char *fileName, int x, int y, bool dither = 0, bool invert = 0);
-    bool drawPngFromFile(FILE *p, int x, int y, bool dither = 0, bool invert = 0);
-    bool  drawPngFromWeb(const char *url, int x, int y, bool dither = 0, bool invert = 0);
+    bool    drawJpegFromWeb(const char *url, int x, int y, bool dither = 0, bool invert = 0);
+    bool     drawPngFromWeb(const char *url, int x, int y, bool dither = 0, bool invert = 0);
 
     // Defined in Adafruit-GFX-Library, but should fit here
     // void drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, uint16_t color);
