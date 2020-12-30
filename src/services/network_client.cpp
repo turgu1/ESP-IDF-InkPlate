@@ -211,6 +211,7 @@ static esp_err_t http_event_handler(esp_http_client_event_t * evt)
       //ESP_LOGI(TAG, "key = %s, value = %s", evt->header_key, evt->header_value);
       if (strcmp("Content-Length", evt->header_key) == 0) {
         buffer_size = atoi(evt->header_value);
+        ESP_LOGI(TAG, "Donwload file size: %d", buffer_size);
       }
       break;
     case HTTP_EVENT_ON_DATA:
@@ -234,7 +235,6 @@ static esp_err_t http_event_handler(esp_http_client_event_t * evt)
           }
         }
       }
-
       break;
     case HTTP_EVENT_ON_FINISH:
       ESP_LOGI(TAG, "HTTP_EVENT_ON_FINISH");
