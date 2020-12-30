@@ -76,6 +76,8 @@ void mainTask(void * params)
 
   #if defined(INKPLATE_6)
     display.print("Welcome to Inkplate 6!");
+  #elif defined(INKPLATE_6PLUS)
+    display.print("Welcome to Inkplate 6PLUS!");
   #else
     display.print("Welcome to Inkplate 10!");
   #endif
@@ -351,6 +353,8 @@ void mainTask(void * params)
                                              // place you want to write someting next
         #if defined(INKPLATE_6)
           display.print("INKPLATE 6!");        // The actual text you want to show on e-paper as String
+        #elif defined(INKPLATE_6PLUS)
+          display.print("INKPLATE 6PLUS!");        // The actual text you want to show on e-paper as String
         #else
           display.print("INKPLATE 10!");        // The actual text you want to show on e-paper as String
         #endif
@@ -371,6 +375,8 @@ void mainTask(void * params)
         display.setCursor(200, 300 + (i * i * 8));
         #if defined(INKPLATE_6)
           display.print("INKPLATE 6!");
+        #elif defined(INKPLATE_6PLUS)
+          display.print("INKPLATE 6PLUS!");        // The actual text you want to show on e-paper as String
         #else
           display.print("INKPLATE 10!");
         #endif
@@ -447,7 +453,13 @@ void mainTask(void * params)
       display.clearDisplay();
       display.setRotation(
           r); // Set rotation will sent rotation for the entire display, so you can use it sideways or upside-down
-      display.print("INKPLATE6");
+      #if defined(INKPLATE_6)
+        display.print("INKPLATE 6");
+      #elif defined(INKPLATE_6PLUS)
+        display.print("INKPLATE 6PLUS");        // The actual text you want to show on e-paper as String
+      #else
+        display.print("INKPLATE 10");
+      #endif
       display.display();
       delay(5000);
     }

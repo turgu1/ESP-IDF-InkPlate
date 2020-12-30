@@ -36,7 +36,7 @@ int random(int a, int b)
   return (a + (r * b) / RAND_MAX);
 }
 
-void wait_a_bit(int sec = 5) { vTaskDelay((sec * 1000) / portTICK_PERIOD_MS); }
+void delay(int sec = 5) { vTaskDelay((sec * 1000) / portTICK_PERIOD_MS); }
 
 void mainTask(void * params) 
 {
@@ -64,12 +64,14 @@ void mainTask(void * params)
 
   #if defined(INKPLATE_6)
     display.print("Network test for Inkplate 6!");
+  #elif defined(INKPLATE_6PLUS)
+    display.print("Network test for Inkplate 6PLUS!");
   #else
     display.print("Network test for Inkplate 10!");
   #endif
 
   display.display(); // Write hello message
-  wait_a_bit();
+  delay();
 
   if (display.joinAP(YOUR_SSID, YOUR_PASSWORD)) {
     int32_t size;
@@ -78,7 +80,7 @@ void mainTask(void * params)
 
   for (;;) {
     ESP_LOGI(TAG, "Completed...");
-    wait_a_bit(15);
+    delay(15);
   }
 
 }

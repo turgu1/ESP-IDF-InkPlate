@@ -432,6 +432,9 @@ extern "C" {
   {
     TaskHandle_t xHandle = NULL;
 
+    // This will insure that no LOG messages will interfere with the USB exchanges.
+    esp_log_level_set("*", ESP_LOG_NONE);
+
     xTaskCreate(peripheral_task, "mainTask", STACK_SIZE, (void *) 1, tskIDLE_PRIORITY, &xHandle);
     configASSERT(xHandle);
   }

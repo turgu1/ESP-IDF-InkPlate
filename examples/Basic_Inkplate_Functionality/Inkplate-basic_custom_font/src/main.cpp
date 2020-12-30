@@ -54,6 +54,8 @@ void mainTask(void * param)
     
     #if defined(INKPLATE_6)
       display.print("InkPlate 6");
+    #elif defined(INKPLATE_6PLUS)
+      display.print("InkPlate 6PLUS");
     #else
       display.print("InkPlate 10");
     #endif

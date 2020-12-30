@@ -28,6 +28,9 @@ static const char * TAG = "Main";
 #if defined(INKPLATE_6)
   const char text[] = "This is partial update on Inkplate 6 e-paper display! :)";
   int max = 9;
+#elif defined(INKPLATE_6PLUS)
+  const char text[] = "This is partial update on Inkplate 6PLUS e-paper display! :)";
+  int max = 30;
 #else
   const char text[] = "This is partial update on Inkplate 10 e-paper display! :)";
   int max = 50;
