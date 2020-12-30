@@ -252,6 +252,8 @@ NetworkClient::downloadFile(const char * url, int32_t * defaultLen)
 {
   if (!connected) return nullptr;
 
+  ESP_LOGI(TAG, "Downloading file from URL: %s", url);
+  
   buffer = buffer_ptr = nullptr;
   buffer_size = *defaultLen;
 

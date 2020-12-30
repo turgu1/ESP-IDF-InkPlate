@@ -36,8 +36,8 @@ Inkplate display(DisplayMode::INKPLATE_1BIT); // Create an object on Inkplate li
 
 static const char * TAG = "VariPassGraph";
 
-const char *ssid     = YOUR_SSID;      // Your WiFi SSID
-const char *password = YOUR_PASSWORD;  // Your WiFi password
+const char * ssid     = YOUR_SSID;      // Your WiFi SSID
+const char * password = YOUR_PASSWORD;  // Your WiFi password
 
 void delay(int msec) { vTaskDelay(msec / portTICK_PERIOD_MS); }
 
@@ -52,6 +52,8 @@ void mainTask(void * param)
 
   // Connect to the WiFi network.
   if (display.joinAP(ssid, password)) {
+
+    ESP_LOGI(TAG, "Connected. Downloading the image...");
 
     display.println("\nWiFi OK! Downloading...");
     display.partialUpdate();
@@ -69,8 +71,8 @@ void mainTask(void * param)
     if (!display.drawImage("https://api.varipass.org/?action=sgraph&id=kbg3eQfA&width=400&height=300&eink=true",
                                   200, 150))
     {
-        display.println("Image open error");
-        display.partialUpdate();
+      ESP_LOGE(TAG, "Not able to retrieve and draw image from web address.");
+      display.println("Image open error");
     }
     display.partialUpdate();
 
