@@ -177,10 +177,9 @@ void
 NetworkClient::disconnect()
 {
   if (connected) {
-    ESP_ERROR_CHECK(esp_event_loop_delete_default());
     
-    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT,   ESP_EVENT_ANY_ID,     &sta_event_handler));
-    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_START, &sta_event_handler));
+    ESP_ERROR_CHECK(esp_event_handler_unregister(ESP_EVENT_ANY_BASE, ESP_EVENT_ANY_ID, &sta_event_handler));
+    ESP_ERROR_CHECK(esp_event_loop_delete_default());
 
     vEventGroupDelete(wifi_event_group);
 
