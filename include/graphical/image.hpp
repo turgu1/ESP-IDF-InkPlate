@@ -73,6 +73,18 @@ class Image : virtual public Adafruit_GFX
     bool drawImage(const std::string path, const Format& format, const int x, const int y, const bool dither = 1, const bool invert = 0);
     bool drawImage(const char* path, const Format& format, const Position& position, const bool dither = 1, const bool invert = 0);	
 
+    bool drawBitmapFromFile(const char *fileName, int x, int y, bool dither = 0, bool invert = 0);
+    bool drawBitmapFromFile(FILE *p, int x, int y, bool dither = 0, bool invert = 0);
+    bool  drawBitmapFromWeb(const char *url, int x, int y, bool dither = 0, bool invert = 0);
+
+    bool drawJpegFromFile(const char *fileName, int x, int y, bool dither = 0, bool invert = 0);
+    bool drawJpegFromFile(FILE *p, int x, int y, bool dither = 0, bool invert = 0);
+    bool  drawJpegFromWeb(const char *url, int x, int y, bool dither = 0, bool invert = 0);
+
+    bool drawPngFromFile(const char *fileName, int x, int y, bool dither = 0, bool invert = 0);
+    bool drawPngFromFile(FILE *p, int x, int y, bool dither = 0, bool invert = 0);
+    bool  drawPngFromWeb(const char *url, int x, int y, bool dither = 0, bool invert = 0);
+
     // Defined in Adafruit-GFX-Library, but should fit here
     // void drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, uint16_t color);
     // void drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, uint16_t color,
@@ -110,18 +122,6 @@ class Image : virtual public Adafruit_GFX
     virtual void       endWrite(void) = 0;
 
     static bool   drawJpegChunk(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t *bitmap, bool dither, bool invert);
-
-    bool drawBitmapFromFile(const char *fileName, int x, int y, bool dither = 0, bool invert = 0);
-    bool drawBitmapFromFile(FILE *p, int x, int y, bool dither = 0, bool invert = 0);
-    bool  drawBitmapFromWeb(const char *url, int x, int y, bool dither = 0, bool invert = 0);
-
-    bool drawJpegFromFile(const char *fileName, int x, int y, bool dither = 0, bool invert = 0);
-    bool drawJpegFromFile(FILE *p, int x, int y, bool dither = 0, bool invert = 0);
-    bool drawJpegFromWeb(const char *url, int x, int y, bool dither = 0, bool invert = 0);
-
-    bool drawPngFromFile(const char *fileName, int x, int y, bool dither = 0, bool invert = 0);
-    bool drawPngFromFile(FILE *p, int x, int y, bool dither = 0, bool invert = 0);
-    bool drawPngFromWeb(const char *url, int x, int y, bool dither = 0, bool invert = 0);
 
     // uint8_t pixelBuffer[e_ink_width * 4 + 5];
     // uint8_t ditherBuffer[2][e_ink_width + 20];
