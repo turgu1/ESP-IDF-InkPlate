@@ -74,7 +74,7 @@ MCP23017::read_all_registers()
   wire.write(0x00);
   wire.end_transmission();
   wire.request_from(mcp_address, (uint8_t) 22);
-  for (auto reg : registers) {
+  for (auto & reg : registers) {
     reg = wire.read();
   }
 }
