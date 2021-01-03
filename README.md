@@ -2,7 +2,7 @@
 
 A porting effort to the ESP-IDF framework for the e-Radionica InkPlate software that can be find [here](https://github.com/e-radionicacom/Inkplate-Arduino-library).
 
---> Work in progress. Not ready yet. <--
+--> Work in progress. It is usable, but testing remains to be completed. <--
 
 Look in the `examples` folder for ready-made applications. This library is conform to the PlatformIO IDE extension. All examples can be compiled using PlatformIO.
 
