@@ -1,4 +1,6 @@
-# ESP-IDF-InkPlate Library Version 0.9.1
+# ESP-IDF-InkPlate Library Version 0.9.2
+
+(January 16, 2021)
 
 A porting effort to the ESP-IDF framework for the e-Radionica InkPlate software that can be find [here](https://github.com/e-radionicacom/Inkplate-Arduino-library).
 
