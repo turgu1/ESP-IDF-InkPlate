@@ -19,6 +19,8 @@ SDCard::setup()
   sdmmc_host_t        host        = SDSPI_HOST_DEFAULT();
   sdspi_slot_config_t slot_config = SDSPI_SLOT_CONFIG_DEFAULT();
 
+  host.flags = SDMMC_HOST_FLAG_SPI;
+
   slot_config.gpio_miso = PIN_NUM_MISO;
   slot_config.gpio_mosi = PIN_NUM_MOSI;
   slot_config.gpio_sck  = PIN_NUM_CLK;
