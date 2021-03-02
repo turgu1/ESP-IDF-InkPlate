@@ -2,6 +2,10 @@
 
 (March 2, 2021)
 
+Version 0.9.3: Change required by ESP-IDF Version 4.2 for the SD Card support. Thanks to Yuki Mizuno for the supplied patch.
+
+----
+
 A porting effort to the ESP-IDF framework for the e-Radionica InkPlate software that can be find [here](https://github.com/e-radionicacom/Inkplate-Arduino-library).
 
 --> Work in progress. It is usable, but testing remains to be completed. <--
