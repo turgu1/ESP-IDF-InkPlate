@@ -6,7 +6,7 @@
 class PressKeys : NonCopyable 
 {
   public:
-    enum class Key : uint8_t { KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5 };
+    enum class Key : uint8_t { U2, U4, U1, U5, U3, U6 };
 
     PressKeys(MCP23017 & _mcp) : mcp(_mcp) {}
     bool setup();
@@ -16,7 +16,7 @@ class PressKeys : NonCopyable
      * 
      * Read one of the six presskeys.
      * 
-     * @param key presskey  (KEY_0, KEY_1, or KEY_2)
+     * @param key presskey  (U1 .. U6)
      * @return uint8_t 1 if pressed, 0 if not
      */
     uint8_t read_key(Key key);
