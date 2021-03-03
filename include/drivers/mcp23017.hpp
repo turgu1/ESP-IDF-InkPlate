@@ -20,8 +20,7 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#ifndef __MCP_HPP__
-#define __MCP_HPP__
+#pragma once
 
 #include <cinttypes>
 #include <cstring>
@@ -138,5 +137,3 @@ class MCP23017 : NonCopyable
     void            set_ports(uint16_t values);
     uint16_t        get_ports();
 };
-
-#endif

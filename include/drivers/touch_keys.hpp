@@ -1,5 +1,4 @@
-#ifndef __TOUCH_KEYS_HPP__
-#define __TOUCH_KEYS_HPP__
+#pragma once
 
 #include "non_copyable.hpp"
 #include "mcp23017.hpp"
@@ -38,5 +37,3 @@ class TouchKeys : NonCopyable
     const MCP23017::Pin TOUCH_2 = MCP23017::Pin::IOPIN_12;
 
 };
-
-#endif

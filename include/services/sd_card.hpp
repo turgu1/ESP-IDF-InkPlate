@@ -1,5 +1,4 @@
-#ifndef __SD_CARD_HPP__
-#define __SD_CARD_HPP__
+#pragma once
 
 class SDCard
 {
@@ -18,5 +17,3 @@ class SDCard
   private:
     static constexpr char const * TAG = "SDCard";
 };
-
-#endif

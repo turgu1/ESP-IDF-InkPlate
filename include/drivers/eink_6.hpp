@@ -21,8 +21,7 @@ Distributed as-is; no warranty is given.
 */
 #ifdef INKPLATE_6
 
-#ifndef __EINK6_HPP__
-#define __EINK6_HPP__
+#pragma once
 
 #include <cinttypes>
 #include <cstring>
@@ -110,5 +109,4 @@ class EInk6 : public EInk, NonCopyable
     static const uint8_t  LUTB[16];
 };
 
-#endif
 #endif

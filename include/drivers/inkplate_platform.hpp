@@ -15,8 +15,7 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#ifndef __INKPLATE_PLATFORM_HPP__
-#define __INKPLATE_PLATFORM_HPP__
+#pragma once
 
 #include <cstdint>
 
@@ -24,15 +23,24 @@ Distributed as-is; no warranty is given.
 
 #include "mcp23017.hpp"
 #include "battery.hpp"
-#include "touch_keys.hpp"
 #include "eink.hpp"
 #include "eink_6.hpp"
 #include "eink_10.hpp"
 
+#if defined(BUTTONS_EXTENSION)
+  #include "press_keys.hpp"
+#else
+  #include "touch_keys.hpp"
+#endif
+
 #if __INKPLATE_PLATFORM__
   MCP23017  mcp_int(0x20);
   Battery   battery(mcp_int);
-  TouchKeys touch_keys(mcp_int);
+  #if defined(BUTTONS_EXTENSION)
+    PressKeys press_keys(mcp_int);
+  #else
+    TouchKeys touch_keys(mcp_int);
+  #endif
 
   #if defined(INKPLATE_6)
     EInk6     e_ink(mcp_int);
@@ -45,7 +53,11 @@ Distributed as-is; no warranty is given.
 #else
   extern MCP23017  mcp_int;
   extern Battery   battery;
-  extern TouchKeys touch_keys;
+  #if defined(BUTTONS_EXTENSION)
+    extern PressKeys press_keys;
+  #else
+    extern TouchKeys touch_keys;
+  #endif
 
   #if defined(INKPLATE_6)
     extern EInk6     e_ink;
@@ -87,6 +99,4 @@ class InkPlatePlatform : NonCopyable
   InkPlatePlatform & inkplate_platform = InkPlatePlatform::get_singleton();
 #else
   extern InkPlatePlatform & inkplate_platform;
-#endif
-
 #endif

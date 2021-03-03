@@ -1,5 +1,4 @@
-#ifndef __BATTERY_HPP__
-#define __BATTERY_HPP__
+#pragma once
 
 #include "non_copyable.hpp"
 #include "mcp23017.hpp"
@@ -18,5 +17,3 @@ class Battery : NonCopyable
 
     const MCP23017::Pin BATTERY_SWITCH = MCP23017::Pin::IOPIN_9;
 };
-
-#endif

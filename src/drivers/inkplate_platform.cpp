@@ -8,9 +8,14 @@
 #include "esp.hpp"
 #include "eink.hpp"
 #include "eink_6.hpp"
-#include "touch_keys.hpp"
 #include "battery.hpp"
 #include "sd_card.hpp"
+
+#if defined(BUTTONS_EXTENSION)
+  #include "press_keys.hpp"
+#else
+  #include "touch_keys.hpp"
+#endif
 
 #include "esp_sleep.h"
 
@@ -27,8 +32,13 @@ InkPlatePlatform::setup()
   // Battery
   if (!battery.setup()) return false;
   
-  // Setup Touch keys
-  if (!touch_keys.setup()) return false;
+  #if defined(BUTTONS_EXTENSION)
+    // Setup Press keys
+    if (!press_keys.setup()) return false;
+  #else
+    // Setup Touch keys
+    if (!touch_keys.setup()) return false;
+  #endif
 
   // Mount and check the SD Card
   if (!SDCard::setup()) return false;

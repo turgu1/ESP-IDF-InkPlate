@@ -1,5 +1,4 @@
-#ifndef __EINK_HPP__
-#define __EINK_HPP__
+#pragma once
 
 #include "logging.hpp"
 #include "frame_buffer.hpp"
@@ -129,4 +128,3 @@ class EInk
     inline void vcom_clear()   { mcp_int.digital_write(VCOM,   MCP23017::SignalLevel::LOW ); }
 };
 
-#endif

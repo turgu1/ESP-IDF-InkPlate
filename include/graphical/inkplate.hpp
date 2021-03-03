@@ -14,8 +14,7 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#ifndef __INKPLATE_H__
-#define __INKPLATE_H__
+#pragma once
 
 #include "defines.hpp"
 
@@ -41,7 +40,11 @@ class Inkplate : public Graphics
 
     int8_t readTemperature() { return e_ink.read_temperature(); }
 
-    uint8_t readTouchpad(int c) { return touch_keys.read_key((TouchKeys::Key) c); }
+    #if defined(BUTTONS_EXTENSION)
+      uint8_t readPresskey(int c) { return press_keys.read_key((PressKeys::Key) c); }
+    #else
+      uint8_t readTouchpad(int c) { return touch_keys.read_key((TouchKeys::Key) c); }
+    #endif
     
     inline void  disconnect() { network_client.disconnect(); }
     inline bool isConnected() { return network_client.isConnected(); }
@@ -53,4 +56,3 @@ class Inkplate : public Graphics
     bool sdCardInit() { return true; }
 };
 
-#endif

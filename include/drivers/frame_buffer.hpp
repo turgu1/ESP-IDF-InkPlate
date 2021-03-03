@@ -1,5 +1,4 @@
-#ifndef __FRAME_BUFFER_HPP__
-#define __FRAME_BUFFER_HPP__
+#pragma once
 
 #include "logging.hpp"
 
@@ -43,5 +42,3 @@ class FrameBuffer3Bit : public FrameBuffer
   public:
     FrameBuffer3Bit(int16_t w, int16_t h, int32_t s) : FrameBuffer(w, h, s, (uint8_t) 0x77) {}
 };
-
-#endif

@@ -15,8 +15,7 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#ifndef __NETWORKCLIENT_H__
-#define __NETWORKCLIENT_H__
+#pragma once
 
 #include <cstdint>
 
@@ -40,6 +39,4 @@ class NetworkClient
   NetworkClient network_client;
 #else
   extern NetworkClient network_client;
-#endif
-
 #endif

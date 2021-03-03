@@ -1,5 +1,4 @@
-#ifndef __BACKLIGHT_H__
-#define __BACKLIGHT_H__
+#pragma once
 
 #if defined(INKPLATE_6PLUS)
 
@@ -18,7 +17,5 @@ class Backlight
 
     const MCP23017::Pin BACKLIGHT_EN = MCP23017::Pin::IOPIN_11;
 };
-
-#endif
 
 #endif

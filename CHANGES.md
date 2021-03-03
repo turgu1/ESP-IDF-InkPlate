@@ -86,3 +86,7 @@ This name reflect more what it is. This class will is currently under eavy chang
 ## FrameBuffer classes
 
 A hierarchy of frame buffer classes has been added. These allow for flexible adaptation to the different geometry of devices and pixel sizes.
+
+## press_keys (.hpp, .cpp)
+
+This class implements the Buttons Extension: 6 mechanical press buttons that replace the touch keys. To be used, at compile time, BUTTONS_EXTENSION must be #defined. The touch_keys class will then not be included.  

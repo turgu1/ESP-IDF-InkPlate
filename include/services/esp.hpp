@@ -2,8 +2,7 @@
 //
 // MIT License. Look at file licenses.txt for details.
 
-#ifndef __ESP_HPP__
-#define __ESP_HPP__
+#pragma once
 
 #include <cinttypes>
 
@@ -78,5 +77,3 @@ class ESP
       ESP_LOGD(TAG, "+----------------------+");
     }
 };
-
-#endif

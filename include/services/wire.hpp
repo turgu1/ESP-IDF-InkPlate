@@ -2,8 +2,7 @@
 //
 // MIT License. Look at file licenses.txt for details.
 
-#ifndef __WIRE_HPP__
-#define __WIRE_HPP__
+#pragma once
 
 #include <cinttypes>
 
@@ -53,6 +52,4 @@ class Wire : NonCopyable
   Wire & wire = Wire::get_singleton();
 #else
   extern Wire & wire;
-#endif
-
 #endif
