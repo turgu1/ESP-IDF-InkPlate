@@ -40,7 +40,7 @@ class Inkplate : public Graphics
 
     int8_t readTemperature() { return e_ink.read_temperature(); }
 
-    #if defined(BUTTONS_EXTENSION)
+    #if defined(EXTENDED_CASE)
       uint8_t readPresskey(int c) { return press_keys.read_key((PressKeys::Key) c); }
     #else
       uint8_t readTouchpad(int c) { return touch_keys.read_key((TouchKeys::Key) c); }

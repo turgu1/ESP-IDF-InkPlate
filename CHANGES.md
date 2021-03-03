@@ -89,4 +89,4 @@ A hierarchy of frame buffer classes has been added. These allow for flexible ada
 
 ## press_keys (.hpp, .cpp)
 
-This class implements the Buttons Extension: 6 mechanical press buttons that replace the touch keys. To be used, at compile time, BUTTONS_EXTENSION must be #defined. The `TouchKeys` class will then **not** be included.  
+This class implements the Buttons Extension: 6 mechanical press buttons that replace the touch keys. To be used, at compile time, EXTENDED_CASE must be #defined. The `TouchKeys` class will then **not** be included.  

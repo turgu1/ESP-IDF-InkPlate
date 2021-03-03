@@ -11,7 +11,7 @@
 #include "battery.hpp"
 #include "sd_card.hpp"
 
-#if defined(BUTTONS_EXTENSION)
+#if defined(EXTENDED_CASE)
   #include "press_keys.hpp"
 #else
   #include "touch_keys.hpp"
@@ -32,7 +32,7 @@ InkPlatePlatform::setup()
   // Battery
   if (!battery.setup()) return false;
   
-  #if defined(BUTTONS_EXTENSION)
+  #if defined(EXTENDED_CASE)
     // Setup Press keys
     if (!press_keys.setup()) return false;
   #else

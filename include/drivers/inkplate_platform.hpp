@@ -27,7 +27,7 @@ Distributed as-is; no warranty is given.
 #include "eink_6.hpp"
 #include "eink_10.hpp"
 
-#if defined(BUTTONS_EXTENSION)
+#if defined(EXTENDED_CASE)
   #include "press_keys.hpp"
 #else
   #include "touch_keys.hpp"
@@ -36,7 +36,7 @@ Distributed as-is; no warranty is given.
 #if __INKPLATE_PLATFORM__
   MCP23017  mcp_int(0x20);
   Battery   battery(mcp_int);
-  #if defined(BUTTONS_EXTENSION)
+  #if defined(EXTENDED_CASE)
     PressKeys press_keys(mcp_int);
   #else
     TouchKeys touch_keys(mcp_int);
@@ -53,7 +53,7 @@ Distributed as-is; no warranty is given.
 #else
   extern MCP23017  mcp_int;
   extern Battery   battery;
-  #if defined(BUTTONS_EXTENSION)
+  #if defined(EXTENDED_CASE)
     extern PressKeys press_keys;
   #else
     extern TouchKeys touch_keys;
