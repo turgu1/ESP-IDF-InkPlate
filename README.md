@@ -1,6 +1,6 @@
 # ESP-IDF-InkPlate Library Version 0.9.4
 
-(March 3, 2021)
+(March 4, 2021)
 
 Version 0.9.4: Added `PressKeys` class in support of the Buttons Extended Case as described [here](https://github.com/turgu1/InkPlate-6-Extended-Case). To be used, at compile time, EXTENDED_CASE must be #defined. The `TouchKeys` class will then **not** be included.
 
