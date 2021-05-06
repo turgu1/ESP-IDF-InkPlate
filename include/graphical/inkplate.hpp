@@ -43,7 +43,9 @@ class Inkplate : public Graphics
     #if defined(EXTENDED_CASE)
       uint8_t readPresskey(int c) { return press_keys.read_key((PressKeys::Key) c); }
     #else
-      uint8_t readTouchpad(int c) { return touch_keys.read_key((TouchKeys::Key) c); }
+      #if defined(INKPLATE_6) || defined(INKPLATE_10)
+        uint8_t readTouchpad(int c) { return touch_keys.read_key((TouchKeys::Key) c); }
+      #endif
     #endif
     
     inline void  disconnect() { network_client.disconnect(); }

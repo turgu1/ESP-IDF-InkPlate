@@ -9,13 +9,15 @@ class Backlight
   public:
     Backlight(MCP23017 & _mcp) : mcp(_mcp) {}
     bool setup();
-    void setBacklight(uint8_t _v);
-    void backlight(bool _e);
+    void set_level(uint8_t level);
+    void power_on(bool on);
 
   private:
     MCP23017 & mcp;
 
     const MCP23017::Pin BACKLIGHT_EN = MCP23017::Pin::IOPIN_11;
+
+    static const uint8_t BACKLIGHT_ADDRESS = 0x2E;
 };
 
 #endif

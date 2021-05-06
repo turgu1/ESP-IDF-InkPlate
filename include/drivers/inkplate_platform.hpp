@@ -25,6 +25,7 @@ Distributed as-is; no warranty is given.
 #include "battery.hpp"
 #include "eink.hpp"
 #include "eink_6.hpp"
+#include "eink_6plus.hpp"
 #include "eink_10.hpp"
 
 #if defined(EXTENDED_CASE)
@@ -47,8 +48,11 @@ Distributed as-is; no warranty is given.
   #elif defined(INKPLATE_10)
     MCP23017  mcp_ext(0x22);
     EInk10    e_ink(mcp_int, mcp_ext);
+  #elif defined(INKPLATE_6PLUS)
+    MCP23017  mcp_ext(0x22);
+    EInk6PLUS e_ink(mcp_int, mcp_ext);
   #else
-    #error "One of INKPLATE_6, INKPLATE_10 must be defined."
+    #error "One of INKPLATE_6, INKPLATE_10, INKPLATE_6PLUS must be defined."
   #endif
 #else
   extern MCP23017  mcp_int;
@@ -56,7 +60,9 @@ Distributed as-is; no warranty is given.
   #if defined(EXTENDED_CASE)
     extern PressKeys press_keys;
   #else
-    extern TouchKeys touch_keys;
+    #if defined(INKPLATE_6) || defined(INKPLATE_10)
+      extern TouchKeys touch_keys;
+    #endif
   #endif
 
   #if defined(INKPLATE_6)
@@ -64,8 +70,11 @@ Distributed as-is; no warranty is given.
   #elif defined(INKPLATE_10)
     extern MCP23017  mcp_ext;
     extern EInk10    e_ink;
+  #elif defined(INKPLATE_6PLUS)
+    extern MCP23017  mcp_ext;
+    extern EInk6PLUS e_ink;
   #else
-    #error "One of INKPLATE_6, INKPLATE_10 must be defined."
+    #error "One of INKPLATE_6, INKPLATE_10, INKPLATE_6PLUS must be defined."
   #endif
 #endif
 

@@ -36,8 +36,10 @@ InkPlatePlatform::setup()
     // Setup Press keys
     if (!press_keys.setup()) return false;
   #else
-    // Setup Touch keys
-    if (!touch_keys.setup()) return false;
+    #if defined(INKPLATE_6) || defined(INKPLATE_10)
+      // Setup Touch keys
+      if (!touch_keys.setup()) return false;
+    #endif
   #endif
 
   // Mount and check the SD Card

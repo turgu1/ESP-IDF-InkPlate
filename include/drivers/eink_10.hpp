@@ -19,7 +19,8 @@ Please review the LICENSE file included with this example.
 If you have any questions about licensing, please contact techsupport@e-radionica.com
 Distributed as-is; no warranty is given.
 */
-#ifdef INKPLATE_10
+
+#if defined(INKPLATE_10)
 
 #pragma once
 
@@ -102,7 +103,7 @@ class EInk10 : public EInk, NonCopyable
         uint8_t * get_data() { return data; }
     };
 
-    void clean_fast(uint8_t c, uint8_t rep);
+    void clean(PixelState pixel_state, uint8_t repeat_count);
 
     static const uint8_t  WAVEFORM_3BIT[8][8]; 
     static const uint8_t  LUT2[16];

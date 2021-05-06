@@ -1,5 +1,5 @@
 /*
-eink.cpp
+eink_10.cpp
 Inkplate 10 ESP-IDF
 
 Modified by Guy Turcotte 
@@ -178,10 +178,10 @@ EInk10::update(FrameBuffer1Bit & frame_buffer)
 
   turn_on();
 
-  clean_fast(0, 10);
-  clean_fast(1, 10);
-  clean_fast(0, 10);
-  clean_fast(1, 10);
+  clean(PixelState::WHITE, 10);
+  clean(PixelState::BLACK, 10);
+  clean(PixelState::WHITE, 10);
+  clean(PixelState::BLACK, 10);
 
   uint8_t * data = frame_buffer.get_data();
 
@@ -214,8 +214,8 @@ EInk10::update(FrameBuffer1Bit & frame_buffer)
     ESP::delay_microseconds(230);
   }
 
-  clean_fast(2, 2);
-  clean_fast(3, 1);
+  clean(PixelState::DISCHARGE, 2);
+  clean(PixelState::SKIP,      1);
 
   vscan_start();
   turn_off();
@@ -234,10 +234,10 @@ EInk10::update(FrameBuffer3Bit & frame_buffer)
   Wire::enter();
   turn_on();
 
-  clean_fast(0, 10);
-  clean_fast(1, 10);
-  clean_fast(0, 10);
-  clean_fast(1, 10);
+  clean(PixelState::WHITE, 10);
+  clean(PixelState::BLACK, 10);
+  clean(PixelState::WHITE, 10);
+  clean(PixelState::BLACK, 10);
 
   uint8_t * data = frame_buffer.get_data();
 
@@ -274,7 +274,7 @@ EInk10::update(FrameBuffer3Bit & frame_buffer)
     ESP::delay_microseconds(230);
   }
 
-  clean_fast(3, 1);
+  clean(PixelState::SKIP, 1);
   vscan_start();
   turn_off();
 
@@ -293,17 +293,16 @@ EInk10::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 
   ESP_LOGD(TAG, "Partial update...");
 
-  uint32_t n   = BITMAP_SIZE_1BIT * 2 - 1;
-  uint32_t pos = BITMAP_SIZE_1BIT - 1;
-  uint8_t  diffw, diffb;
-
   uint8_t * idata = frame_buffer.get_data();
   uint8_t * odata = d_memory_new->get_data();
 
+  uint32_t n   = BITMAP_SIZE_1BIT * 2 - 1;
+  uint32_t pos = BITMAP_SIZE_1BIT - 1;
+  
   for (int i = 0; i < HEIGHT; i++) {
     for (int j = 0; j < LINE_SIZE_1BIT; j++) {
-      diffw =  odata[pos] & ~idata[pos];
-      diffb = ~odata[pos] &  idata[pos];
+      uint8_t diffw =  odata[pos] & ~idata[pos];
+      uint8_t diffb = ~odata[pos] &  idata[pos];
       pos--;
       p_buffer[n--] = LUTW[diffw >>   4] & (LUTB[diffb >>   4]);
       p_buffer[n--] = LUTW[diffw & 0x0F] & (LUTB[diffb & 0x0F]);
@@ -322,19 +321,19 @@ EInk10::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 
       for (int j = 0; j < ((WIDTH / 4) - 1); j++) {
         send = PIN_LUT[p_buffer[n--]];
-        GPIO.out_w1ts = send | CL;
-        GPIO.out_w1tc = DATA | CL;
+        GPIO.out_w1ts = CL | send;
+        GPIO.out_w1tc = CL | DATA;
       }
 
-      GPIO.out_w1ts = send | CL;
-      GPIO.out_w1tc = DATA | CL;
+      GPIO.out_w1ts = CL | send;
+      GPIO.out_w1tc = CL | DATA;
       vscan_end();
     }
     ESP::delay_microseconds(230);
   }
 
-  clean_fast(2, 2);
-  clean_fast(3, 1);
+  clean(PixelState::DISCHARGE, 2);
+  clean(PixelState::SKIP,      1);
   
   vscan_start();
   turn_off();
@@ -344,15 +343,14 @@ EInk10::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 }
 
 void
-EInk10::clean_fast(uint8_t c, uint8_t rep)
+EInk10::clean(PixelState pixel_state, uint8_t repeat_count)
 {
-  static uint8_t byte[4] = { 0b10101010, 0b01010101, 0b00000000, 0b11111111 };
 
   turn_on();
 
-  uint32_t send = PIN_LUT[byte[c]];
+  uint32_t send = PIN_LUT[(uint8_t) pixel_state];
 
-  for (int8_t k = 0; k < rep; k++) {
+  for (int8_t k = 0; k < repeat_count; k++) {
 
     vscan_start();
 

@@ -1,4 +1,9 @@
-# ESP-IDF-InkPlate Library Version 0.9.4
+# ESP-IDF-InkPlate Library Version 0.9.5
+
+(May, 5, 2021)
+
+(Not ready yet...)
+Version 0.9.5: Added InkPlate-6PLUS support: Screen, Touch Screen, Back Light. Some code refactoring in drivers.
 
 (March 4, 2021)
 

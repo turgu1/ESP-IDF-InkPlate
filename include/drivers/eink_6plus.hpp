@@ -1,9 +1,9 @@
 /*
-eink_6.hpp
-Inkplate 6 ESP-IDF
+eink_6plus.hpp
+Inkplate 6PLUS ESP-IDF
 
 Modified by Guy Turcotte 
-November 12, 2020
+May 5, 2021
 
 from the Arduino Library:
 
@@ -20,7 +20,7 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#if defined(INKPLATE_6)
+#if defined(INKPLATE_6PLUS)
 
 #pragma once
 
@@ -43,15 +43,15 @@ Distributed as-is; no warranty is given.
  * below. It also cannot be copied through the NonCopyable derivation.
  */
 
-class EInk6 : public EInk, NonCopyable
+class EInk6PLUS : public EInk, NonCopyable
 {
   public:
-    EInk6(MCP23017 & mcp) : EInk(mcp)
-      { }
+    EInk6PLUS(MCP23017 & mcp_i, MCP23017 & mcp_e) : EInk(mcp_i), mcp_ext(mcp_e)
+      { }  // Private constructor
 
-    static const uint16_t WIDTH  = 800; // In pixels
-    static const uint16_t HEIGHT = 600; // In pixels
-    static const uint16_t BITMAP_SIZE_1BIT = (WIDTH * HEIGHT) >> 3;            // In bytes
+    static const uint16_t WIDTH  = 1024; // In pixels
+    static const uint16_t HEIGHT =  758; // In pixels
+    static const uint32_t BITMAP_SIZE_1BIT = (WIDTH * HEIGHT) >> 3;            // In bytes
     static const uint32_t BITMAP_SIZE_3BIT = ((uint32_t) WIDTH * HEIGHT) >> 1; // In bytes
     static const uint16_t LINE_SIZE_1BIT   = WIDTH >> 3;                       // In bytes
     static const uint16_t LINE_SIZE_3BIT   = WIDTH >> 1;                       // In bytes
@@ -79,10 +79,12 @@ class EInk6 : public EInk, NonCopyable
     void update(FrameBuffer3Bit & frame_buffer);
 
     void partial_update(FrameBuffer1Bit & frame_buffer, bool force = false);
-
+    
   private:
-    static constexpr char const * TAG = "EInk6";
+    static constexpr char const * TAG = "EInk6PLUS";
 
+    MCP23017 & mcp_ext;
+    
     class FrameBuffer1BitX : public FrameBuffer1Bit {
       private:
         uint8_t data[BITMAP_SIZE_1BIT];
@@ -103,8 +105,7 @@ class EInk6 : public EInk, NonCopyable
 
     void clean(PixelState pixel_state, uint8_t repeat_count);
 
-    static const uint8_t  WAVEFORM_3BIT[8][8]; 
-    static const uint32_t WAVEFORM[50]; 
+    static const uint8_t  WAVEFORM_3BIT[8][9]; 
     static const uint8_t  LUT2[16];
     static const uint8_t  LUTW[16];
     static const uint8_t  LUTB[16];
