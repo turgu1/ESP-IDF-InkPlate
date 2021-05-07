@@ -4,7 +4,7 @@
 
 #include "mcp23017.hpp"
 
-class Backlight
+class BackLight
 {
   public:
     Backlight(MCP23017 & _mcp) : mcp(_mcp) {}

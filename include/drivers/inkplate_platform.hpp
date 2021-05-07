@@ -28,19 +28,25 @@ Distributed as-is; no warranty is given.
 #include "eink_6plus.hpp"
 #include "eink_10.hpp"
 
-#if defined(EXTENDED_CASE)
+#if defined(EXTENDED_CASE) && (defined(INKPLATE_6) || defined(INKPLATE_10))
   #include "press_keys.hpp"
-#else
+#elif defined(INKPLATE_6) || defined(INKPLATE_10)
   #include "touch_keys.hpp"
+#elif defined(INKPLATE_6PLUS)
+  #include "touch_screen.hpp"
+  #include "back_light.hpp"
 #endif
 
 #if __INKPLATE_PLATFORM__
   MCP23017  mcp_int(0x20);
   Battery   battery(mcp_int);
-  #if defined(EXTENDED_CASE)
+  #if defined(EXTENDED_CASE) && (defined(INKPLATE_6) || defined(INKPLATE_10))
     PressKeys press_keys(mcp_int);
-  #else
+  #elif defined(INKPLATE_6) || defined(INKPLATE_10)
     TouchKeys touch_keys(mcp_int);
+  #elif defined(INKPLATE_6PLUS)
+    TouchScreen touch_screen(mcp_int);
+    BackLight   back_light(mcp_int);
   #endif
 
   #if defined(INKPLATE_6)
@@ -59,10 +65,11 @@ Distributed as-is; no warranty is given.
   extern Battery   battery;
   #if defined(EXTENDED_CASE)
     extern PressKeys press_keys;
-  #else
-    #if defined(INKPLATE_6) || defined(INKPLATE_10)
-      extern TouchKeys touch_keys;
-    #endif
+  #elif defined(INKPLATE_6) || defined(INKPLATE_10)
+    extern TouchKeys touch_keys;
+  #elif defined(INKPLATE_6PLUS)
+    extern TouchScreen touch_screen;
+    extern BackLight   back_light;
   #endif
 
   #if defined(INKPLATE_6)

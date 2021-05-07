@@ -44,12 +44,10 @@ class ESP
     }
 
     static void delay(uint32_t milliseconds) {
-      if (milliseconds < portTICK_PERIOD_MS) {
-        //taskYIELD();
-      }
-      else {
-        vTaskDelay(milliseconds / portTICK_PERIOD_MS);
-      }
+      vTaskDelay(milliseconds / portTICK_PERIOD_MS);
+    
+      uint32_t remainder_usec = (milliseconds % portTICK_PERIOD_MS) * 1000;
+      if (remainder_usec) delay_microseconds(remainder_usec);
     }
 
     static int16_t analog_read(adc1_channel_t channel) {

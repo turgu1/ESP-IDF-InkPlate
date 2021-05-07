@@ -30,31 +30,32 @@ class Inkplate : public Graphics
 
     void begin() { inkplate_platform.setup(); }
 
-    inline void einkOn()  { e_ink.turn_on(); }
-    inline void einkOff() { e_ink.turn_off(); }
-    inline uint8_t getPanelState() { return (uint8_t) e_ink.get_panel_state(); }
+    inline void             einkOn() { e_ink.turn_on();                          }
+    inline void            einkOff() { e_ink.turn_off();                         }
+    inline uint8_t   getPanelState() { return (uint8_t) e_ink.get_panel_state(); }
+    inline double      readBattery() { return battery.read_level();              }
+    inline uint8_t   readPowerGood() { return e_ink.read_power_good();           }
+    inline int8_t  readTemperature() { return e_ink.read_temperature();          }
+    inline void         disconnect() { network_client.disconnect();              }
+    inline bool        isConnected() { return network_client.isConnected();      }
+    inline int        _getRotation() { return Graphics::getRotation();           }
+    inline bool         sdCardInit() { return true;                              }
 
-    inline double readBattery() { return battery.read_level(); }
+    inline bool             joinAP(const char * ssid, const char * pass) { 
+                                       return network_client.joinAP(ssid, pass); }
 
-    uint8_t readPowerGood() { return e_ink.read_power_good(); }
+    #if defined(EXTENDED_CASE) && (defined(INKPLATE_6) || defined(INKPLATE_10))
+      inline uint8_t readPresskey(int c) { return press_keys.read_key((PressKeys::Key) c); }
+    #elif defined(INKPLATE_6) || defined(INKPLATE_10)
+      inline uint8_t readTouchpad(int c) { return touch_keys.read_key((TouchKeys::Key) c); }
+    #elif defined(INKPLATE_6PLUS)
+      inline bool touchInArea(int16_t x1, int16_t y1, int16_t w, int16_t h);
 
-    int8_t readTemperature() { return e_ink.read_temperature(); }
-
-    #if defined(EXTENDED_CASE)
-      uint8_t readPresskey(int c) { return press_keys.read_key((PressKeys::Key) c); }
-    #else
-      #if defined(INKPLATE_6) || defined(INKPLATE_10)
-        uint8_t readTouchpad(int c) { return touch_keys.read_key((TouchKeys::Key) c); }
-      #endif
+      inline bool    tsAvailable() { return touch_screen.is_screen_touched(); }      
+      inline uint8_t tsGetData(TouchPositions & xPos, TouchPositions & yPos) { return touch_screen.get_positions(xPos, yPos); }
+      inline uint8_t tsGetPowerState() { return touch_screen.get_power_state(); }
+      inline void    tsSetPowerState(uint8_t s) { touch_screen.set_power_state(s != 0); }
+      inline void    tsShutdown();
     #endif
-    
-    inline void  disconnect() { network_client.disconnect(); }
-    inline bool isConnected() { return network_client.isConnected(); }
-    inline int _getRotation() { return Graphics::getRotation(); }
-
-    inline bool joinAP(const char * ssid, const char * pass) { 
-                return network_client.joinAP(ssid, pass); }
-
-    bool sdCardInit() { return true; }
 };
 

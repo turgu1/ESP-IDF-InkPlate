@@ -4,18 +4,8 @@
 #include "logging.hpp"
 
 #include "wire.hpp"
-#include "mcp23017.hpp"
 #include "esp.hpp"
-#include "eink.hpp"
-#include "eink_6.hpp"
-#include "battery.hpp"
 #include "sd_card.hpp"
-
-#if defined(EXTENDED_CASE)
-  #include "press_keys.hpp"
-#else
-  #include "touch_keys.hpp"
-#endif
 
 #include "esp_sleep.h"
 
@@ -32,14 +22,15 @@ InkPlatePlatform::setup()
   // Battery
   if (!battery.setup()) return false;
   
-  #if defined(EXTENDED_CASE)
+  #if defined(EXTENDED_CASE) && (defined(INKPLATE_6) || defined(INKPLATE_10))
     // Setup Press keys
     if (!press_keys.setup()) return false;
-  #else
-    #if defined(INKPLATE_6) || defined(INKPLATE_10)
-      // Setup Touch keys
-      if (!touch_keys.setup()) return false;
-    #endif
+  #elif defined(INKPLATE_6) || defined(INKPLATE_10)
+    // Setup Touch keys
+    if (!touch_keys.setup()) return false;
+  #elif defined(INKPLATE_6PLUS)
+    if (!touch_screen.setup(true, nullptr, e_ink.get_width(), e_ink.get_height())) return false;
+    if (!back_light.setup()) return false;
   #endif
 
   // Mount and check the SD Card
@@ -87,5 +78,7 @@ InkPlatePlatform::deep_sleep()
   if ((err = esp_sleep_enable_ext0_wakeup(GPIO_NUM_34, 1)) != ESP_OK) {
     LOG_E("Unable to set ext0 WakeUp for Deep Sleep: %d", err);
   }
+  
+  rtc_gpio_isolate(GPIO_NUM_12);
   esp_deep_sleep_start();
 }

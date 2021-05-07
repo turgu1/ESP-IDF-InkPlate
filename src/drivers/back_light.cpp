@@ -1,10 +1,10 @@
 #if defined(INKPLATE_6PLUS)
 
-#include "backlight.hpp"
+#include "back_light.hpp"
 #include "wire.hpp"
 
 bool 
-Backlight::setup()
+BackLight::setup()
 {
   Wire::enter();
   mcp.set_direction(BACKLIGHT_EN, MCP23017::PinMode::OUTPUT);
@@ -15,7 +15,7 @@ Backlight::setup()
 }
 
 void 
-Backlight::set_level(uint8_t level)
+BackLight::set_level(uint8_t level)
 {
   Wire::enter();
   wire.beginTransmission(BACKLIGHT_ADDRESS);
@@ -26,7 +26,7 @@ Backlight::set_level(uint8_t level)
 }
 
 void 
-Backlight::power_on(bool on)
+BackLight::power_on(bool on)
 {
   Wire::enter();
   if (on) {
