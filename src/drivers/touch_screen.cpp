@@ -18,7 +18,7 @@ touchscreen_isr(void * value)
 }
 
 bool 
-TouchScreen::setup(bool power_on, void IRAM_ATTR (*isr_handler)(), uint16_t scr_width, uint16_t scr_height)
+TouchScreen::setup(bool power_on, void (*isr_handler)(), uint16_t scr_width, uint16_t scr_height)
 {
   ready                          = false;
   touchscreen_interrupt_happened = false;
@@ -70,7 +70,7 @@ TouchScreen::setup(bool power_on, void IRAM_ATTR (*isr_handler)(), uint16_t scr_
 }
 
 void 
-TouchScreen::set_app_isr_handler(void IRAM_ATTR (*isr_handler)())
+TouchScreen::set_app_isr_handler(void (*isr_handler)())
 {
   gpio_intr_disable(TOUCHSCREEN_INTERRUPT_PIN);
   app_isr_handler = isr_handler;

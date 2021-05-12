@@ -14,7 +14,7 @@ class TouchScreen : NonCopyable
 
     typedef std::array<uint16_t, 2> TouchPositions;
     
-    bool             setup(bool power_on, void IRAM_ATTR (*isr_handler)(), uint16_t scr_width, uint16_t scr_height);
+    bool             setup(bool power_on, void (*isr_handler)(), uint16_t scr_width, uint16_t scr_height);
 
     void          shutdown();
     bool is_screen_touched();
@@ -25,7 +25,7 @@ class TouchScreen : NonCopyable
 
     bool          is_ready() { return ready; }
 
-    void set_app_isr_handler(void IRAM_ATTR (*isr_handler)());
+    void set_app_isr_handler(void (*isr_handler)());
 
   private:
     static constexpr char const * TAG = "TouchScreen";
