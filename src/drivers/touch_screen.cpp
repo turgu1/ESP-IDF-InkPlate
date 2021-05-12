@@ -37,7 +37,7 @@ TouchScreen::setup(bool power_on, void (*isr_handler)(), uint16_t scr_width, uin
   gpio_config_t io_conf;
 
   io_conf.intr_type    = GPIO_INTR_NEGEDGE; 
-  io_conf.pin_bit_mask = 1ULL << TOUCHSCREEN_INTERRUPT_PIN;
+  io_conf.pin_bit_mask = 1ULL << PIN_TOUCHSCREEN_INTERRUPT;
   io_conf.mode         = GPIO_MODE_INPUT;
   io_conf.pull_up_en   = GPIO_PULLUP_ENABLE;
 
@@ -46,9 +46,9 @@ TouchScreen::setup(bool power_on, void (*isr_handler)(), uint16_t scr_width, uin
   gpio_install_isr_service(0);
   
   gpio_isr_handler_add(
-    TOUCHSCREEN_INTERRUPT_PIN, 
+    PIN_TOUCHSCREEN_INTERRUPT, 
     touchscreen_isr, 
-    (void *) TOUCHSCREEN_INTERRUPT_PIN);
+    (void *) PIN_TOUCHSCREEN_INTERRUPT);
 
   Wire::leave();
 
@@ -56,25 +56,22 @@ TouchScreen::setup(bool power_on, void (*isr_handler)(), uint16_t scr_width, uin
 
   if (software_reset()) {
     get_resolution();
-    set_power(power_on);
+    set_power_state(power_on);
 
     if (isr_handler != nullptr) set_app_isr_handler(isr_handler);
 
     ready = true;
+  }
 
-    return true;
-  }
-  else {
-    return false;
-  }
+  return ready;
 }
 
 void 
 TouchScreen::set_app_isr_handler(void (*isr_handler)())
 {
-  gpio_intr_disable(TOUCHSCREEN_INTERRUPT_PIN);
+  gpio_intr_disable(PIN_TOUCHSCREEN_INTERRUPT);
   app_isr_handler = isr_handler;
-  gpio_intr_enable(TOUCHSCREEN_INTERRUPT_PIN);
+  gpio_intr_enable(PIN_TOUCHSCREEN_INTERRUPT);
 }
 
 void
@@ -185,7 +182,7 @@ TouchScreen::get_power_state()
     Data data;
 
     Wire::enter();
-    write(power_state_reg);
+    write(power_state_cmd);
     read(data);
     Wire::leave();
 
@@ -227,9 +224,9 @@ TouchScreen::write(Data & data)
 void
 TouchScreen::shutdown()
 {
-  Wire.enter();
+  Wire::enter();
   mcp.digital_write(TOUCHSCREEN_ENABLE, MCP23017::SignalLevel::HIGH); // off
-  Wire.leave();
+  Wire::leave();
 
   ready = false;
 }

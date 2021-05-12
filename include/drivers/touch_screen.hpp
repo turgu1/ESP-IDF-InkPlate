@@ -37,8 +37,8 @@ class TouchScreen : NonCopyable
     const MCP23017::Pin TOUCHSCREEN_ENABLE = MCP23017::Pin::IOPIN_12;
     const MCP23017::Pin TOUCHSCREEN_RESET  = MCP23017::Pin::IOPIN_10;
 
-    static const uint8_t TOUCHSCREEN_ADDRESS       = 0x15;
-    static const uint8_t TOUCHSCREEN_INTERRUPT_PIN = GPIO_NUM_36;
+    static const uint8_t    TOUCHSCREEN_ADDRESS       = 0x15;
+    static const gpio_num_t PIN_TOUCHSCREEN_INTERRUPT = GPIO_NUM_36;
 
     typedef std::array<uint8_t, 4> Data;
     typedef std::array<uint8_t, 8> Data8;
@@ -47,8 +47,8 @@ class TouchScreen : NonCopyable
 
     bool ready;
 
-    void  harware_reset();
-    void software_reset();
+    void hardware_reset();
+    bool software_reset();
 
     bool  read(Data  & data);
     bool  read(Data8 & data);

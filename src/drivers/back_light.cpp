@@ -18,10 +18,10 @@ void
 BackLight::set_level(uint8_t level)
 {
   Wire::enter();
-  wire.beginTransmission(BACKLIGHT_ADDRESS);
+  wire.begin_transmission(BACKLIGHT_ADDRESS);
   wire.write(0);
   wire.write(63 - (level & 0b00111111));
-  wire.endTransmission();
+  wire.end_transmission();
   Wire::leave();
 }
 

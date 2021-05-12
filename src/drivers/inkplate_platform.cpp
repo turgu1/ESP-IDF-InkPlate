@@ -9,6 +9,8 @@
 
 #include "esp_sleep.h"
 
+#include "driver/gpio.h"
+
 InkPlatePlatform InkPlatePlatform::singleton;
 
 bool
