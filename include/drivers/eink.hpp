@@ -9,7 +9,7 @@ class EInk
 {
   public:
     enum class PanelState  { OFF, ON };
-    enum class PixelState : uint8_t { WHITE = 0b10101010, BLACK = 0b01010101, DISCHARGE = 0b00000000, SKIP = 0b11111111 }
+    enum class PixelState : uint8_t { WHITE = 0b10101010, BLACK = 0b01010101, DISCHARGE = 0b00000000, SKIP = 0b11111111 };
 
     inline PanelState get_panel_state() { return panel_state; }
     inline bool        is_initialized() { return initialized; }
