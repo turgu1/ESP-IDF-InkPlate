@@ -50,9 +50,9 @@ class TouchScreen : NonCopyable
     void hardware_reset();
     bool software_reset();
 
-    bool  read(Data  & data);
-    bool  read(Data8 & data);
-    void write(Data  & data);
+    bool  read(      Data  & data);
+    bool  read(      Data8 & data);
+    void write(const Data  & data);
 
     void get_resolution();
 };

@@ -9,7 +9,7 @@
 
 #include "esp_sleep.h"
 
-#include "driver/gpio.h"
+#include "driver/rtc_io.h"
 
 InkPlatePlatform InkPlatePlatform::singleton;
 

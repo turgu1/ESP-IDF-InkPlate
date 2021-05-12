@@ -6,7 +6,7 @@
 
 #include "driver/gpio.h"
 
-static volatile void (* app_isr_handler)();
+static void          (* app_isr_handler)();
 static volatile bool touchscreen_interrupt_happened = false;
 
 static void IRAM_ATTR 
@@ -78,8 +78,8 @@ void
 TouchScreen::hardware_reset()
 {
   Wire::enter();
-  mcp.digital_write(TOUCHSCREEN_RESET, MCP23017::SignalLevel::LOW ); delay(15);
-  mcp.digital_write(TOUCHSCREEN_RESET, MCP23017::SignalLevel::HIGH); delay(15); 
+  mcp.digital_write(TOUCHSCREEN_RESET, MCP23017::SignalLevel::LOW ); ESP::delay(15);
+  mcp.digital_write(TOUCHSCREEN_RESET, MCP23017::SignalLevel::HIGH); ESP::delay(15); 
   Wire::leave();
 }
 
@@ -138,7 +138,7 @@ uint8_t
 TouchScreen::get_positions(TouchPositions & x_positions, TouchPositions & y_positions)
 {
   Data8 raw;
-  TouchPositions x_raw[2], y_raw[2];
+  TouchPositions x_raw, y_raw;
 
   Wire::enter();
   read(raw);
@@ -212,7 +212,7 @@ TouchScreen::read(Data8 & data)
 }
 
 void 
-TouchScreen::write(Data & data)
+TouchScreen::write(const Data & data)
 {
   wire.begin_transmission(TOUCHSCREEN_ADDRESS);
   for (auto & d : data) {
