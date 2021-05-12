@@ -95,7 +95,7 @@ TouchScreen::software_reset()
 
   uint16_t timeout = 1000;
   while (!touchscreen_interrupt_happened && (timeout > 0)) {
-    ESP.delay(1);
+    ESP::delay(1);
     timeout--;
   }
 
