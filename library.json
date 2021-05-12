@@ -1,6 +1,6 @@
 {
   "name": "ESP-IDF-Inkplate",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "Implements common functions for Inkplate e-paper displays",
   "keywords": "e-ink, e-paper, display, esp32",
   "repository":
