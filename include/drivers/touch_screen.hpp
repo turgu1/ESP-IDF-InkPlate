@@ -41,6 +41,7 @@ class TouchScreen : NonCopyable
     static const uint8_t TOUCHSCREEN_INTERRUPT_PIN = GPIO_NUM_36;
 
     typedef std::array<uint8_t, 4> Data;
+    typedef std::array<uint8_t, 8> Data8;
 
     const Data hello_packet = { 0x55, 0x55, 0x55, 0x55 };
 
@@ -49,8 +50,9 @@ class TouchScreen : NonCopyable
     void  harware_reset();
     void software_reset();
 
-    bool  read(std::array & data);
-    void write(Data & data);
+    bool  read(Data  & data);
+    bool  read(Data8 & data);
+    void write(Data  & data);
 
     void get_resolution();
 };

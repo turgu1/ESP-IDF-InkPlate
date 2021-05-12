@@ -140,7 +140,7 @@ TouchScreen::get_resolution()
 uint8_t
 TouchScreen::get_positions(TouchPositions & x_positions, TouchPositions & y_positions)
 {
-  std::array <uint8_t, 8> raw;
+  Data8 raw;
   TouchPositions x_raw[2], y_raw[2];
 
   Wire::enter();
@@ -195,7 +195,17 @@ TouchScreen::get_power_state()
 }
 
 bool
-TouchScreen::read(std::array & data)
+TouchScreen::read(Data & data)
+{
+  if (wire.request_from(TOUCHSCREEN_ADDRESS, data.size()) != ESP_OK) return false;
+  for (auto & d : data) {
+    d = wire.read();
+  }
+  return true;
+}
+
+bool
+TouchScreen::read(Data8 & data)
 {
   if (wire.request_from(TOUCHSCREEN_ADDRESS, data.size()) != ESP_OK) return false;
   for (auto & d : data) {
