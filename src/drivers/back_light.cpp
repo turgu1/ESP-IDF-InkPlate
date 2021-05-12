@@ -26,10 +26,10 @@ BackLight::set_level(uint8_t level)
 }
 
 void 
-BackLight::power_on(bool on)
+BackLight::enable(bool en)
 {
   Wire::enter();
-  if (on) {
+  if (en) {
     mcp.digital_write(BACKLIGHT_EN, MCP23017::SignalLevel::HIGH);
   }
   else {

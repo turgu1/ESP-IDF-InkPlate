@@ -10,7 +10,7 @@ class BackLight
     BackLight(MCP23017 & _mcp) : mcp(_mcp) {}
     bool setup();
     void set_level(uint8_t level);
-    void power_on(bool on);
+    void enable(bool en);
 
   private:
     MCP23017 & mcp;

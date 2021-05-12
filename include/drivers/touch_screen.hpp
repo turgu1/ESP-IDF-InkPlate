@@ -43,8 +43,6 @@ class TouchScreen : NonCopyable
     typedef std::array<uint8_t, 4> Data;
     typedef std::array<uint8_t, 8> Data8;
 
-    const Data hello_packet = { 0x55, 0x55, 0x55, 0x55 };
-
     bool ready;
 
     void hardware_reset();

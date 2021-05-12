@@ -90,7 +90,7 @@ TouchScreen::software_reset()
 
   Wire::enter();
 
-  Data reset_cmd = { 0x77, 0x77, 0x77, 0x77 };
+  const Data reset_cmd = { 0x77, 0x77, 0x77, 0x77 };
   write(reset_cmd);
 
   uint16_t timeout = 1000;
@@ -101,6 +101,8 @@ TouchScreen::software_reset()
 
   Data answer;
   if (read(answer)) {
+    const Data hello_packet = { 0x55, 0x55, 0x55, 0x55 };
+
     result = answer == hello_packet;
   }
 
@@ -178,7 +180,7 @@ TouchScreen::set_power_state(bool on_state)
 bool
 TouchScreen::get_power_state()
 {
-    Data power_state_cmd = { 0x53, 0x50, 0x00, 0x01 };
+    const Data power_state_cmd = { 0x53, 0x50, 0x00, 0x01 };
     Data data;
 
     Wire::enter();

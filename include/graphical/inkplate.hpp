@@ -56,6 +56,9 @@ class Inkplate : public Graphics
       inline uint8_t tsGetPowerState() { return touch_screen.get_power_state(); }
       inline void    tsSetPowerState(uint8_t s) { touch_screen.set_power_state(s != 0); }
       inline void    tsShutdown();
+
+      inline void    backlight(bool enable)      { back_light.enable(enable); }
+      inline void    setBacklight(uint8_t level) { back_light.set_level(level); }
     #endif
 };
 
