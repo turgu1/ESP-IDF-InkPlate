@@ -52,7 +52,7 @@ class Inkplate : public Graphics
       inline bool touchInArea(int16_t x1, int16_t y1, int16_t w, int16_t h);
 
       inline bool    tsAvailable() { return touch_screen.is_screen_touched(); }      
-      inline uint8_t tsGetData(TouchPositions & xPos, TouchPositions & yPos) { return touch_screen.get_positions(xPos, yPos); }
+      inline uint8_t tsGetData(TouchScreen::TouchPositions & xPos, TouchScreen::TouchPositions & yPos) { return touch_screen.get_positions(xPos, yPos); }
       inline uint8_t tsGetPowerState() { return touch_screen.get_power_state(); }
       inline void    tsSetPowerState(uint8_t s) { touch_screen.set_power_state(s != 0); }
       inline void    tsShutdown();
