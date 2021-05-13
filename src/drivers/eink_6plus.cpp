@@ -54,9 +54,9 @@ const uint8_t EInk6PLUS::LUTB[16] = {
 bool 
 EInk6PLUS::setup()
 {
-  ESP_LOGD(TAG, "Initializing...");
-
   if (initialized) return true;
+
+  ESP_LOGD(TAG, "Initializing...");
 
   wire.setup();
   
