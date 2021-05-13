@@ -344,12 +344,12 @@ EInk6PLUS::update(FrameBuffer1Bit & frame_buffer)
 void Inkplate::display3b()
 {
     einkOn();
-    cleanFast(0, 1);
-    cleanFast(1, 15);
-    cleanFast(2, 1);
-    cleanFast(0, 5);
-    cleanFast(2, 1);
-    cleanFast(1, 15);
+    clean(0, 1);
+    clean(1, 15);
+    clean(2, 1);
+    clean(0, 5);
+    clean(2, 1);
+    clean(1, 15);
 
     for (int k = 0; k < 9; k++)
     {
@@ -365,15 +365,23 @@ void Inkplate::display3b()
         vscan_start();
         for (int i = 0; i < E_INK_HEIGHT; i++)
         {
-            hscan_start((GLUT2[k * 256 + (*(--dp))] | GLUT[k * 256 + (*(--dp))]));
-            GPIO.out_w1ts = (GLUT2[k * 256 + (*(--dp))] | GLUT[k * 256 + (*(--dp))]) | CL;
+            uint32_t t = GLUT2[k * 256 + (*(--dp))];
+            t |= GLUT[k * 256 + (*(--dp))];
+            hscan_start(t);
+            t = GLUT2[k * 256 + (*(--dp))];
+            t|=GLUT[k * 256 + (*(--dp))];
+            GPIO.out_w1ts = t | CL;
             GPIO.out_w1tc = DATA | CL;
 
             for (int j = 0; j < ((E_INK_WIDTH / 8) - 1); j++)
             {
-                GPIO.out_w1ts = (GLUT2[k * 256 + (*(--dp))] | GLUT[k * 256 + (*(--dp))]) | CL;
+                t = GLUT2[k * 256 + (*(--dp))];
+                t |= GLUT[k * 256 + (*(--dp))];
+                GPIO.out_w1ts = t | CL;
                 GPIO.out_w1tc = DATA | CL;
-                GPIO.out_w1ts = (GLUT2[k * 256 + (*(--dp))] | GLUT[k * 256 + (*(--dp))]) | CL;
+                t = GLUT2[k * 256 + (*(--dp))];
+                t |= GLUT[k * 256 + (*(--dp))];
+                GPIO.out_w1ts = t | CL;
                 GPIO.out_w1tc = DATA | CL;
             }
             GPIO.out_w1ts = CL;
@@ -405,7 +413,7 @@ EInk6PLUS::update(FrameBuffer3Bit & frame_buffer)
 
   uint8_t * data = frame_buffer.get_data();
 
-  for (int k = 0; k < 9; k++) {
+  for (int k = 0, kk = 0; k < 9; k++, kk += 256) {
 
     const uint8_t * dp = &data[BITMAP_SIZE_3BIT - 1];
 
@@ -413,18 +421,18 @@ EInk6PLUS::update(FrameBuffer3Bit & frame_buffer)
 
     for (int i = 0; i < HEIGHT; i++) {
 
-      hscan_start((GLUT2[k * 256 + *dp] | GLUT[k * 256 + *(dp - 1)]));
+      hscan_start((GLUT2[kk + *dp] | GLUT[kk + *(dp - 1)]));
       dp -= 2;
 
-      GPIO.out_w1ts = CL | (GLUT2[k * 256 + *dp] | GLUT[k * 256 + *(dp - 1)]);
+      GPIO.out_w1ts = CL | (GLUT2[kk + *dp] | GLUT[kk + *(dp - 1)]);
       GPIO.out_w1tc = CL | DATA;
       dp -= 2;
 
       for (int j = 0; j < ((WIDTH / 8) - 1); j++) {
-          GPIO.out_w1ts = CL | (GLUT2[k * 256 + *dp] | GLUT[k * 256 + *(dp - 1)]);
+          GPIO.out_w1ts = CL | (GLUT2[kk + *dp] | GLUT[kk + *(dp - 1)]);
           GPIO.out_w1tc = CL | DATA;
           dp -= 2;
-          GPIO.out_w1ts = CL | (GLUT2[k * 256 + *dp] | GLUT[k * 256 + *(dp - 1)]);
+          GPIO.out_w1ts = CL | (GLUT2[kk + *dp] | GLUT[kk + *(dp - 1)]);
           GPIO.out_w1tc = CL | DATA;
           dp -= 2;
       }
