@@ -56,6 +56,8 @@ MCP23017::test()
 bool 
 MCP23017::setup()
 {
+  ESP_LOGD(TAG, "Initializing...");
+  
   wire.begin_transmission(mcp_address);
   wire.end_transmission();
     
