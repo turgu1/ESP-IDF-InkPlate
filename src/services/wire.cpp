@@ -18,9 +18,9 @@ StaticSemaphore_t Wire::mutex_buffer;
 void
 Wire::setup()
 {
-  ESP_LOGD(TAG, "Initializing...");
-
   if (!initialized) {
+
+    ESP_LOGD(TAG, "Initializing...");
 
     mutex = xSemaphoreCreateMutexStatic(&mutex_buffer);
 
@@ -33,7 +33,7 @@ Wire::setup()
     config.scl_pullup_en    = GPIO_PULLUP_DISABLE;
     config.sda_io_num       = GPIO_NUM_21;
     config.sda_pullup_en    = GPIO_PULLUP_DISABLE;
-    config.master.clk_speed = 1E6;
+    config.master.clk_speed = 4E5;
 
     ESP_ERROR_CHECK(  i2c_param_config(I2C_NUM_0, &config));
     ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0));
@@ -47,7 +47,7 @@ Wire::begin_transmission(uint8_t addr)
 {
   if (!initialized) setup();
 
-  ESP_LOGD(TAG, "Transmission to address %x", addr);
+  ESP_LOGD(TAG, "Begin Transmission to address %x", addr);
 
   if (initialized) {
     address = addr;
