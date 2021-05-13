@@ -223,7 +223,7 @@ EInk10::update(FrameBuffer1Bit & frame_buffer)
   Wire::leave();
 
   memcpy(d_memory_new->get_data(), frame_buffer.get_data(), BITMAP_SIZE_1BIT);
-  partial_allowed = true;
+  allow_partial();
 }
 
 void IRAM_ATTR
@@ -279,12 +279,13 @@ EInk10::update(FrameBuffer3Bit & frame_buffer)
   turn_off();
 
   Wire::leave();
+  block_partial();
 }
 
 void
 EInk10::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 {
-  if (!partial_allowed && !force) {
+  if (!is_partial_allowed() && !force) {
     update(frame_buffer);
     return;
   }

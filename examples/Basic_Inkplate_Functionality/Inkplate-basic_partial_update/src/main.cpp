@@ -30,17 +30,15 @@ static const char * TAG = "Main";
   int max = 9;
 #elif defined(INKPLATE_6PLUS)
   const char text[] = "This is partial update on Inkplate 6PLUS e-paper display! :)";
-  int max = 30;
+  int max = 999;
 #else
   const char text[] = "This is partial update on Inkplate 10 e-paper display! :)";
-  int max = 50;
+  int max = 9;
 #endif
 
 // This variable is used for moving the text (scrolling)
 int offset;
 int w, h;
-
-void delay(int msec) { vTaskDelay(msec / portTICK_PERIOD_MS); }
 
 // Variable that keeps count on how much screen has been partially updated
 int n = 0;
@@ -78,7 +76,7 @@ void mainTask(void * param)
     offset -= 20; // Move text into new position
     if (offset < 0)
         offset = w; // Text is scrolled till the end of the screen? Get it back on the start!
-    delay(200);   // Delay between refreshes.
+    ESP::delay(200);   // Delay between refreshes.
   }
 }
 

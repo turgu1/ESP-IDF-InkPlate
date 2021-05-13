@@ -179,12 +179,12 @@ void Inkplate::display1b()
     uint8_t dram;
     einkOn();
 
-    cleanFast(0, 1);
-    cleanFast(1, 15);
-    cleanFast(2, 1);
-    cleanFast(0, 5);
-    cleanFast(2, 1);
-    cleanFast(1, 15);
+    clean(0, 1);
+    clean(1, 15);
+    clean(2, 1);
+    clean(0, 5);
+    clean(2, 1);
+    clean(1, 15);
     for (int k = 0; k < 4; k++)
     {
         _pos = (E_INK_HEIGHT * E_INK_WIDTH / 8) - 1;
@@ -243,13 +243,12 @@ void Inkplate::display1b()
         vscan_end();
     }
     delayMicroseconds(230);
-
-
-    cleanFast(2, 2);
-    cleanFast(3, 1);
+    clean(2, 2);
+    clean(3, 1);
     vscan_start();
     einkOff();
     _blockPartial = 0;
+
 }
 #endif
 
@@ -336,7 +335,7 @@ EInk6PLUS::update(FrameBuffer1Bit & frame_buffer)
   Wire::leave();
 
   memcpy(d_memory_new->get_data(), frame_buffer.get_data(), BITMAP_SIZE_1BIT);
-  partial_allowed = true;
+  allow_partial();
 }
 
 #if 0
@@ -442,6 +441,7 @@ EInk6PLUS::update(FrameBuffer3Bit & frame_buffer)
   turn_off();
 
   Wire::leave();
+  block_partial();
 }
 
 #if 0
@@ -543,7 +543,7 @@ void Inkplate::partialUpdate(bool _forced)
 void
 EInk6PLUS::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 {
-  if (!partial_allowed && !force) {
+  if (!is_partial_allowed() && !force) {
     update(frame_buffer);
     return;
   }
@@ -604,7 +604,12 @@ EInk6PLUS::clean(PixelState pixel_state, uint8_t repeat_count)
 {
   turn_on();
 
-  uint32_t send = PIN_LUT[(uint8_t) pixel_state];
+  // uint32_t send = PIN_LUT[(uint8_t) pixel_state];
+
+  uint32_t send = (( ((uint8_t) pixel_state) & 0b00000011) << 4)        | 
+                  (((((uint8_t) pixel_state) & 0b00001100) >> 2) << 18) | 
+                  (((((uint8_t) pixel_state) & 0b00010000) >> 4) << 23) |
+                  (((((uint8_t) pixel_state) & 0b11100000) >> 5) << 25);
 
   for (int8_t k = 0; k < repeat_count; k++) {
 

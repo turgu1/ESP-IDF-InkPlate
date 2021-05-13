@@ -141,8 +141,6 @@ void Graphics::selectDisplayMode(DisplayMode mode)
           _partial->clear();
         else
           DMemory4Bit->clear();
-
-        _blockPartial = 1;
     }
 }
 

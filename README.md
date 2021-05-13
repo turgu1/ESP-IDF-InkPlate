@@ -3,7 +3,11 @@
 (May, 5, 2021)
 
 (Not ready yet...)
-Version 0.9.5: Added InkPlate-6PLUS support: Screen, Touch Screen, Back Light. Some code refactoring in drivers.
+Version 0.9.5: 
+
+- Added InkPlate-6PLUS support: Screen, Touch Screen, Back Light. 
+- Some code refactoring in drivers. 
+- I2C speed lowered to 400Khz instead of 1Mhz.
 
 (March 4, 2021)
 
