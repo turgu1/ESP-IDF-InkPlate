@@ -315,7 +315,7 @@ EInk6PLUS::update(FrameBuffer1Bit & frame_buffer)
     GPIO.out_w1tc = CL | DATA;
 
     for (int j = 0; j < (LINE_SIZE_1BIT - 1); j++) {
-      dram = ~(*ptr--);
+      dram = *ptr--;
       GPIO.out_w1ts = CL | PIN_LUT[LUTB[(dram >> 4) & 0x0F]];
       GPIO.out_w1tc = CL | DATA;
       GPIO.out_w1ts = CL | PIN_LUT[LUTB[dram & 0x0F]];
