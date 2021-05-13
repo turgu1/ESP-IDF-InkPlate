@@ -304,9 +304,11 @@ EInk6PLUS::update(FrameBuffer1Bit & frame_buffer)
 
   vscan_start();
 
+  ptr = &data[BITMAP_SIZE_1BIT - 1];
+
   for (int i = 0; i < HEIGHT; i++) {
 
-    dram = ~(*ptr--);
+    dram = *ptr--;
 
     hscan_start(PIN_LUT[LUTB[(dram >> 4) & 0x0F]]);
     GPIO.out_w1ts = CL | PIN_LUT[LUTB[dram & 0x0F]];
@@ -604,12 +606,7 @@ EInk6PLUS::clean(PixelState pixel_state, uint8_t repeat_count)
 {
   turn_on();
 
-  // uint32_t send = PIN_LUT[(uint8_t) pixel_state];
-
-  uint32_t send = (( ((uint8_t) pixel_state) & 0b00000011) << 4)        | 
-                  (((((uint8_t) pixel_state) & 0b00001100) >> 2) << 18) | 
-                  (((((uint8_t) pixel_state) & 0b00010000) >> 4) << 23) |
-                  (((((uint8_t) pixel_state) & 0b11100000) >> 5) << 25);
+  uint32_t send = PIN_LUT[(uint8_t) pixel_state];
 
   for (int8_t k = 0; k < repeat_count; k++) {
 
