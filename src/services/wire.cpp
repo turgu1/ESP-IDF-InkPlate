@@ -47,7 +47,7 @@ Wire::begin_transmission(uint8_t addr)
 {
   if (!initialized) setup();
 
-  ESP_LOGD(TAG, "Begin Transmission to address %x", addr);
+  //ESP_LOGD(TAG, "Begin Transmission to address %x", addr);
 
   if (initialized) {
     address = addr;

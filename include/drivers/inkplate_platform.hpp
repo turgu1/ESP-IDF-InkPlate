@@ -101,11 +101,11 @@ class InkPlatePlatform : NonCopyable
      * 
      * This method initialize the SD-Card, the e-Ink display, battery status, and the touchkeys 
      * capabilities.
-     * 
+     * @param sd_card_init - true will initialize the sd_card, default is false
      * @return true - All devices ready
      * @return false - Some device not initialized properly
      */
-    bool setup();
+    bool setup(bool sd_card_init = false);
 
     bool light_sleep(uint32_t minutes_to_sleep);
     void deep_sleep();

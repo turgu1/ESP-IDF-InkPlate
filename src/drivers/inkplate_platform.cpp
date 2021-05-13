@@ -14,7 +14,7 @@
 InkPlatePlatform InkPlatePlatform::singleton;
 
 bool
-InkPlatePlatform::setup()
+InkPlatePlatform::setup(bool sd_card_init)
 {
   wire.setup();
 
@@ -36,7 +36,7 @@ InkPlatePlatform::setup()
   #endif
 
   // Mount and check the SD Card
-  if (!SDCard::setup()) return false;
+  if (sd_card_init && !SDCard::setup()) return false;
 
   // Good to go
   return true;
