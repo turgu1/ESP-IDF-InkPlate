@@ -8,7 +8,9 @@ class TouchKeys : NonCopyable
   public:
     enum class Key : uint8_t { KEY_0, KEY_1, KEY_2 };
 
-    TouchKeys(MCP23017 & _mcp) : mcp(_mcp) {}
+    static const gpio_num_t PIN_TOUCHKEYS_INTERRUPT = GPIO_NUM_34;
+
+   TouchKeys(MCP23017 & _mcp) : mcp(_mcp) {}
     bool setup();
 
     /**

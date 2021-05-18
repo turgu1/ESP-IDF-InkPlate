@@ -106,7 +106,6 @@ class EInk6PLUS : public EInk, NonCopyable
     void clean(PixelState pixel_state, uint8_t repeat_count);
 
     static const uint8_t  WAVEFORM_3BIT[8][9]; 
-    static const uint8_t  LUT2[16];
     static const uint8_t  LUTW[16];
     static const uint8_t  LUTB[16];
 };

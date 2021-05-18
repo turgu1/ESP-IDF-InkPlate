@@ -34,7 +34,7 @@ Distributed as-is; no warranty is given.
   #include "touch_keys.hpp"
 #elif defined(INKPLATE_6PLUS)
   #include "touch_screen.hpp"
-  #include "back_light.hpp"
+  #include "front_light.hpp"
 #endif
 
 #if __INKPLATE_PLATFORM__
@@ -46,7 +46,7 @@ Distributed as-is; no warranty is given.
     TouchKeys touch_keys(mcp_int);
   #elif defined(INKPLATE_6PLUS)
     TouchScreen touch_screen(mcp_int);
-    BackLight   back_light(mcp_int);
+    FrontLight   front_light(mcp_int);
   #endif
 
   #if defined(INKPLATE_6)
@@ -69,7 +69,7 @@ Distributed as-is; no warranty is given.
     extern TouchKeys touch_keys;
   #elif defined(INKPLATE_6PLUS)
     extern TouchScreen touch_screen;
-    extern BackLight   back_light;
+    extern FrontLight   front_light;
   #endif
 
   #if defined(INKPLATE_6)
@@ -99,16 +99,25 @@ class InkPlatePlatform : NonCopyable
     /**
      * @brief Setup the InkPlate Devices
      * 
-     * This method initialize the SD-Card, the e-Ink display, battery status, and the touchkeys 
+     * This method initialize the SD-Card, the e-Ink display, battery status, and the touchkeys/touchscreen 
      * capabilities.
      * @param sd_card_init - true will initialize the sd_card, default is false
+     * @param touch_screen_handler - For INKPLATE_6PLUS only, pointer to the touch_screen handler. As this 
+     *                               handler is called from an interrupt function, it is very limited
+     *                               in actions that can be taken there. In the handler code, better use
+     *                               a flag or a FreeRTOS queue to get the processing done in an out of interrupt
+     *                               method or handler. 
      * @return true - All devices ready
      * @return false - Some device not initialized properly
      */
-    bool setup(bool sd_card_init = false);
+    #if defined(INKPLATE_6PLUS)
+      bool setup(bool sd_card_init = false, void (*touch_screen_handler)() = nullptr);
+    #else
+      bool setup(bool sd_card_init = false);
+    #endif
 
-    bool light_sleep(uint32_t minutes_to_sleep);
-    void deep_sleep();
+    bool light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num, int level);
+    void deep_sleep(gpio_num_t gpio_num, int level);
 };
 
 #if __INKPLATE_PLATFORM__

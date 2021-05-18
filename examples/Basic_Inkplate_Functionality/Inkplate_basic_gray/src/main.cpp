@@ -43,6 +43,7 @@ uint16_t h;
 // Small function that will write on the screen what function is currently in demonstration.
 void displayCurrentAction(std::string text)
 {
+  display.setTextColor(0, 7);
   display.setTextSize(2);
   display.setCursor(2, h - 20);
   display.print(text);
@@ -76,6 +77,8 @@ void mainTask(void * params)
   #if defined(INKPLATE_6)
     display.print("Welcome to Inkplate 6!");
   #elif defined(INKPLATE_6PLUS)
+    display.frontlight(true);
+    display.setFrontlight(10);
     display.print("Welcome to Inkplate 6PLUS!");
   #else
     display.print("Welcome to Inkplate 10!");
@@ -93,6 +96,7 @@ void mainTask(void * params)
     // Let'sstart by drawing pixel at x = 100 and y = 50 location
     display.clearDisplay();        // Clear everytning that is inside frame buffer in ESP32
     display.drawPixel(100, 50, 0); // Draw one black pixel at X = 100, Y = 50 position in 0 (BLACK) color
+    display.drawRect(95, 145, 10, 10, 0);
     displayCurrentAction(
         "Drawing a pixel"); // Function which writes small text at bottom left indicating what's currently done
                             // NOTE: you do not need displayCurrentAction function to use Inkplate!
@@ -311,8 +315,7 @@ void mainTask(void * params)
     for (int i = 0; i < 6; i++)
     {
         display.setTextColor(i);
-        display.setTextSize(i +
-                            1); // textSize parameter starts at 0 and goes up to 10 (larger won't fit Inkplate 6 screen)
+        display.setTextSize(i + 1);           // textSize parameter starts at 0 and goes up to 10 (larger won't fit Inkplate 6 screen)
         display.setCursor(200, (i * i * 8)); // setCursor works as same as on LCD displays - sets "the cursor" at the
                                              // place you want to write someting next
         #if defined(INKPLATE_6)
@@ -418,6 +421,7 @@ void mainTask(void * params)
         display.display();
         ESP::delay(5000);
     }
+
     display.setTextColor(0, 7);
 
     // Did you know that you can change between BW and greyscale mode anytime?
@@ -425,8 +429,6 @@ void mainTask(void * params)
     // Inkplate display(DisplayMode::INKPLATE_3BIT)
   }
 }
-
-
 
 #define STACK_SIZE 10000
 

@@ -153,11 +153,9 @@ EInk10::setup()
   for (int i = 0; i < 8; ++i) {
     for (uint32_t j = 0; j < 256; ++j) {
       uint8_t z = (WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i]);
-      GLUT[i * 256 + j] = ((z & 0b00000011) << 4) | (((z & 0b00001100) >> 2) << 18) |
-                          (((z & 0b00010000) >> 4) << 23) | (((z & 0b11100000) >> 5) << 25);
+      GLUT[i * 256 + j] = PIN_LUT[z];
       z = ((WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i])) << 4;
-      GLUT2[i * 256 + j] = ((z & 0b00000011) << 4) | (((z & 0b00001100) >> 2) << 18) |
-                           (((z & 0b00010000) >> 4) << 23) | (((z & 0b11100000) >> 5) << 25);
+      GLUT2[i * 256 + j] = PIN_LUT[z];
     }
   }
 
@@ -243,24 +241,24 @@ EInk10::update(FrameBuffer3Bit & frame_buffer)
 
   for (int k = 0, kk = 0; k < 8; k++, kk += 256) {
 
-    const uint8_t * dp = &data[BITMAP_SIZE_3BIT - 1];
+    const uint8_t * dp = &data[BITMAP_SIZE_3BIT - 2];
 
     vscan_start();
 
     for (int i = 0; i < HEIGHT; i++) {
 
-      hscan_start((GLUT2[kk + *dp] | GLUT[kk + *(dp - 1)]));
+      hscan_start((GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]));
       dp -= 2;
 
-      GPIO.out_w1ts = CL | (GLUT2[kk + *dp] | GLUT[kk + *(dp - 1)]);
+      GPIO.out_w1ts = CL | (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]);
       GPIO.out_w1tc = CL | DATA;
       dp -= 2;
 
       for (int j = 0; j < ((WIDTH / 8) - 1); j++) {
-          GPIO.out_w1ts = CL | (GLUT2[kk + *dp] | GLUT[kk + *(dp - 1)]);
+          GPIO.out_w1ts = CL | (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]);
           GPIO.out_w1tc = CL | DATA;
           dp -= 2;
-          GPIO.out_w1ts = CL | (GLUT2[kk + *dp] | GLUT[kk + *(dp - 1)]);
+          GPIO.out_w1ts = CL | (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]);
           GPIO.out_w1tc = CL | DATA;
           dp -= 2;
       }

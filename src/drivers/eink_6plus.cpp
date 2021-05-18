@@ -39,10 +39,6 @@ const uint8_t EInk6PLUS::WAVEFORM_3BIT[8][9] = {
   {0, 0, 0, 0, 2, 2, 2, 1, 0}, {0, 0, 2, 1, 2, 1, 1, 2, 0},
   {0, 0, 2, 2, 2, 1, 1, 2, 0}, {0, 0, 0, 0, 2, 2, 2, 2, 0}};
 
-const uint8_t EInk6PLUS::LUT2[16] = {
-  0xAA, 0xA9, 0xA6, 0xA5, 0x9A, 0x99, 0x96, 0x95,
-  0x6A, 0x69, 0x66, 0x65, 0x5A, 0x59, 0x56, 0x55 };
-
 const uint8_t EInk6PLUS::LUTW[16] = {
   0xFF, 0xFE, 0xFB, 0xFA, 0xEF, 0xEE, 0xEB, 0xEA,
   0xBF, 0xBE, 0xBB, 0xBA, 0xAF, 0xAE, 0xAB, 0xAA };
@@ -153,11 +149,9 @@ EInk6PLUS::setup()
   for (int j = 0; j < 9; ++j) {
     for (uint32_t i = 0; i < 256; ++i) {
       uint8_t z = (WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j]);
-      GLUT[j * 256 + i] = ((z & 0b00000011) << 4) | (((z & 0b00001100) >> 2) << 18) |
-                          (((z & 0b00010000) >> 4) << 23) | (((z & 0b11100000) >> 5) << 25);
+      GLUT[j * 256 + i] = PIN_LUT[z];
       z = ((WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j])) << 4;
-      GLUT2[j * 256 + i] = ((z & 0b00000011) << 4) | (((z & 0b00001100) >> 2) << 18) |
-                            (((z & 0b00010000) >> 4) << 23) | (((z & 0b11100000) >> 5) << 25);
+      GLUT2[j * 256 + i] = PIN_LUT[z];
     }
   }
 
@@ -165,92 +159,6 @@ EInk6PLUS::setup()
 
   return true;
 }
-
-#if 0
-void Inkplate::display1b()
-{
-    for (int i = 0; i < (E_INK_HEIGHT * E_INK_WIDTH) / 8; i++)
-    {
-        *(DMemoryNew + i) &= *(_partial + i);
-        *(DMemoryNew + i) |= (*(_partial + i));
-    }
-    uint32_t _pos;
-    uint8_t data;
-    uint8_t dram;
-    einkOn();
-
-    clean(0, 1);
-    clean(1, 15);
-    clean(2, 1);
-    clean(0, 5);
-    clean(2, 1);
-    clean(1, 15);
-    for (int k = 0; k < 4; k++)
-    {
-        _pos = (E_INK_HEIGHT * E_INK_WIDTH / 8) - 1;
-        vscan_start();
-        for (int i = 0; i < E_INK_HEIGHT; i++)
-        {
-            dram = *(DMemoryNew + _pos);
-            data = LUTW[((~dram) >> 4) & 0x0F];
-            hscan_start(pinLUT[data]);
-            data = LUTW[(~dram) & 0x0F];
-            GPIO.out_w1ts = pinLUT[data] | CL;
-            GPIO.out_w1tc = DATA | CL;
-            _pos--;
-            for (int j = 0; j < ((E_INK_WIDTH / 8) - 1); j++)
-            {
-                dram = *(DMemoryNew + _pos);
-                data = LUTW[((~dram) >> 4) & 0x0F];
-                GPIO.out_w1ts = pinLUT[data] | CL;
-                GPIO.out_w1tc = DATA | CL;
-                data = LUTW[(~dram) & 0x0F];
-                GPIO.out_w1ts = pinLUT[data] | CL;
-                GPIO.out_w1tc = DATA | CL;
-                _pos--;
-            }
-            GPIO.out_w1ts = CL;
-            GPIO.out_w1tc = DATA | CL;
-            vscan_end();
-        }
-        delayMicroseconds(230);
-    }
-
-    _pos = (E_INK_HEIGHT * E_INK_WIDTH / 8) - 1;
-    vscan_start();
-    for (int i = 0; i < E_INK_HEIGHT; i++)
-    {
-        dram = *(DMemoryNew + _pos);
-        data = LUTB[(dram >> 4) & 0x0F];
-        hscan_start(pinLUT[data]);
-        data = LUTB[dram & 0x0F];
-        GPIO.out_w1ts = (pinLUT[data]) | CL;
-        GPIO.out_w1tc = DATA | CL;
-        _pos--;
-        for (int j = 0; j < ((E_INK_WIDTH / 8) - 1); j++)
-        {
-            dram = *(DMemoryNew + _pos);
-            data = LUTB[(dram >> 4) & 0x0F];
-            GPIO.out_w1ts = (pinLUT[data]) | CL;
-            GPIO.out_w1tc = DATA | CL;
-            data = LUTB[dram & 0x0F];
-            GPIO.out_w1ts = (pinLUT[data]) | CL;
-            GPIO.out_w1tc = DATA | CL;
-            _pos--;
-        }
-        GPIO.out_w1ts = CL;
-        GPIO.out_w1tc = DATA | CL;
-        vscan_end();
-    }
-    delayMicroseconds(230);
-    clean(2, 2);
-    clean(3, 1);
-    vscan_start();
-    einkOff();
-    _blockPartial = 0;
-
-}
-#endif
 
 void
 EInk6PLUS::update(FrameBuffer1Bit & frame_buffer)
@@ -340,62 +248,6 @@ EInk6PLUS::update(FrameBuffer1Bit & frame_buffer)
   allow_partial();
 }
 
-#if 0
-void Inkplate::display3b()
-{
-    einkOn();
-    clean(0, 1);
-    clean(1, 15);
-    clean(2, 1);
-    clean(0, 5);
-    clean(2, 1);
-    clean(1, 15);
-
-    for (int k = 0; k < 9; k++)
-    {
-        uint8_t *dp = DMemory4Bit + (E_INK_HEIGHT * E_INK_WIDTH / 2);
-        uint32_t _send;
-        uint8_t pix1;
-        uint8_t pix2;
-        uint8_t pix3;
-        uint8_t pix4;
-        uint8_t pixel;
-        uint8_t pixel2;
-
-        vscan_start();
-        for (int i = 0; i < E_INK_HEIGHT; i++)
-        {
-            uint32_t t = GLUT2[k * 256 + (*(--dp))];
-            t |= GLUT[k * 256 + (*(--dp))];
-            hscan_start(t);
-            t = GLUT2[k * 256 + (*(--dp))];
-            t|=GLUT[k * 256 + (*(--dp))];
-            GPIO.out_w1ts = t | CL;
-            GPIO.out_w1tc = DATA | CL;
-
-            for (int j = 0; j < ((E_INK_WIDTH / 8) - 1); j++)
-            {
-                t = GLUT2[k * 256 + (*(--dp))];
-                t |= GLUT[k * 256 + (*(--dp))];
-                GPIO.out_w1ts = t | CL;
-                GPIO.out_w1tc = DATA | CL;
-                t = GLUT2[k * 256 + (*(--dp))];
-                t |= GLUT[k * 256 + (*(--dp))];
-                GPIO.out_w1ts = t | CL;
-                GPIO.out_w1tc = DATA | CL;
-            }
-            GPIO.out_w1ts = CL;
-            GPIO.out_w1tc = DATA | CL;
-            vscan_end();
-        }
-        delayMicroseconds(230);
-    }
-    clean(3, 1);
-    vscan_start();
-    einkOff();
-}
-#endif
-
 void IRAM_ATTR
 EInk6PLUS::update(FrameBuffer3Bit & frame_buffer)
 {
@@ -415,24 +267,24 @@ EInk6PLUS::update(FrameBuffer3Bit & frame_buffer)
 
   for (int k = 0, kk = 0; k < 9; k++, kk += 256) {
 
-    const uint8_t * dp = &data[BITMAP_SIZE_3BIT - 1];
+    const uint8_t * dp = &data[BITMAP_SIZE_3BIT - 2];
 
     vscan_start();
 
     for (int i = 0; i < HEIGHT; i++) {
 
-      hscan_start((GLUT2[kk + *dp] | GLUT[kk + *(dp - 1)]));
+      hscan_start((GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]));
       dp -= 2;
 
-      GPIO.out_w1ts = CL | (GLUT2[kk + *dp] | GLUT[kk + *(dp - 1)]);
+      GPIO.out_w1ts = CL | (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]);
       GPIO.out_w1tc = CL | DATA;
       dp -= 2;
 
       for (int j = 0; j < ((WIDTH / 8) - 1); j++) {
-          GPIO.out_w1ts = CL | (GLUT2[kk + *dp] | GLUT[kk + *(dp - 1)]);
+          GPIO.out_w1ts = CL | (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]);
           GPIO.out_w1tc = CL | DATA;
           dp -= 2;
-          GPIO.out_w1ts = CL | (GLUT2[kk + *dp] | GLUT[kk + *(dp - 1)]);
+          GPIO.out_w1ts = CL | (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]);
           GPIO.out_w1tc = CL | DATA;
           dp -= 2;
       }
@@ -453,102 +305,6 @@ EInk6PLUS::update(FrameBuffer3Bit & frame_buffer)
   Wire::leave();
   block_partial();
 }
-
-#if 0
-/**
- * @brief       partialUpdate function updates changed parts of the screen without need to refresh whole display
- * 
- * @param       bool _forced 
- *              For advanced use with deep sleep. Can force partial update in deep sleep
- * 
- * @note        Partial update only works in black and white mode
- */
-void Inkplate::partialUpdate(bool _forced)
-{
-    if (getDisplayMode() == 1)
-        return;
-    if (_blockPartial == 1 && !_forced)
-    {
-        display1b();
-        return;
-    }
-
-    uint32_t _pos = (E_INK_WIDTH * E_INK_HEIGHT / 8) - 1;
-    //uint32_t _send;
-    uint8_t data;
-    uint8_t diffw, diffb;
-    uint32_t n = (E_INK_WIDTH * E_INK_HEIGHT / 4) - 1;
-    uint8_t dram;
-
-    for (int i = 0; i < E_INK_HEIGHT; i++)
-    {
-        for (int j = 0; j < E_INK_WIDTH / 8; j++)
-        {
-            diffw = ((*(DMemoryNew + _pos)) ^ (*(_partial + _pos))) & (~(*(_partial + _pos)));
-            diffb = ((*(DMemoryNew + _pos)) ^ (*(_partial + _pos))) & ((*(_partial + _pos)));
-            _pos--;
-            *(_pBuffer + n) = LUTW[diffw >> 4] & (LUTB[diffb >> 4]);
-            n--;
-            *(_pBuffer + n) = LUTW[diffw & 0x0F] & (LUTB[diffb & 0x0F]);
-            n--;
-        }
-    }
-
-    einkOn();
-    for (int k = 0; k < 5; k++)
-    {
-        vscan_start();
-        n = (E_INK_WIDTH * E_INK_HEIGHT / 4) - 1;
-        for (int i = 0; i < E_INK_HEIGHT; i++)
-        {
-            data = *(_pBuffer + n);
-            hscan_start(pinLUT[data]);
-            n--;
-            for (int j = 0; j < ((E_INK_WIDTH / 4) - 1); j++)
-            {
-                data = *(_pBuffer + n);
-                GPIO.out_w1ts = (pinLUT[data]) | CL;
-                GPIO.out_w1tc = DATA | CL;
-                n--;
-            }
-            GPIO.out_w1ts =  CL;
-            GPIO.out_w1tc = DATA | CL;
-            vscan_end();
-        }
-        delayMicroseconds(230);
-    }
-
-    // for (int k = 0; k < 60; ++k)
-    // {
-    //     uint8_t _send = B11111111;
-    //     vscan_start();
-
-    //     writeRow(_send);
-    //     for (int i = 0; i < E_INK_HEIGHT / 2; i++)
-    //     {
-    //         hscan_start(pinLUT[_send]);
-    //         delayMicroseconds(1);
-    //         vscan_end();
-    //     }
-
-    //     _send = B01010101;
-
-    //     writeRow(_send);
-    //     for (int i = 0; i < E_INK_HEIGHT / 2; i++)
-    //     {
-    //         hscan_start(pinLUT[_send]);
-    //         delayMicroseconds(1);
-    //         vscan_end();
-    //     }
-    // }
-
-    clean(2, 2);
-    clean(3, 1);
-    vscan_start();
-    einkOff();
-    memcpy(DMemoryNew, _partial, E_INK_WIDTH * E_INK_HEIGHT / 8);
-}
-#endif
 
 void
 EInk6PLUS::partial_update(FrameBuffer1Bit & frame_buffer, bool force)

@@ -8,6 +8,8 @@ class PressKeys : NonCopyable
   public:
     enum class Key : uint8_t { U2, U4, U1, U5, U3, U6 };
 
+    static const gpio_num_t PIN_PRESSKEYS_INTERRUPT = GPIO_NUM_34;
+
     PressKeys(MCP23017 & _mcp) : mcp(_mcp) {}
     bool setup();
 

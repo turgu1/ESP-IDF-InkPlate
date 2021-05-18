@@ -18,7 +18,7 @@ touchscreen_isr(void * value)
 }
 
 bool 
-TouchScreen::setup(bool power_on, void (*isr_handler)(), uint16_t scr_width, uint16_t scr_height)
+TouchScreen::setup(bool power_on, uint16_t scr_width, uint16_t scr_height, void (*isr_handler)())
 {
   ready                          = false;
   touchscreen_interrupt_happened = false;

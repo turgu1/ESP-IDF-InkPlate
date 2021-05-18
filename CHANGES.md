@@ -73,7 +73,7 @@ This class is implementing a generic MCP23017 driver. It is instanciated in the 
 - as mcp_int (for all Inkplate devices) 
 - as mcp_ext (for the Inkplate-10, and Inkplate-6Plus).
 
-Each class that uses the MCPs are independant from each other in terms of initialzing and accessing the MCP. This is the case for EInk, Battery, TouchKeys, Backlight. They all uses `Wire::enter()` and `Wire::leave()` to reserve access to the I2C bus.
+Each class that uses the MCPs are independant from each other in terms of initialzing and accessing the MCP. This is the case for EInk, Battery, TouchKeys, TouchScreen, Frontlight. They all uses `Wire::enter()` and `Wire::leave()` to reserve access to the I2C bus.
 
 ## battery, touch_keys (.hpp, .cpp)
 

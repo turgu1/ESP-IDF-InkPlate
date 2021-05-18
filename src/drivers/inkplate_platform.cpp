@@ -14,7 +14,11 @@
 InkPlatePlatform InkPlatePlatform::singleton;
 
 bool
-InkPlatePlatform::setup(bool sd_card_init)
+#if defined(INKPLATE_6PLUS)
+  InkPlatePlatform::setup(bool sd_card_init, void (*touch_screen_handler)())
+#else
+  InkPlatePlatform::setup(bool sd_card_init)
+#endif
 {
   wire.setup();
 
@@ -31,8 +35,8 @@ InkPlatePlatform::setup(bool sd_card_init)
     // Setup Touch keys
     if (!touch_keys.setup()) return false;
   #elif defined(INKPLATE_6PLUS)
-    if (!touch_screen.setup(true, nullptr, e_ink.get_width(), e_ink.get_height())) return false;
-    if (!back_light.setup()) return false;
+    if (!touch_screen.setup(true, e_ink.get_width(), e_ink.get_height(), touch_screen_handler)) return false;
+    if (!front_light.setup()) return false;
   #endif
 
   // Mount and check the SD Card
@@ -52,14 +56,14 @@ InkPlatePlatform::setup(bool sd_card_init)
  * @return false A key was pressed
  */
 bool
-InkPlatePlatform::light_sleep(uint32_t minutes_to_sleep)
+InkPlatePlatform::light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num, int level)
 {
   esp_err_t err;
 
   if ((err = esp_sleep_enable_timer_wakeup(minutes_to_sleep * 60e6)) != ESP_OK) {
     LOG_E("Unable to program Light Sleep wait time: %d", err);
   }
-  else if ((err = esp_sleep_enable_ext0_wakeup(GPIO_NUM_34, 1)) != ESP_OK) {
+  else if ((err = esp_sleep_enable_ext0_wakeup(gpio_num, level)) != ESP_OK) {
     LOG_E("Unable to set ext0 WakeUp for Light Sleep: %d", err);
   } 
   else if ((err = esp_light_sleep_start()) != ESP_OK) {
@@ -70,14 +74,14 @@ InkPlatePlatform::light_sleep(uint32_t minutes_to_sleep)
 }
 
 void 
-InkPlatePlatform::deep_sleep()
+InkPlatePlatform::deep_sleep(gpio_num_t gpio_num, int level)
 {
   esp_err_t err;
   
   if ((err = esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER)) != ESP_OK) {
     LOG_E("Unable to disable Sleep wait time: %d", err);
   }
-  if ((err = esp_sleep_enable_ext0_wakeup(GPIO_NUM_34, 1)) != ESP_OK) {
+  if ((err = esp_sleep_enable_ext0_wakeup(gpio_num, level)) != ESP_OK) {
     LOG_E("Unable to set ext0 WakeUp for Deep Sleep: %d", err);
   }
   
