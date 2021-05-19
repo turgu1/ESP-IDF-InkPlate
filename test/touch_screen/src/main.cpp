@@ -6,7 +6,7 @@ static const char * TAG = "Main";
 
 volatile bool handler_called = false;
 
-void touch_screen_handler()
+void touch_screen_handler(void * arg)
 {
   handler_called = true;
 }
@@ -35,6 +35,7 @@ void mainTask(void * params)
     else {
       ESP_LOGI(TAG, "Interupt Occured...");
     };
+    ESP::delay(1000);
 
     if (handler_called) {
       ESP_LOGI(TAG, "Handler called...");

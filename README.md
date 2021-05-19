@@ -5,13 +5,13 @@
 (Not ready yet...)
 Version 0.9.5: 
 
-- Added InkPlate-6PLUS support: Screen, Touch Screen, Front Light. INKPLATE_6PLUS must be defined to compile for this device. 
+- Added InkPlate-6PLUS support: Screen, Touch Screen, Front Light. `INKPLATE_6PLUS` must be defined to 1 to compile for this device. 
 - Some code refactoring in drivers. 
-- I2C speed lowered to 100Khz instead of 1Mhz. This to respect I2C hardware limitation related to the PullUp resistors in used with Inkplate devices.
-- Added lightSleep and deepSleep methods to the Inkplate class, calling the InkplatePlatform methods
-- InkplatePlatform's light_sleep and deep_sleep methods modified to get gpio number and level as parameters
-- Inkplate::begin method now allow for one parameter to enable/disable the SDCard initialization. Disabled by default.
-- For the InkPlate-6PLUS, the Inkplate::begin method takes a second paremeter: a handler function pointer to process touch_screen interrupts.
+- I2C speed lowered to 100Khz instead of 1Mhz (Wire class). This to respect I2C hardware limitation related to the PullUp resistors in used with Inkplate devices.
+- Added Inkplate::lightSleep() and Inkplate::deepSleep() methods, calling the InkplatePlatform class methods
+- InkplatePlatform::light_sleep() and InkplatePlatform::deep_sleep() methods modified to get gpio number and level as parameters
+- Inkplate::begin() method now allows for one parameter to enable/disable the SDCard initialization. Disabled by default.
+- For the InkPlate-6PLUS, the Inkplate::begin() method takes a second paremeter: a handler function pointer to process touch_screen interrupts.
 
 (March 4, 2021)
 
