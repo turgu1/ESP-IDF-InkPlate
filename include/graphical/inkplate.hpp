@@ -33,7 +33,7 @@ class Inkplate : public Graphics
         inkplate_platform.setup(sd_card_init, touch_screen_handler);
       }
     #else
-      void begin(bool sd_card_init = false, ) { inkplate_platform.setup(sd_card_init); }
+      void begin(bool sd_card_init = false) { inkplate_platform.setup(sd_card_init); }
     #endif
 
     inline void             einkOn() { e_ink.turn_on();                          }
