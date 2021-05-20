@@ -61,17 +61,24 @@ class Inkplate : public Graphics
     inline bool joinAP(const char * ssid, const char * pass) { 
       return network_client.joinAP(ssid, pass); 
     }
-
+    
     #if defined(EXTENDED_CASE) && (defined(INKPLATE_6) || defined(INKPLATE_10))
       inline uint8_t readPresskey(int c) { return press_keys.read_key((PressKeys::Key) c); }
     #elif defined(INKPLATE_6) || defined(INKPLATE_10)
       inline uint8_t readTouchpad(int c) { return touch_keys.read_key((TouchKeys::Key) c); }
     #elif defined(INKPLATE_6PLUS)
-      inline bool touchInArea(int16_t x1, int16_t y1, int16_t w, int16_t h);
+
+      void rotateFromPhy(TouchScreen::TouchPositions & xPos, TouchScreen::TouchPositions & yPos, uint8_t count);
+
+      bool touchInArea(uint16_t x1, uint16_t y1, uint16_t w, uint16_t h);
 
       inline bool    tsInit(void (*tsHandler)() = nullptr) { return touch_screen.setup(true, einkWidth(), einkHeight(), tsHandler); }
       inline bool    tsAvailable() { return touch_screen.is_screen_touched(); }      
-      inline uint8_t tsGetData(TouchScreen::TouchPositions & xPos, TouchScreen::TouchPositions & yPos) { return touch_screen.get_positions(xPos, yPos); }
+      inline uint8_t tsGetData(TouchScreen::TouchPositions & xPos, TouchScreen::TouchPositions & yPos) { 
+        uint8_t count = touch_screen.get_positions(xPos, yPos);
+        rotateFromPhy(xPos, yPos, count);
+        return count; 
+      }
       inline uint8_t tsGetPowerState() { return touch_screen.get_power_state(); }
       inline void    tsSetPowerState(uint8_t s) { touch_screen.set_power_state(s != 0); }
       inline void    tsShutdown();

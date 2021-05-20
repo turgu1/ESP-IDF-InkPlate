@@ -12,7 +12,7 @@ class TouchScreen : NonCopyable
   public:
     TouchScreen(MCP23017 & _mcp) : mcp(_mcp), ready(false) {}
 
-    static const gpio_num_t PIN_TOUCHSCREEN_INTERRUPT = GPIO_NUM_36;
+    static const gpio_num_t INTERRUPT_PIN = GPIO_NUM_36;
 
     typedef std::array<uint16_t, 2> TouchPositions;
     
@@ -25,7 +25,7 @@ class TouchScreen : NonCopyable
     void   set_power_state(bool on_state);
     bool   get_power_state();
 
-    bool          is_ready() { return ready; }
+    bool   is_ready() { return ready; }
 
     void set_app_isr_handler(void (*isr_handler)(void * arg));
 

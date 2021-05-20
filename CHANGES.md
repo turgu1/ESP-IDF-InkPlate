@@ -81,7 +81,7 @@ Those classes implement basic access to the battery and touch keys state.
 
 ## system class renamed InkplatePlatform
 
-This name reflect more what it is. This class will is currently under eavy changes.
+This name reflect more what it is: the integration of all physical drivers for an Inkplate device. 
 
 ## FrameBuffer classes
 
@@ -90,3 +90,7 @@ A hierarchy of frame buffer classes has been added. These allow for flexible ada
 ## press_keys (.hpp, .cpp)
 
 This class implements the Buttons Extension: 6 mechanical press buttons that replace the touch keys. To be used, at compile time, EXTENDED_CASE must be #defined. The `TouchKeys` class will then **not** be included.  
+
+## Screen Rotation
+
+All drivers implement physical screen coordinates. The rotation is the property of the graphical environment that sit on top of the drivers. As such, all rotation related methods have been moved outside of the driver classes.

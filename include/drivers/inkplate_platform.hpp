@@ -116,8 +116,8 @@ class InkPlatePlatform : NonCopyable
       bool setup(bool sd_card_init = false);
     #endif
 
-    bool light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num, int level);
-    void deep_sleep(gpio_num_t gpio_num, int level);
+    bool light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num = 0, int level = 1);
+    void deep_sleep(gpio_num_t gpio_num = 0, int level = 1);
 };
 
 #if __INKPLATE_PLATFORM__

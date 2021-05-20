@@ -29,7 +29,7 @@ void mainTask(void * params)
 
     // Check if there is any touch detected
     
-    if (display.lightSleep(1, TouchScreen::PIN_TOUCHSCREEN_INTERRUPT, 0)) {
+    if (display.lightSleep(1, TouchScreen::INTERRUPT_PIN, 0)) {
       ESP_LOGI(TAG, "Light Sleep Timeout...");
     }
     else {

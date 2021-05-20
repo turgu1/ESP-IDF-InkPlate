@@ -37,7 +37,7 @@ TouchScreen::setup(bool power_on, uint16_t scr_width, uint16_t scr_height, void 
   gpio_config_t io_conf;
 
   io_conf.intr_type    = GPIO_INTR_NEGEDGE; 
-  io_conf.pin_bit_mask = 1ULL << PIN_TOUCHSCREEN_INTERRUPT;
+  io_conf.pin_bit_mask = 1ULL << INTERRUPT_PIN;
   io_conf.mode         = GPIO_MODE_INPUT;
   io_conf.pull_up_en   = GPIO_PULLUP_ENABLE;
 
@@ -46,9 +46,9 @@ TouchScreen::setup(bool power_on, uint16_t scr_width, uint16_t scr_height, void 
   gpio_install_isr_service(0);
   
   gpio_isr_handler_add(
-    PIN_TOUCHSCREEN_INTERRUPT, 
+    INTERRUPT_PIN, 
     touchscreen_isr, 
-    (void *) PIN_TOUCHSCREEN_INTERRUPT);
+    (void *) INTERRUPT_PIN);
 
   Wire::leave();
 
@@ -69,9 +69,9 @@ TouchScreen::setup(bool power_on, uint16_t scr_width, uint16_t scr_height, void 
 void 
 TouchScreen::set_app_isr_handler(void (*isr_handler)(void * arg))
 {
-  gpio_intr_disable(PIN_TOUCHSCREEN_INTERRUPT);
+  gpio_intr_disable(INTERRUPT_PIN);
   app_isr_handler = isr_handler;
-  gpio_intr_enable(PIN_TOUCHSCREEN_INTERRUPT);
+  gpio_intr_enable(INTERRUPT_PIN);
 }
 
 void
