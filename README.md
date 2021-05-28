@@ -5,7 +5,7 @@
 (Not ready yet...)
 Version 0.9.5: 
 
-- Added InkPlate-6PLUS support: Screen, Touch Screen, Front Light. `INKPLATE_6PLUS` must be defined to 1 to compile for this device. For the TouchScreen class, TouchPositions has been defined as an array of 2 entries to minimize the potential of bad methods parameters.
+- Added InkPlate-6PLUS support: Screen, Touch Screen, Front Light. `INKPLATE_6PLUS` must be defined to compile for this device. For the TouchScreen class, TouchPositions has been defined as an array of 2 entries to minimize the potential of bad methods parameters.
 - Some code refactoring in drivers. 
 - I2C speed lowered to 100Khz instead of 1Mhz (Wire class). This to respect I2C hardware limitation related to the PullUp resistors in used with Inkplate devices.
 - Added Inkplate::lightSleep() and Inkplate::deepSleep() methods, calling the InkplatePlatform class methods
