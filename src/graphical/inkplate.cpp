@@ -85,8 +85,8 @@ Inkplate::Inkplate(DisplayMode mode) :
       {
         touchT = ESP::millis();
         touchN = n;
-        memcpy(touchX, x, 2);
-        memcpy(touchY, y, 2);
+        touchX = x;
+        touchY = y;
       }
     }
 
