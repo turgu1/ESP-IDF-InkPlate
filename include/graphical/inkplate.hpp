@@ -29,7 +29,7 @@ class Inkplate : public Graphics
     Inkplate(DisplayMode mode);
 
     #if defined(INKPLATE_6PLUS)
-      void begin(bool sd_card_init = false, void (*touch_screen_handler)() = nullptr) { 
+      void begin(bool sd_card_init = false, void (*touch_screen_handler)(void *) = nullptr) { 
         inkplate_platform.setup(sd_card_init, touch_screen_handler);
       }
     #else
