@@ -15,7 +15,7 @@ InkPlatePlatform InkPlatePlatform::singleton;
 
 bool
 #if defined(INKPLATE_6PLUS)
-  InkPlatePlatform::setup(bool sd_card_init, void (*touch_screen_handler)())
+  InkPlatePlatform::setup(bool sd_card_init, void (*touch_screen_handler)(void *))
 #else
   InkPlatePlatform::setup(bool sd_card_init)
 #endif
