@@ -111,7 +111,7 @@ class InkPlatePlatform : NonCopyable
      * @return false - Some device not initialized properly
      */
     #if defined(INKPLATE_6PLUS)
-      bool setup(bool sd_card_init = false, void (*touch_screen_handler)() = nullptr);
+      bool setup(bool sd_card_init = false, void (*touch_screen_handler)(void *) = nullptr);
     #else
       bool setup(bool sd_card_init = false);
     #endif
