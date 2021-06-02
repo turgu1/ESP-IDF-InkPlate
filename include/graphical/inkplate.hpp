@@ -72,7 +72,7 @@ class Inkplate : public Graphics
 
       bool touchInArea(uint16_t x1, uint16_t y1, uint16_t w, uint16_t h);
 
-      inline bool    tsInit(void (*tsHandler)() = nullptr) { return touch_screen.setup(true, einkWidth(), einkHeight(), tsHandler); }
+      inline bool    tsInit(void (*tsHandler)(void *) = nullptr) { return touch_screen.setup(true, einkWidth(), einkHeight(), tsHandler); }
       inline bool    tsAvailable() { return touch_screen.is_screen_touched(); }      
       inline uint8_t tsGetData(TouchScreen::TouchPositions & xPos, TouchScreen::TouchPositions & yPos) { 
         uint8_t count = touch_screen.get_positions(xPos, yPos);
