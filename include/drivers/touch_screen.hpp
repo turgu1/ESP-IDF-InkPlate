@@ -2,6 +2,7 @@
 
 #if defined(INKPLATE_6PLUS)
 
+#include "inkplate_platform.hpp"
 #include "non_copyable.hpp"
 #include "mcp23017.hpp"
 
@@ -12,11 +13,13 @@ class TouchScreen : NonCopyable
   public:
     TouchScreen(MCP23017 & _mcp) : mcp(_mcp), ready(false) {}
 
+    typedef void (* ISRHandlerPtr)();
+
     static const gpio_num_t INTERRUPT_PIN = GPIO_NUM_36;
 
     typedef std::array<uint16_t, 2> TouchPositions;
     
-    bool             setup(bool power_on, uint16_t scr_width, uint16_t scr_height, void (*isr_handler)(void * arg) = nullptr);
+    bool             setup(bool power_on, uint16_t scr_width, uint16_t scr_height, ISRHandlerPtr isr_handler = nullptr);
 
     void          shutdown();
     bool is_screen_touched();
@@ -27,7 +30,7 @@ class TouchScreen : NonCopyable
 
     bool   is_ready() { return ready; }
 
-    void set_app_isr_handler(void (*isr_handler)(void * arg));
+    void set_app_isr_handler(ISRHandlerPtr isr_handler);
 
   private:
     static constexpr char const * TAG = "TouchScreen";

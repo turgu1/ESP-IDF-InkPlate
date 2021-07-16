@@ -6,7 +6,7 @@
 
 #include "driver/gpio.h"
 
-static void          (* app_isr_handler)(void * arg);
+static ISRHandlerPtr app_isr_handler;
 static volatile bool touchscreen_interrupt_happened = false;
 
 static void IRAM_ATTR 
@@ -18,7 +18,7 @@ touchscreen_isr(void * value)
 }
 
 bool 
-TouchScreen::setup(bool power_on, uint16_t scr_width, uint16_t scr_height, void (*isr_handler)(void * arg))
+TouchScreen::setup(bool power_on, uint16_t scr_width, uint16_t scr_height, ISRHandlerPtr isr_handler)
 {
   ready                          = false;
   touchscreen_interrupt_happened = false;
@@ -67,7 +67,7 @@ TouchScreen::setup(bool power_on, uint16_t scr_width, uint16_t scr_height, void 
 }
 
 void 
-TouchScreen::set_app_isr_handler(void (*isr_handler)(void * arg))
+TouchScreen::set_app_isr_handler(ISRHandlerPtr isr_handler)
 {
   gpio_intr_disable(INTERRUPT_PIN);
   app_isr_handler = isr_handler;

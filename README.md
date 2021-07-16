@@ -1,10 +1,11 @@
 # ESP-IDF-InkPlate Library Version 0.9.5
 
-(May, 20, 2021)
+(July, 15, 2021)
 
 (Not ready yet...)
 Version 0.9.5: 
 
+- Corrected issue with PlatformIO Espressif32 version 3.3.0 (wifi_interface_t vs esp_interface_t)
 - Added InkPlate-6PLUS support: Screen, Touch Screen, Front Light. `INKPLATE_6PLUS` must be defined to compile for this device. For the TouchScreen class, TouchPositions has been defined as an array of 2 entries to minimize the potential of bad methods parameters.
 - Some code refactoring in drivers. 
 - I2C speed lowered to 100Khz instead of 1Mhz (Wire class). This to respect I2C hardware limitation related to the PullUp resistors in used with Inkplate devices.

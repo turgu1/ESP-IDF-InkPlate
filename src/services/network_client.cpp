@@ -134,7 +134,7 @@ NetworkClient::joinAP(const char * ssid, const char * pass)
   wifi_config.sta.password[sizeof(wifi_config.sta.password) - 1] = 0;
 
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-  ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+  ESP_ERROR_CHECK(esp_wifi_set_config((wifi_interface_t)ESP_IF_WIFI_STA, &wifi_config));
   ESP_ERROR_CHECK(esp_wifi_start());
 
   ESP_LOGI(TAG, "wifi_init_sta finished.");
