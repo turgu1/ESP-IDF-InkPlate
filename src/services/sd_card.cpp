@@ -1,5 +1,6 @@
 #define __SD_CARD__ 1
 #include "sd_card.hpp"
+#include "esp_log.h"
 
 #include "esp_vfs_fat.h"
 #include "driver/sdmmc_host.h"

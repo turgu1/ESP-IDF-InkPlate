@@ -24,6 +24,7 @@ Distributed as-is; no warranty is given.
 
 #define __EINK6__ 1
 #include "eink_6.hpp"
+#include "esp_log.h"
 
 #include "wire.hpp"
 #include "mcp23017.hpp"

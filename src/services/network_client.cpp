@@ -16,6 +16,7 @@ Distributed as-is; no warranty is given.
 
 #define __NETWORK_CLIENT__ 1
 #include "network_client.hpp"
+#include "esp_log.h"
 
 #include <string.h>
 #include "freertos/FreeRTOS.h"
@@ -24,7 +25,6 @@ Distributed as-is; no warranty is given.
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
-#include "esp_log.h"
 #include "nvs_flash.h"
 
 #include "lwip/err.h"

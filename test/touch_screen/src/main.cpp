@@ -1,4 +1,5 @@
 #include "inkplate.hpp"
+#include "esp_log.h"
 
 Inkplate display(DisplayMode::INKPLATE_1BIT);
 

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "esp_log.h"
+
 #include <cinttypes>
 
 #include "freertos/FreeRTOS.h"

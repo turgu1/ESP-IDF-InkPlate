@@ -1,6 +1,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"s
 #include "nvs_flash.h"
+#include "esp_log.h"
 
 #include <iostream>
 #include <string>

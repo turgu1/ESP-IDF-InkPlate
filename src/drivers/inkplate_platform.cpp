@@ -1,5 +1,6 @@
 #define __INKPLATE_PLATFORM__ 1
 #include "inkplate_platform.hpp"
+#include "esp_log.h"
 
 #include "wire.hpp"
 #include "esp.hpp"

@@ -16,6 +16,7 @@ Distributed as-is; no warranty is given.
 
 #include "graphics.hpp"
 #include "inkplate_platform.hpp"
+#include "esp_log.h"
 
 #include <algorithm>
 

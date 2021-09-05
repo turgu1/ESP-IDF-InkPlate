@@ -5,6 +5,7 @@
 
 #define __WIRE__ 1
 #include "wire.hpp"
+#include "esp_log.h"
 
 #include "driver/i2c.h"
 

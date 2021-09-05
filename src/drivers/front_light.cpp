@@ -1,5 +1,7 @@
 #if defined(INKPLATE_6PLUS)
 
+#include "esp_log.h"
+
 #include "front_light.hpp"
 #include "wire.hpp"
 
