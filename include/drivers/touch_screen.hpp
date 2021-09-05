@@ -13,7 +13,7 @@ class TouchScreen : NonCopyable
   public:
     TouchScreen(MCP23017 & _mcp) : mcp(_mcp), ready(false) {}
 
-    typedef void (* ISRHandlerPtr)();
+    typedef void (* ISRHandlerPtr)(void *);
 
     static const gpio_num_t INTERRUPT_PIN = GPIO_NUM_36;
 
