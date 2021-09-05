@@ -6,7 +6,7 @@
 
 #include "driver/gpio.h"
 
-static ISRHandlerPtr app_isr_handler;
+static TouchScreen::ISRHandlerPtr app_isr_handler;
 static volatile bool touchscreen_interrupt_happened = false;
 
 static void IRAM_ATTR 
