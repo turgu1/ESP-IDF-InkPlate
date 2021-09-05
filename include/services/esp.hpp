@@ -12,8 +12,6 @@
 #include "driver/gpio.h"
 #include "driver/adc.h"
 
-#include "logging.hpp"
-
 static const uint8_t HIGH = 1;
 static const uint8_t LOW  = 0;
 

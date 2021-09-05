@@ -17,7 +17,6 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "logging.hpp"
 
 #include "inkplate.hpp"            //Include Inkplate library to the sketch
 Inkplate display(DisplayMode::INKPLATE_1BIT); // Create an object on Inkplate library and also set library into 1-bit mode (BW)

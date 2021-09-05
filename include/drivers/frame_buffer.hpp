@@ -1,7 +1,5 @@
 #pragma once
 
-#include "logging.hpp"
-
 #include <cstdint>
 #include <cstring>
 

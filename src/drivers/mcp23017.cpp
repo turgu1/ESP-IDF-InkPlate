@@ -23,8 +23,6 @@ Distributed as-is; no warranty is given.
 #define __MCP__ 1
 #include "mcp23017.hpp"
 
-#include "logging.hpp"
-
 #include "wire.hpp"
 #include "driver/gpio.h"
 

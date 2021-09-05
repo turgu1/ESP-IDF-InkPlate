@@ -17,8 +17,6 @@ Distributed as-is; no warranty is given.
 #define __NETWORK_CLIENT__ 1
 #include "network_client.hpp"
 
-#include "logging.hpp"
-
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"

@@ -6,7 +6,6 @@
 #define __WIRE__ 1
 #include "wire.hpp"
 
-#include "logging.hpp"
 #include "driver/i2c.h"
 
 #include <cstring>

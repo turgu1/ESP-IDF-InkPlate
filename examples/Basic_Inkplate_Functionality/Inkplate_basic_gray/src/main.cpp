@@ -19,7 +19,6 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "logging.hpp"
 
 #include <iostream>
 #include <string>

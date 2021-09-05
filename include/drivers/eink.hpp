@@ -1,6 +1,5 @@
 #pragma once
 
-#include "logging.hpp"
 #include "frame_buffer.hpp"
 #include "mcp23017.hpp"
 #include "wire.hpp"
