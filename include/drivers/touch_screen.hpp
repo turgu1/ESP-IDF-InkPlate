@@ -2,7 +2,6 @@
 
 #if defined(INKPLATE_6PLUS)
 
-#include "inkplate_platform.hpp"
 #include "non_copyable.hpp"
 #include "mcp23017.hpp"
 
