@@ -68,7 +68,8 @@ class ESP
       return mem;
     }
 
-    static void show_heaps_info(char * task_name) {
+    static void show_heaps_info() {
+      char * task_name = pcTaskGetName(nullptr);
       ESP_LOGD(TAG, "%s +----- HEAPS/STACK DATA -----+", task_name);
       ESP_LOGD(TAG, "%s | Total heap:        %7d |",      task_name,    heap_caps_get_total_size(MALLOC_CAP_8BIT));
       ESP_LOGD(TAG, "%s | Free heap:         %7d |",      task_name,     heap_caps_get_free_size(MALLOC_CAP_8BIT));
