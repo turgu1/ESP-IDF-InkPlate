@@ -68,10 +68,11 @@ class ESP
       return mem;
     }
 
-    static void show_heaps_info() {
-      ESP_LOGD(TAG, "+----- HEAPS DATA -----+");
-      ESP_LOGD(TAG, "| Total heap:  %7d |",  heap_caps_get_total_size(MALLOC_CAP_8BIT  ));
-      ESP_LOGD(TAG, "| Free heap:   %7d |",   heap_caps_get_free_size(MALLOC_CAP_8BIT  ));
-      ESP_LOGD(TAG, "+----------------------+");
+    static void show_heaps_info(char * task_name) {
+      ESP_LOGD(TAG, "%s +----- HEAPS/STACK DATA -----+", task_name);
+      ESP_LOGD(TAG, "%s | Total heap:        %7d |",      task_name,    heap_caps_get_total_size(MALLOC_CAP_8BIT));
+      ESP_LOGD(TAG, "%s | Free heap:         %7d |",      task_name,     heap_caps_get_free_size(MALLOC_CAP_8BIT));
+      ESP_LOGD(TAG, "%s | Free stack:        %7d |",      task_name, uxTaskGetStackHighWaterMark(nullptr        ));
+      ESP_LOGD(TAG, "%s +----------------------------+",  task_name);
     }
 };
