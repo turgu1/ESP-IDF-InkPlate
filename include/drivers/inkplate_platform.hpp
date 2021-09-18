@@ -89,9 +89,9 @@ class InkPlatePlatform : NonCopyable
 {
   private:
     static constexpr char const * TAG = "InkPlatePlatform";
-
+    static bool light_sleep_engaged;
     static InkPlatePlatform singleton;
-    InkPlatePlatform() {};
+    InkPlatePlatform() : light_sleep_engaged(false) {};
 
   public:
     static inline InkPlatePlatform & get_singleton() noexcept { return singleton; }

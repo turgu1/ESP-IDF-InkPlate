@@ -65,10 +65,14 @@ InkPlatePlatform::light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num, in
   else if ((gpio_num != ((gpio_num_t) 0)) && ((err = esp_sleep_enable_ext0_wakeup(gpio_num, level)) != ESP_OK)) {
     ESP_LOGE(TAG, "Unable to set ext0 WakeUp for Light Sleep: %d", err);
   } 
-  else if ((err = esp_light_sleep_start()) != ESP_OK) {
-    ESP_LOGE(TAG, "Unable to start Light Sleep mode: %d", err);
+  else {
+    light_sleep_engaged = true;
+    if ((err = esp_light_sleep_start()) != ESP_OK) {
+      ESP_LOGE(TAG, "Unable to start Light Sleep mode: %d", err);
+    }
   }
 
+  light_sleep_engaged = false;
   return esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER;
 }
 
@@ -77,11 +81,16 @@ InkPlatePlatform::deep_sleep(gpio_num_t gpio_num, int level)
 {
   esp_err_t err;
   
-  if ((err = esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER)) != ESP_OK) {
-    ESP_LOGE(TAG, "Unable to disable Sleep wait time: %d", err);
+  if (light_sleep_engaged && (((err = esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER)) != ESP_OK)) {
+    if (err != ESP_ERR_INVALID_STATE) {
+      ESP_LOGE(TAG, "Unable to disable Sleep wait time. Error: %d", err);
+    }
   }
+
+  light_sleep_engaged = false;
+  
   if ((gpio_num != ((gpio_num_t) 0)) && ((err = esp_sleep_enable_ext0_wakeup(gpio_num, level)) != ESP_OK)) {
-    ESP_LOGE(TAG, "Unable to set ext0 WakeUp for Deep Sleep: %d", err);
+    ESP_LOGE(TAG, "Unable to set ext0 WakeUp for Deep Sleep. Error: %d", err);
   }
   
   rtc_gpio_isolate(GPIO_NUM_12);
