@@ -71,13 +71,15 @@ InkPlatePlatform::light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num, in
     }
   }
 
-  if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER) {
-    return true;
+  bool result = esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER);
+
+  if ((err = esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER)) != ESP_OK) {
+    if (err != ESP_ERR_INVALID_STATE) {
+      ESP_LOGE(TAG, "Unable to disable Sleep wait time. Error: %d", err);
+    }
   }
-  else {
-    esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
-    return false;
-  }
+
+  return result;
 }
 
 void 
