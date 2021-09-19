@@ -71,7 +71,7 @@ InkPlatePlatform::light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num, in
     }
   }
 
-  bool result = esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER);
+  bool result = esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER;
 
   if ((err = esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER)) != ESP_OK) {
     if (err != ESP_ERR_INVALID_STATE) {
