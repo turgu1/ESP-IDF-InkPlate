@@ -31,10 +31,8 @@ class TouchScreen : NonCopyable
 
     void set_app_isr_handler(ISRHandlerPtr isr_handler);
 
-    inline void get_resolution(uint16_t & x, uint16_t & y) {
-      x = x_resolution;
-      y = y_resolution;
-    }
+    inline uint16_t get_x_resolution() { return x_resolution; }
+    inline uint16_t get_y_resolution() { return y_resolution; }
 
   private:
     static constexpr char const * TAG = "TouchScreen";
