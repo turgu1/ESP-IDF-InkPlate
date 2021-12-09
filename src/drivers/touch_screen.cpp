@@ -55,7 +55,7 @@ TouchScreen::setup(bool power_on, uint16_t scr_width, uint16_t scr_height, ISRHa
   hardware_reset();
 
   if (software_reset()) {
-    get_resolution();
+    retrieve_resolution();
     set_power_state(power_on);
 
     if (isr_handler != nullptr) set_app_isr_handler(isr_handler);
