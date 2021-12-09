@@ -18,7 +18,7 @@ class TouchScreen : NonCopyable
 
     typedef std::array<uint16_t, 2> TouchPositions;
     
-    bool             setup(bool power_on, uint16_t scr_width, uint16_t scr_height, ISRHandlerPtr isr_handler = nullptr);
+    bool             setup(bool power_on, ISRHandlerPtr isr_handler = nullptr);
 
     void          shutdown();
     bool is_screen_touched();
