@@ -30,6 +30,7 @@ class TouchScreen : NonCopyable
     bool   is_ready() { return ready; }
 
     void set_app_isr_handler(ISRHandlerPtr isr_handler);
+
     inline void get_resolution(uint16_t & x, uint16_t & y) {
       x = x_resolution;
       y = y_resolution;
@@ -39,7 +40,6 @@ class TouchScreen : NonCopyable
     static constexpr char const * TAG = "TouchScreen";
     MCP23017 & mcp;
 
-    uint16_t screen_width, screen_height;
     uint16_t x_resolution, y_resolution;
 
     const MCP23017::Pin TOUCHSCREEN_ENABLE = MCP23017::Pin::IOPIN_12;
