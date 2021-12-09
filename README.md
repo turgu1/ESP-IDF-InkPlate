@@ -1,6 +1,6 @@
 # ESP-IDF-InkPlate Library Version 0.9.5
 
-(July, 15, 2021)
+(December 9th, 2021)
 
 (Not ready yet...)
 Version 0.9.5: 
