@@ -34,7 +34,7 @@ bool
     // Setup Touch keys
     if (!touch_keys.setup()) return false;
   #elif defined(INKPLATE_6PLUS)
-    if (!touch_screen.setup(true, e_ink.get_width(), e_ink.get_height(), touch_screen_handler)) return false;
+    if (!touch_screen.setup(true, touch_screen_handler)) return false;
     if (!front_light.setup()) return false;
   #endif
 

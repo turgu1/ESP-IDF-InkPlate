@@ -18,7 +18,7 @@ class TouchScreen : NonCopyable
 
     typedef std::array<uint16_t, 2> TouchPositions;
     
-    bool             setup(bool power_on, uint16_t scr_width, uint16_t scr_height, ISRHandlerPtr isr_handler = nullptr);
+    bool             setup(bool power_on, ISRHandlerPtr isr_handler = nullptr);
 
     void          shutdown();
     bool is_screen_touched();
@@ -31,11 +31,13 @@ class TouchScreen : NonCopyable
 
     void set_app_isr_handler(ISRHandlerPtr isr_handler);
 
+    inline uint16_t get_x_resolution() { return x_resolution; }
+    inline uint16_t get_y_resolution() { return y_resolution; }
+
   private:
     static constexpr char const * TAG = "TouchScreen";
     MCP23017 & mcp;
 
-    uint16_t screen_width, screen_height;
     uint16_t x_resolution, y_resolution;
 
     const MCP23017::Pin TOUCHSCREEN_ENABLE = MCP23017::Pin::IOPIN_12;
@@ -55,7 +57,7 @@ class TouchScreen : NonCopyable
     bool  read(      Data8 & data);
     void write(const Data  & data);
 
-    void get_resolution();
+    void retrieve_resolution();
 };
 
 #endif

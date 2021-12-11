@@ -18,15 +18,12 @@ touchscreen_isr(void * value)
 }
 
 bool 
-TouchScreen::setup(bool power_on, uint16_t scr_width, uint16_t scr_height, ISRHandlerPtr isr_handler)
+TouchScreen::setup(bool power_on, ISRHandlerPtr isr_handler)
 {
   ready                          = false;
   touchscreen_interrupt_happened = false;
 
   app_isr_handler                = nullptr;
-
-  screen_width  = scr_width;
-  screen_height = scr_height;
 
   Wire::enter();
 
@@ -55,7 +52,7 @@ TouchScreen::setup(bool power_on, uint16_t scr_width, uint16_t scr_height, ISRHa
   hardware_reset();
 
   if (software_reset()) {
-    get_resolution();
+    retrieve_resolution();
     set_power_state(power_on);
 
     if (isr_handler != nullptr) set_app_isr_handler(isr_handler);
@@ -114,7 +111,7 @@ TouchScreen::software_reset()
 }
 
 void 
-TouchScreen::get_resolution()
+TouchScreen::retrieve_resolution()
 {
   const Data cmd_get_x_resolution = { 0x53, 0x60, 0x00, 0x00 };
   const Data cmd_get_y_resolution = { 0x53, 0x63, 0x00, 0x00 };
@@ -140,7 +137,7 @@ uint8_t
 TouchScreen::get_positions(TouchPositions & x_positions, TouchPositions & y_positions)
 {
   Data8 raw;
-  TouchPositions x_raw, y_raw;
+  // TouchPositions x_raw, y_raw;
 
   Wire::enter();
   read(raw);
@@ -153,12 +150,8 @@ TouchScreen::get_positions(TouchPositions & x_positions, TouchPositions & y_posi
   }
 
   for (int i = 0, j = 1; i < 2; i++, j += 3) {
-      
-    x_raw[i] = ((raw[j] & 0xf0) << 4) + raw[j + 1];
-    y_raw[i] = ((raw[j] & 0x0f) << 8) + raw[j + 2];
-
-    x_positions[i] = ((x_raw[i] * screen_width  - 1) / x_resolution);
-    y_positions[i] = ((y_raw[i] * screen_height - 1) / y_resolution);
+    x_positions[i] = ((raw[j] & 0xf0) << 4) + raw[j + 1];
+    y_positions[i] = ((raw[j] & 0x0f) << 8) + raw[j + 2];
   }
 
   touchscreen_interrupt_happened = false;
