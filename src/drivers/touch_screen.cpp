@@ -134,7 +134,7 @@ TouchScreen::retrieve_resolution()
 }
 
 uint8_t
-TouchScreen::get_positions(TouchPositions & x_positions, TouchPositions & y_positions)
+TouchScreen::get_position(TouchPositions & x_positions, TouchPositions & y_positions)
 {
   Data8 raw;
   // TouchPositions x_raw, y_raw;
