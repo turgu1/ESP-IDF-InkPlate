@@ -83,7 +83,7 @@ class Inkplate : public Graphics
       inline void    tsSetPowerState(uint8_t s) { touch_screen.set_power_state(s != 0); }
       inline void    tsShutdown();
 
-      inline void    frontlight(bool enable)      { front_light.enable(enable); }
+      inline void    frontlight(bool enable)      { enable ? front_light.enable() : front_light.disable(); }
       inline void    setFrontlight(uint8_t level) { front_light.set_level(level); }
     #endif
 };
