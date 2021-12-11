@@ -10,7 +10,8 @@ class FrontLight
     FrontLight(MCP23017 & _mcp) : mcp(_mcp) {}
     bool setup();
     void set_level(uint8_t level);
-    void enable(bool en);
+    void enable();
+    void disable();
 
   private:
     static constexpr char const * TAG = "FrontLight";

@@ -14,7 +14,7 @@ FrontLight::setup()
   
   Wire::enter();
   mcp.set_direction(FRONTLIGHT_EN, MCP23017::PinMode::OUTPUT);
-  mcp.digital_write(FRONTLIGHT_EN, MCP23017::SignalLevel::LOW); // off
+  mcp.digital_write(FRONTLIGHT_EN, MCP23017::SignalLevel::LOW); // disabled
   Wire::leave();
 
   return true;
@@ -32,16 +32,19 @@ FrontLight::set_level(uint8_t level)
 }
 
 void 
-FrontLight::enable(bool en)
+FrontLight::enable()
 {
   Wire::enter();
-  if (en) {
-    mcp.digital_write(FRONTLIGHT_EN, MCP23017::SignalLevel::HIGH);
-  }
-  else {
-    mcp.digital_write(FRONTLIGHT_EN, MCP23017::SignalLevel::LOW);
-  }
+  mcp.digital_write(FRONTLIGHT_EN, MCP23017::SignalLevel::HIGH);
   Wire::leave();
 }
 
+
+void 
+FrontLight::disable()
+{
+  Wire::enter();
+  mcp.digital_write(FRONTLIGHT_EN, MCP23017::SignalLevel::LOW);
+  Wire::leave();
+}
 #endif
