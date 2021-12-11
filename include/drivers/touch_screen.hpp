@@ -22,7 +22,7 @@ class TouchScreen : NonCopyable
 
     void          shutdown();
     bool is_screen_touched();
-    uint8_t  get_positions(TouchPositions & x_positions, TouchPositions & y_positions);
+    uint8_t   get_position(TouchPositions & x_positions, TouchPositions & y_positions);
 
     void   set_power_state(bool on_state);
     bool   get_power_state();
