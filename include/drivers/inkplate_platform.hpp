@@ -58,7 +58,7 @@ Distributed as-is; no warranty is given.
   #elif defined(INKPLATE_6PLUS)
     MCP23017  mcp_ext(0x22);
     EInk6PLUS e_ink(mcp_int, mcp_ext);
-    RTC       rtc(0x58);
+    RTC       rtc(0x51);
   #else
     #error "One of INKPLATE_6, INKPLATE_10, INKPLATE_6PLUS must be defined."
   #endif
