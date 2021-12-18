@@ -33,10 +33,10 @@ bool
   #elif defined(INKPLATE_6) || defined(INKPLATE_10)
     // Setup Touch keys
     if (!touch_keys.setup()) return false;
-    if (!rtc.setup()) return false;
   #elif defined(INKPLATE_6PLUS)
     if (!touch_screen.setup(true, touch_screen_handler)) return false;
     if (!front_light.setup()) return false;
+    if (!rtc.setup()) return false;
   #endif
 
   // Mount and check the SD Card
