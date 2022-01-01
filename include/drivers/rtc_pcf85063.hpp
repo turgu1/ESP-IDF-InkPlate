@@ -95,9 +95,9 @@ class RTC : NonCopyable {
     CAPACITOR set_capacitor(CAPACITOR value);
     CAPACITOR get_capacitor();
 
-    void set_date_time(uint16_t &  y, uint8_t &  m, uint8_t & d, 
-                       uint8_t  &  h, uint8_t & mm, uint8_t & s,
-                       WeekDay  & wd);
+    void set_date_time(uint16_t  y, uint8_t  m, uint8_t d, 
+                       uint8_t   h, uint8_t mm, uint8_t s,
+                       WeekDay  wd);
 
     void get_date_time(uint16_t &  y, uint8_t &  m, uint8_t & d, 
                        uint8_t  &  h, uint8_t & mm, uint8_t & s,

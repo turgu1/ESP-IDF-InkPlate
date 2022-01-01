@@ -62,9 +62,9 @@ void RTC::write_date_time()
   write_reg(Reg::YEAR,    dec_to_bcd(year    ));
 }
 
-void RTC::set_date_time(uint16_t &  y, uint8_t &  m, uint8_t & d, 
-                        uint8_t  &  h, uint8_t & mm, uint8_t & s,
-                        WeekDay  & wd)
+void RTC::set_date_time(uint16_t  y, uint8_t  m, uint8_t d, 
+                        uint8_t   h, uint8_t mm, uint8_t s,
+                        WeekDay  wd)
 {
   year     =  y - 2000;
   month    =  m;
