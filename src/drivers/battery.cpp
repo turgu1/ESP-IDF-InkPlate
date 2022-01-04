@@ -30,5 +30,5 @@ Battery::read_level()
   mcp.digital_write(BATTERY_SWITCH, MCP23017::SignalLevel::LOW);
   Wire::leave();
 
-  return (double(adc) * 3.3 * 2) / 4095.0;
+  return (double(adc) * 1.1 * 3.548133892 * 2) / 4095.0;
 }
