@@ -84,14 +84,29 @@ EInk::turn_on()
   if (get_panel_state() == PanelState::ON) return;
 
   wakeup_set();
+  vcom_set();
+
   ESP::delay_microseconds(1800);
   pwrup_set();
 
   // Enable all rails
   wire.begin_transmission(PWRMGR_ADDRESS);
   wire.write(0x01);
-  wire.write(0b00111111);
+  wire.write(0b00101111);
   wire.end_transmission();
+
+  Wire.beginTransmission(PWRMGR_ADDRESS);
+  Wire.write(0x09);
+  Wire.write(0b11100001);
+  Wire.endTransmission();
+
+  delay(1);
+
+  // Switch TPS65186 into active mode
+  Wire.beginTransmission(PWRMGR_ADDRESS);
+  Wire.write(0x01);
+  Wire.write(0b10101111);
+  Wire.endTransmission();
 
   pins_as_outputs();
 
@@ -103,7 +118,6 @@ EInk::turn_on()
    spv_set();
    ckv_clear();
     oe_clear();
-  vcom_set();
 
   unsigned long timer = ESP::millis();
 
