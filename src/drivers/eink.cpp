@@ -61,16 +61,23 @@ EInk::turn_off()
    spv_clear();
   vcom_clear();
 
-  ESP::delay(6);
+  // Put TPS65186 into standby mode (leaving 3V3 SW active)
+  wire.begin_transmission(PWRMGR_ADDRESS);
+  wire.write(0x01);
+  wire.write(0x6f);
+  wire.end_transmission();
 
-   pwrup_clear();
-  wakeup_clear();
+  // Wait for all PWR rails to shut down
+  ESP::delay(100);
 
-  unsigned long timer = ESP::millis();
+  // Disable 3V3 to the panel
+  wire.begin_transmission(PWRMGR_ADDRESS);
+  wire.write(0x01);
+  wire.write(0x4f);
+  wire.end_transmission();
 
-  do {
-    ESP::delay(1);
-  } while ((read_power_good() != 0) && (ESP::millis() - timer) < 250);
+  // Clearing WAKEUP pin can cause vertical lines on panel
+  // WAKEUP_CLEAR;
 
   pins_z_state();
   set_panel_state(PanelState::OFF);
@@ -87,7 +94,8 @@ EInk::turn_on()
   vcom_set();
 
   ESP::delay_microseconds(1800);
-  pwrup_set();
+
+  //pwrup_set();
 
   // Enable all rails
   wire.begin_transmission(PWRMGR_ADDRESS);
@@ -95,18 +103,18 @@ EInk::turn_on()
   wire.write(0b00101111);
   wire.end_transmission();
 
-  Wire.beginTransmission(PWRMGR_ADDRESS);
-  Wire.write(0x09);
-  Wire.write(0b11100001);
-  Wire.endTransmission();
+  wire.begin_transmission(PWRMGR_ADDRESS);
+  wire.write(0x09);
+  wire.write(0b11100001);
+  wire.end_transmission();
 
-  delay(1);
+  ESP::delay_microseconds(1000);
 
   // Switch TPS65186 into active mode
-  Wire.beginTransmission(PWRMGR_ADDRESS);
-  Wire.write(0x01);
-  Wire.write(0b10101111);
-  Wire.endTransmission();
+  wire.begin_transmission(PWRMGR_ADDRESS);
+  wire.write(0x01);
+  wire.write(0b10101111);
+  wire.end_transmission();
 
   pins_as_outputs();
 
