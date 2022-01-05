@@ -88,14 +88,13 @@ InkPlatePlatform::deep_sleep(gpio_num_t gpio_num, int level)
 {
   esp_err_t err;
   
-  // if ((err = esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER)) != ESP_OK) {
-  //   if (err != ESP_ERR_INVALID_STATE) {
-  //     ESP_LOGE(TAG, "Unable to disable Sleep wait time. Error: %d", err);
-  //   }
-  // }
-  
-  if ((gpio_num != ((gpio_num_t) 0)) && ((err = esp_sleep_enable_ext0_wakeup(gpio_num, level)) != ESP_OK)) {
-    ESP_LOGE(TAG, "Unable to set ext0 WakeUp for Deep Sleep. Error: %d", err);
+  if (gpio_num != ((gpio_num_t) 0)) {
+    if ((err = esp_sleep_enable_ext0_wakeup(gpio_num, level)) != ESP_OK) {
+      ESP_LOGE(TAG, "Unable to set ext0 WakeUp for Deep Sleep. Error: %d", err);
+    }
+  }
+  else {
+    esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
   }
   
   rtc_gpio_isolate(GPIO_NUM_12);
