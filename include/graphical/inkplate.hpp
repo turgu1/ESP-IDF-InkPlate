@@ -21,6 +21,7 @@ Distributed as-is; no warranty is given.
 #include "graphics.hpp"
 #include "inkplate_platform.hpp"
 #include "network_client.hpp"
+#include "sd_card.hpp"
 
 class Inkplate : public Graphics
 {
@@ -45,7 +46,7 @@ class Inkplate : public Graphics
     inline void         disconnect() { network_client.disconnect();              }
     inline bool        isConnected() { return network_client.isConnected();      }
     inline int        _getRotation() { return Graphics::getRotation();           }
-    inline bool         sdCardInit() { return true;                              }
+    inline bool         sdCardInit() { return SDCard::setup();                   }
     inline uint16_t      einkWidth() { return e_ink.get_width();                 }
     inline uint16_t     einkHeight() { return e_ink.get_height();                }
 
