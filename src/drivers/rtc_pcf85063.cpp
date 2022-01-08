@@ -121,13 +121,15 @@ RTC::get_date_time(time_t * t)
 {
   struct tm time;
   uint16_t year;
+  RTC::WeekDay wd;
 
   memset(&time, 0, sizeof(time));
   get_date_time(year,                     (uint8_t &) time.tm_mon, (uint8_t &) time.tm_mday,
                 (uint8_t &) time.tm_hour, (uint8_t &) time.tm_min, (uint8_t &) time.tm_sec,
-                (RTC::WeekDay &) time.tm_wday);
+                wd);
   time.tm_year = year - 1970;
-
+  time.tm_wday = (uint8_t) wd;
+  
   *t = timegm(&time);
 }
 
