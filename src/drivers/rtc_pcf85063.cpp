@@ -4,6 +4,8 @@
 #include "rtc_pcf85063.hpp"
 #include "timegm.hpp"
 
+#include <cstring>
+
 uint8_t RTC::dec_to_bcd(uint8_t val) 
 {
   return ((val / 10) << 4) + (val % 10);
