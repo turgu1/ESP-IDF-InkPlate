@@ -98,7 +98,7 @@ void RTC::get_date_time(uint16_t &  y, uint8_t &  m, uint8_t & d,
 /**
  * @brief Set the date time from epoch relative time
  * 
- * The parameter *t* must represent a time >= 2000/01/01 00:00:00.
+ * The parameter *t* must represent a time >= 2000/01/01 00:00:00 and <= 2099/12/32 23:59:59.
  * 
  * @param t The time value as a number of seconds from 1970/01/01 00:00:00
  */
@@ -129,7 +129,7 @@ RTC::get_date_time(time_t * t)
                 wd);
   time.tm_year = year - 1970;
   time.tm_wday = (uint8_t) wd;
-  
+
   *t = timegm(&time);
 }
 
