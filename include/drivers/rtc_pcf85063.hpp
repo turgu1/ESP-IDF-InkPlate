@@ -107,7 +107,7 @@ class RTC : NonCopyable {
                        uint8_t  &  h, uint8_t & mm, uint8_t & s,
                        WeekDay  & wd);
 
-    void get_date_time(const time_t * t);
+    void get_date_time(time_t * t);
 };
 
 #endif
