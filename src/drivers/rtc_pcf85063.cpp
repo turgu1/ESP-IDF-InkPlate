@@ -93,6 +93,42 @@ void RTC::get_date_time(uint16_t &  y, uint8_t &  m, uint8_t & d,
 }
 
 /**
+ * @brief Set the date time from epoch relative time
+ * 
+ * The parameter *t* must represent a time >= 2000/01/01 00:00:00.
+ * 
+ * @param t The time value as a number of seconds from 1970/01/01 00:00:00
+ */
+void 
+RTC::set_date_time(const time_t * t)
+{
+  struct tm time;
+  if (gmtime_r(t, &time) == nullptr) return;
+
+  uint16_t year = time.tm_year + 1900;
+  if ((year < 2000) || (year > 2099)) return;
+
+  set_date_time(year,         time.tm_mon, time.tm_mday, 
+                time.tm_hour, time.tm_min, time.tm_sec,
+                time.tm_wday);
+}
+
+void
+RTC::get_date_time(const time_t * t)
+{
+  struct tm time;
+  uint16_t year;
+
+  memset(&time, 0, sizeof(time));
+  get_date_time(year, (uint8_t) time.tm_mon, (uint8_t) time.tm_day,
+                (uint8_t) time.tm.hour, (uint8_t) time.tm_min, (uint8_t) time.tm_sec,
+                (uint8_t) time.tm_wday);
+  time.tm_year = year - 1970;
+
+  *t = timegm(&time);
+}
+
+/**
   @brief  clock calibration setting
 
   @parameter:
@@ -169,7 +205,6 @@ uint8_t RTC::read_reg(Reg reg)
   wire.request_from(rtc_address, 1);
 
   return wire.read();
-
 }
 
 void RTC::write_reg(Reg reg, uint8_t value) 
@@ -178,7 +213,6 @@ void RTC::write_reg(Reg reg, uint8_t value)
   wire.write((uint8_t) reg);
   wire.write(value);
   wire.end_transmission();
-
 }
 
 #endif
