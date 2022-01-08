@@ -2,6 +2,7 @@
 
 #include "wire.hpp"
 #include "rtc_pcf85063.hpp"
+#include "timegm.hpp"
 
 uint8_t RTC::dec_to_bcd(uint8_t val) 
 {
@@ -108,9 +109,9 @@ RTC::set_date_time(const time_t * t)
   uint16_t year = time.tm_year + 1900;
   if ((year < 2000) || (year > 2099)) return;
 
-  set_date_time(year,         time.tm_mon, time.tm_mday, 
-                time.tm_hour, time.tm_min, time.tm_sec,
-                time.tm_wday);
+  set_date_time(year,                   (uint8_t) time.tm_mon, (uint8_t) time.tm_mday, 
+                (uint8_t) time.tm_hour, (uint8_t) time.tm_min, (uint8_t) time.tm_sec,
+                (uint8_t) time.tm_wday);
 }
 
 void
@@ -120,8 +121,8 @@ RTC::get_date_time(const time_t * t)
   uint16_t year;
 
   memset(&time, 0, sizeof(time));
-  get_date_time(year, (uint8_t) time.tm_mon, (uint8_t) time.tm_day,
-                (uint8_t) time.tm.hour, (uint8_t) time.tm_min, (uint8_t) time.tm_sec,
+  get_date_time(year,                   (uint8_t) time.tm_mon, (uint8_t) time.tm_mday,
+                (uint8_t) time.tm_hour, (uint8_t) time.tm_min, (uint8_t) time.tm_sec,
                 (uint8_t) time.tm_wday);
   time.tm_year = year - 1970;
 
