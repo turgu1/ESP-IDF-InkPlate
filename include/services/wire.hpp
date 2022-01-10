@@ -39,7 +39,7 @@ class Wire : NonCopyable
 
     void       setup();
     void       begin_transmission(uint8_t addr);
-    void       end_transmission();
+    esp_err_t  end_transmission();
     void       write(uint8_t val);
     uint8_t    read();
     esp_err_t  request_from(uint8_t addr, uint8_t size);

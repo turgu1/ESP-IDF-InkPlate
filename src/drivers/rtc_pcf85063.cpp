@@ -6,6 +6,11 @@
 
 #include <cstring>
 
+RTC::RTC(uint8_t address) : rtc_address(address) {
+  wire.begin_transmission(rtc_address);
+  present = wire.end_transmission() == ESP_OK;      
+}
+
 uint8_t RTC::dec_to_bcd(uint8_t val) 
 {
   return ((val / 10) << 4) + (val % 10);
@@ -18,22 +23,26 @@ uint8_t RTC::bcd_to_dec(uint8_t val)
 
 bool RTC::setup() 
 {
+  if (!present) return false;
   set_capacitor(CAPACITOR::SEL_12_5PF);
   return true;
 }
 
 void RTC::reset() 
 {
+  if (!present) return;
   write_reg(Reg::CTRL1, RESET_CODE);
 }
 
 void RTC::start() 
 {
+  if (!present) return;
   write_reg(Reg::CTRL1, read_reg(Reg::CTRL1) & ~STOP_BIT);
 }
 
 void RTC::stop() 
 {
+  if (!present) return;
   write_reg(Reg::CTRL1, read_reg(Reg::CTRL1) | STOP_BIT);
 }
 
@@ -69,6 +78,7 @@ void RTC::set_date_time(uint16_t  y, uint8_t  m, uint8_t d,
                         uint8_t   h, uint8_t mm, uint8_t s,
                         WeekDay  wd)
 {
+  if (!present) return;
   year     =  y - 2000;
   month    =  m;
   day      =  d;
@@ -84,6 +94,7 @@ void RTC::get_date_time(uint16_t &  y, uint8_t &  m, uint8_t & d,
                         uint8_t  &  h, uint8_t & mm, uint8_t & s,
                         WeekDay  & wd)
 {
+  if (!present) return;
   read_date_time();
 
   y  = year + 2000;
@@ -105,6 +116,7 @@ void RTC::get_date_time(uint16_t &  y, uint8_t &  m, uint8_t & d,
 void 
 RTC::set_date_time(const time_t * t)
 {
+  if (!present) return;
   struct tm time;
   if (gmtime_r(t, &time) == nullptr) return;
 
@@ -119,6 +131,7 @@ RTC::set_date_time(const time_t * t)
 void
 RTC::get_date_time(time_t * t)
 {
+  if (!present) return;
   struct tm time;
   uint16_t year;
   RTC::WeekDay wd;
@@ -147,6 +160,7 @@ RTC::get_date_time(time_t * t)
 */
 uint8_t RTC::calibrate_by_seconds(CalibrationMode mode, float offset_sec) 
 {
+  if (!present) return 0;
   float Fmeas = 32768.0 + offset_sec * 32768.0;
   set_calibration(mode, Fmeas);
   return read_calibration_reg();
@@ -160,6 +174,7 @@ uint8_t RTC::calibrate_by_seconds(CalibrationMode mode, float offset_sec)
 */
 void RTC::set_calibration(CalibrationMode mode, float Fmeas) 
 {
+  if (!present) return;
   float offset = 0;
   float Tmeas  = 1.0 / Fmeas;
   float Dmeas  = 1.0 / 32768 - Tmeas;
@@ -182,16 +197,19 @@ uint8_t RTC::read_calibration_reg(void)
 
 
 void RTC::set_ram(uint8_t value) {
+  if (!present) return;
   write_reg(Reg::RAM, value);
 }
 
 uint8_t RTC::get_ram(void) 
 {
+  if (!present) return 0;
   return read_reg(Reg::RAM);
 }
 
 RTC::CAPACITOR RTC::set_capacitor(CAPACITOR value) 
 {
+  if (!present) return (CAPACITOR) 0;
   uint8_t control_1 = read_reg(Reg::CTRL1);
   control_1 = (control_1 & 0xFE) | (0x01 & (uint8_t) value);
   write_reg(Reg::CTRL1, control_1);
@@ -201,6 +219,7 @@ RTC::CAPACITOR RTC::set_capacitor(CAPACITOR value)
 
 RTC::CAPACITOR RTC::get_capacitor() 
 {
+  if (!present) return (CAPACITOR) 0;
   return (CAPACITOR) (read_reg(Reg::CTRL1) & 0x01);
 }
 

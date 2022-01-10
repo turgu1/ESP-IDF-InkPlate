@@ -55,9 +55,11 @@ Wire::begin_transmission(uint8_t addr)
   }
 }
 
-void     
+esp_err_t
 Wire::end_transmission()
 {
+  esp_err_t result;
+
   if (initialized) {
     //ESP_LOGD(TAG, "Writing %d bytes to i2c at address 0x%02x.", index, address);
 
@@ -72,9 +74,11 @@ Wire::end_transmission()
     ESP_ERROR_CHECK(i2c_master_write_byte(cmd, (address << 1) | I2C_MASTER_WRITE, 1));
     if (index > 0) ESP_ERROR_CHECK(i2c_master_write(cmd, buffer, index, 1));
     ESP_ERROR_CHECK(i2c_master_stop(cmd));
-    ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000 / portTICK_RATE_MS));
+    result = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
     index = 0;
+
+    return result;
   }
   
   // ESP_LOGD(TAG, "I2C Transmission completed.");

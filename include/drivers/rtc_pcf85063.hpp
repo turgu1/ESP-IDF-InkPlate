@@ -79,8 +79,10 @@ class RTC : NonCopyable {
     uint8_t  month;
     uint16_t year;
 
+    bool present;
+
   public:
-    RTC(uint8_t address) : rtc_address(address) {}
+    RTC(uint8_t address);
 
     bool setup();
     void reset();
@@ -108,6 +110,8 @@ class RTC : NonCopyable {
                        WeekDay  & wd);
 
     void get_date_time(time_t * t);
+
+    inline bool is_present() { return present; }
 };
 
 #endif
