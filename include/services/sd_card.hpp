@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cinttypes>
+
 class SDCard
 {
   public:
@@ -16,4 +18,6 @@ class SDCard
 
   private:
     static constexpr char const * TAG = "SDCard";
+    enum class SDCardState : uint8_t { UNINITIALIZED, INITIALIZED, FAILED };
+    static SDCardState state;
 };

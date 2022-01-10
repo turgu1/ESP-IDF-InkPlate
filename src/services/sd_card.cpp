@@ -7,10 +7,22 @@
 #include "driver/sdspi_host.h"
 #include "sdmmc_cmd.h"
 
+SDCard::SDCardState SDCard::state = SDCardState::UNINITIALIZED;
+
 bool
 SDCard::setup()
 {
-  ESP_LOGI(TAG, "Setup SD card");
+  switch (state)
+  {
+  case SDCardState::INITIALIZED:
+    ESP_LOGI(TAG, "SD card is already initialized");
+    return true;
+  case SDCardState::FAILED:
+    ESP_LOGI(TAG, "SD card setup is recently failed");
+    return false;
+  case SDCardState::UNINITIALIZED:
+    ESP_LOGI(TAG, "Setup SD card");
+  }
 
   static const gpio_num_t PIN_NUM_MISO = GPIO_NUM_12;
   static const gpio_num_t PIN_NUM_MOSI = GPIO_NUM_13;
@@ -33,6 +45,8 @@ SDCard::setup()
     .allocation_unit_size = 16 * 1024
   };
 
+  state = SDCardState::FAILED;
+
   sdmmc_card_t* card;
   esp_err_t ret = esp_vfs_fat_sdmmc_mount("/sdcard", &host, &slot_config, &mount_config, &card);
 
@@ -47,6 +61,8 @@ SDCard::setup()
 
   // Card has been initialized, print its properties
   sdmmc_card_print_info(stdout, card);
+
+  state = SDCardState::INITIALIZED;
 
   return true;
 }
