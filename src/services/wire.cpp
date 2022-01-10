@@ -80,6 +80,9 @@ Wire::end_transmission()
 
     return result;
   }
+  else {
+    return ESP_ERR_INVALID_STATE;
+  }
   
   // ESP_LOGD(TAG, "I2C Transmission completed.");
 }
