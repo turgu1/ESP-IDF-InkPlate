@@ -4,9 +4,6 @@
 
 #include <cstring>
 
-RTC::RTC(uint8_t address) : rtc_address(address) {
-}
-
 uint8_t RTC::dec_to_bcd(uint8_t val) 
 {
   return ((val / 10) << 4) + (val % 10);
@@ -23,7 +20,7 @@ bool RTC::setup()
   present = wire.end_transmission() == ESP_OK;      
 
   if (!present) return false;
-  
+
   set_capacitor(CAPACITOR::SEL_12_5PF);
   return true;
 }

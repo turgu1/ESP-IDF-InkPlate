@@ -51,6 +51,7 @@ class RTC : NonCopyable {
     };
 
     const uint8_t rtc_address;
+    bool present;
 
     const uint8_t STOP_BIT     = 0x20;
     const uint8_t RESET_CODE   = 0x58;
@@ -77,10 +78,9 @@ class RTC : NonCopyable {
     uint8_t  month;
     uint16_t year;
 
-    bool present;
 
   public:
-    RTC(uint8_t address);
+    RTC(uint8_t address) : rtc_address(address), present(false) { }
 
     bool setup();
     void reset();
