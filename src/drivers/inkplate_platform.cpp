@@ -38,7 +38,7 @@ bool
     if (!front_light.setup()) return false;
   #endif
 
-  if (rtc.is_present() && !rtc.setup()) return false;
+  rtc.setup();
 
   // Mount and check the SD Card
   if (sd_card_init && !SDCard::setup()) return false;
