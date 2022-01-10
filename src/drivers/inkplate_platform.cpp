@@ -36,8 +36,9 @@ bool
   #elif defined(INKPLATE_6PLUS)
     if (!touch_screen.setup(true, touch_screen_handler)) return false;
     if (!front_light.setup()) return false;
-    if (!rtc.setup()) return false;
   #endif
+
+  if (rtc.is_present() && !rtc.setup()) return false;
 
   // Mount and check the SD Card
   if (sd_card_init && !SDCard::setup()) return false;

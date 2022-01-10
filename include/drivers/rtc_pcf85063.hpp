@@ -1,7 +1,5 @@
 #pragma once
 
-#if INKPLATE_6PLUS
-
 #include <cinttypes>
 #include "non_copyable.hpp"
 
@@ -113,5 +111,3 @@ class RTC : NonCopyable {
 
     inline bool is_present() { return present; }
 };
-
-#endif

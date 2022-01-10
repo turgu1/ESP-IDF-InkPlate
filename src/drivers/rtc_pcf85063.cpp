@@ -1,5 +1,3 @@
-#if INKPLATE_6PLUS
-
 #include "wire.hpp"
 #include "rtc_pcf85063.hpp"
 #include "timegm.hpp"
@@ -240,5 +238,3 @@ void RTC::write_reg(Reg reg, uint8_t value)
   wire.write(value);
   wire.end_transmission();
 }
-
-#endif
