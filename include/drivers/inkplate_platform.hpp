@@ -41,6 +41,7 @@ Distributed as-is; no warranty is given.
 #if __INKPLATE_PLATFORM__
   MCP23017  mcp_int(0x20);
   Battery   battery(mcp_int);
+  RTC       rtc(0x51);
   #if defined(EXTENDED_CASE) && (defined(INKPLATE_6) || defined(INKPLATE_10))
     PressKeys press_keys(mcp_int);
   #elif defined(INKPLATE_6) || defined(INKPLATE_10)
@@ -58,7 +59,6 @@ Distributed as-is; no warranty is given.
   #elif defined(INKPLATE_6PLUS)
     MCP23017  mcp_ext(0x22);
     EInk6PLUS e_ink(mcp_int, mcp_ext);
-    RTC       rtc(0x51);
   #else
     #error "One of INKPLATE_6, INKPLATE_10, INKPLATE_6PLUS must be defined."
   #endif
