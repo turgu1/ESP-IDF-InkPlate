@@ -117,7 +117,7 @@ RTC::set_date_time(const time_t * t)
   struct tm time;
   if (gmtime_r(t, &time) == nullptr) return;
 
-  uint16_t year = time.tm_year + 1970;
+  uint16_t year = time.tm_year + 1900;
   if ((year < 2000) || (year > 2099)) return;
 
   set_date_time(year,                   (uint8_t)(time.tm_mon + 1), (uint8_t) time.tm_mday, 
@@ -137,7 +137,7 @@ RTC::get_date_time(time_t * t)
   get_date_time(year,                     (uint8_t &) time.tm_mon, (uint8_t &) time.tm_mday,
                 (uint8_t &) time.tm_hour, (uint8_t &) time.tm_min, (uint8_t &) time.tm_sec,
                 wd);
-  time.tm_year = year - 1970;
+  time.tm_year = year - 1900;
   time.tm_wday = (uint8_t) wd;
   time.tm_mon -= 1;
   if ((time.tm_mon < 0) || (time.tm_mon > 11)) time.tm_mon = 0;
