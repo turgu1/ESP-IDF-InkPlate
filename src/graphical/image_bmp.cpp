@@ -182,7 +182,7 @@ void Image::displayBmpLine(int16_t x, int16_t y, bitmapHeader *bmpHeader, bool d
             if (dither)
                 val = ditherGetPixelBmp(px, j, w, 1);
             else
-                val = palette[px >> 1] & (px & 1 ? 0x0F : 0xF0) >> (px & 1 ? 0 : 4);
+                val = (palette[px >> 1] & (px & 1 ? 0x0F : 0xF0)) >> (px & 1 ? 0 : 4);
             if (invert)
                 val = 7 - val;
             if (getDisplayMode() == DisplayMode::INKPLATE_1BIT)
@@ -198,7 +198,7 @@ void Image::displayBmpLine(int16_t x, int16_t y, bitmapHeader *bmpHeader, bool d
             if (dither)
                 val = ditherGetPixelBmp(px, j, w, 1);
             else
-                val = palette[px >> 1] & (px & 1 ? 0x0F : 0xF0) >> (px & 1 ? 0 : 4);
+                val = (palette[px >> 1] & (px & 1 ? 0x0F : 0xF0)) >> (px & 1 ? 0 : 4);
             if (invert)
                 val = 7 - val;
             if (getDisplayMode() == DisplayMode::INKPLATE_1BIT)
