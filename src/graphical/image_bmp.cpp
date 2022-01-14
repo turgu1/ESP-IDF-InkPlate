@@ -176,7 +176,7 @@ void Image::displayBmpLine(int16_t x, int16_t y, bitmapHeader *bmpHeader, bool d
             break;
         // as for 2 bit, literally cannot find an example online or in PS, so skipped
         case 4: {
-            uint8_t px = pixelBuffer[j >> 1] & (j & 1 ? 0x0F : 0xF0) >> (j & 1 ? 0 : 4);
+            uint8_t px = (pixelBuffer[j >> 1] & (j & 1 ? 0x0F : 0xF0)) >> (j & 1 ? 0 : 4);
             uint8_t val;
 
             if (dither)
