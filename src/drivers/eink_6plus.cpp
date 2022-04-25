@@ -89,12 +89,14 @@ EInk6PLUS::setup()
 
   wakeup_clear();
 
+#ifndef ONE_MCP_MODE
   // Set all pins of seconds I/O expander to outputs, low.
   // For some reason, it draw more current in deep sleep when pins are set as inputs...
   for (int i = 0; i < 15; i++) {
     mcp_ext.set_direction((MCP23017::Pin) i, MCP23017::PinMode::OUTPUT);
     mcp_ext.digital_write((MCP23017::Pin) i, MCP23017::SignalLevel::LOW);
   }
+#endif
 
   // For same reason, unused pins of first I/O expander have to be also set as outputs, low.
   mcp_int.set_direction(MCP23017::Pin::IOPIN_13, MCP23017::PinMode::OUTPUT);

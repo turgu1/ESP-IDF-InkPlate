@@ -1,5 +1,5 @@
 /*
-   Basic_custom_font example for e-radionica.com Inkplate 6
+   Basic_custom_font example for Soldered Inkplate 6
    For this example you will need only USB cable and Inkplate 6
    Select "Inkplate 6(ESP32)" from Tools -> Board menu.
    Don't have "Inkplate 6(ESP32)" option? Follow our tutorial and add it:
@@ -16,8 +16,15 @@
 
    Want to learn more about Inkplate? Visit www.inkplate.io
    Looking to get support? Write on our forums: http://forum.e-radionica.com/en/
-   15 July 2020 by e-radionica.com
+   15 July 2020 by Soldered
 */
+
+// If your Inkplate doesn't have external (or second) MCP I/O expander, you should uncomment next line,
+// otherwise your code could hang out when you send code to your Inkplate.
+// You can easily check if your Inkplate has second MCP by turning it over and 
+// if there is missing chip near place where "MCP23017-2" is written, but if there is
+// chip soldered, you don't have to uncomment line and use external MCP I/O expander
+//#define ONE_MCP_MODE
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
