@@ -60,12 +60,14 @@ EInk10::setup()
   wire.setup();
   
   if (!mcp_int.setup()) {
-    ESP_LOGE(TAG, "Initialization not completed (MCP Issue).");
+    ESP_LOGE(TAG, "Initialization not completed (Main MCP Issue).");
     return false;
   }
   else {
     ESP_LOGD(TAG, "MCP initialized.");
   }
+
+  mcp_ext.setup();
 
   Wire::enter();
   
@@ -95,9 +97,11 @@ EInk10::setup()
 
   // Set all pins of seconds I/O expander to outputs, low.
   // For some reason, it draw more current in deep sleep when pins are set as inputs...
-  for (int i = 0; i < 15; i++) {
-    mcp_ext.set_direction((MCP23017::Pin) i, MCP23017::PinMode::OUTPUT);
-    mcp_ext.digital_write((MCP23017::Pin) i, MCP23017::SignalLevel::LOW);
+  if (mcp_ext.is_present()) {
+    for (int i = 0; i < 15; i++) {
+      mcp_ext.set_direction((MCP23017::Pin) i, MCP23017::PinMode::OUTPUT);
+      mcp_ext.digital_write((MCP23017::Pin) i, MCP23017::SignalLevel::LOW);
+    }
   }
 
   // For same reason, unused pins of first I/O expander have to be also set as outputs, low.

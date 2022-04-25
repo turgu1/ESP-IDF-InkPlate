@@ -1,8 +1,11 @@
-# ESP-IDF-InkPlate Library Version 0.9.5
+# ESP-IDF-InkPlate Library Version 0.9.6
 
-(December 9th, 2021)
+(April 25th, 2022)
 
-(Not ready yet...)
+Version 0.9.6:
+
+- Added second MCP presence detection. With chips shortage issues, some Inkplate devices (Inkplate-10, Inkplate-6PLUS) may have their second MCP chip missing. the `mcp_ext.is_present()` method can be used to check its availability.
+
 Version 0.9.5: 
 
 - Corrected issue with PlatformIO Espressif32 version 3.3.0 (wifi_interface_t vs esp_interface_t)
@@ -13,6 +16,7 @@ Version 0.9.5:
 - InkplatePlatform::light_sleep() and InkplatePlatform::deep_sleep() methods modified to get gpio number and level as parameters
 - Inkplate::begin() method now allows for one parameter to enable/disable the SDCard initialization. Disabled by default.
 - For the InkPlate-6PLUS, the Inkplate::begin() method takes a second paremeter: a handler function pointer to process touch_screen interrupts.
+- Added RTC PCF85063 support.
 
 (March 4, 2021)
 

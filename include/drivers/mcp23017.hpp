@@ -74,6 +74,8 @@ class MCP23017 : NonCopyable
 
     const uint8_t mcp_address;
     enum_array<Reg, uint8_t, 22> registers;
+
+    bool present;
  
     // Adjust Register, adding offset p
     inline Reg R(Reg r, uint8_t p) { return (Reg)((uint8_t)r + p); }
@@ -88,7 +90,7 @@ class MCP23017 : NonCopyable
 
   public:
 
-    MCP23017(uint8_t address) : mcp_address(address) { 
+    MCP23017(uint8_t address) : mcp_address(address), present(false) { 
       std::fill(registers.begin(), registers.end(), 0); 
     }
 
@@ -116,6 +118,9 @@ class MCP23017 : NonCopyable
       IOPIN_15
     };
 
+    inline bool is_present() { return present; }
+    bool check_presence();
+    
     // BEFORE CALLING ANY OF THE FOLLOWING METHODS, ENSURE THAT THE Wire I2C
     // CLASS IS PROTECTED THROUGH THE USE OF Wire::enter() and Wire::leave() METHODS.
     

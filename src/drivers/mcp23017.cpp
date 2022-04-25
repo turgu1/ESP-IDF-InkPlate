@@ -29,9 +29,18 @@ Distributed as-is; no warranty is given.
 
 // LOW LEVEL:
 
+bool
+MCP23017::check_presence()
+{
+  if (!present) ESP_LOGE(TAG, "The MCP at address 0x%X has not been detected.", mcp_address);
+  return present;
+}
+
 void 
 MCP23017::test()
 {
+  if (!check_presence()) return;
+
   printf("Registers before read:\n");
   for (auto reg : registers) {
     printf("%02x ", reg);
@@ -58,8 +67,10 @@ MCP23017::setup()
   ESP_LOGD(TAG, "Initializing...");
   
   wire.begin_transmission(mcp_address);
-  wire.end_transmission();
-    
+  present = wire.end_transmission() == ESP_OK;
+  
+  ESP_LOGI(TAG, "MCP at address 0x%X has%s been detected", mcp_address, present ? "" : " NOT");
+
   read_all_registers();
   registers[Reg::IODIRA] = 0xff;
   registers[Reg::IODIRB] = 0xff;
@@ -71,6 +82,8 @@ MCP23017::setup()
 void 
 MCP23017::read_all_registers()
 {
+  if (!check_presence()) return;
+
   wire.begin_transmission(mcp_address);
   wire.write(0x00);
   wire.end_transmission();
@@ -83,6 +96,8 @@ MCP23017::read_all_registers()
 void 
 MCP23017::read_registers(Reg first_reg, uint8_t count)
 {
+  if (!check_presence()) return;
+
   wire.begin_transmission(mcp_address);
   wire.write((int8_t)first_reg);
   wire.end_transmission();
@@ -96,6 +111,8 @@ MCP23017::read_registers(Reg first_reg, uint8_t count)
 uint8_t 
 MCP23017::read_register(Reg reg)
 {
+  if (!check_presence()) return 0;
+
   wire.begin_transmission(mcp_address);
   wire.write((int8_t)reg);
   wire.end_transmission();
@@ -108,6 +125,8 @@ MCP23017::read_register(Reg reg)
 void 
 MCP23017::update_all_registers()
 {
+  if (!check_presence()) return;
+
   wire.begin_transmission(mcp_address);
   wire.write(0x00);
   for (auto reg : registers) {
@@ -119,6 +138,8 @@ MCP23017::update_all_registers()
 void 
 MCP23017::update_register(Reg reg, uint8_t value)
 {
+  if (!check_presence()) return;
+
   wire.begin_transmission(mcp_address);
   wire.write((int8_t)reg);
   wire.write(value);
@@ -128,6 +149,8 @@ MCP23017::update_register(Reg reg, uint8_t value)
 void 
 MCP23017::update_registers(Reg first_reg, uint8_t count)
 {
+  if (!check_presence()) return;
+
   wire.begin_transmission(mcp_address);
   wire.write((int8_t)first_reg);
   for (int i = 0; i < count; ++i) {
@@ -139,10 +162,12 @@ MCP23017::update_registers(Reg first_reg, uint8_t count)
 // HIGH LEVEL:
 
 void
- MCP23017::set_direction(Pin pin, PinMode mode)
+MCP23017::set_direction(Pin pin, PinMode mode)
 {
   uint8_t port = ((uint8_t)pin >> 3) & 1;
   uint8_t p    =  (uint8_t)pin & 7;
+
+  if (!check_presence()) return;
 
   switch (mode) {
     case PinMode::INPUT:
