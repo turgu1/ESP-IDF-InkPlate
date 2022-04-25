@@ -4,7 +4,7 @@
 
 Version 0.9.6:
 
-- Added second MCP presence detection. With chips shortage issues, some Inkplate devices (Inkplate-10, Inkplate-6PLUS) may have their second MCP chip missing. the `mcp_ext.is_present()` method can be used to check its availability.
+- Added second MCP presence detection. With chips shortage issues, some Inkplate devices (Inkplate-10, Inkplate-6PLUS) may have their second MCP chip missing. the `mcp_ext.is_present()` method can be used to check its availability. Log information messages are produced indicating if MCPs are detected as present or not.
 
 Version 0.9.5: 
 
