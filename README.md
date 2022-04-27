@@ -1,10 +1,10 @@
 # ESP-IDF-InkPlate Library Version 0.9.6
 
-(April 25th, 2022)
+(April 27th, 2022)
 
 Version 0.9.6:
 
-- Added second MCP presence detection. With chips shortage issues, some Inkplate devices (Inkplate-10, Inkplate-6PLUS) may have their second MCP chip missing. The `mcp_ext.is_present()` method can be used to check its availability. Log information messages are produced indicating if MCPs are detected as present or not.
+- Added MCP presence detection. With chips shortage issues, some Inkplate devices (Inkplate-10, Inkplate-6PLUS) may have their second MCP chip missing. The `mcp_ext.is_present()` method can be used to check its availability. Log information messages are produced indicating if MCPs are detected as present or not.
 
 Version 0.9.5: 
 
