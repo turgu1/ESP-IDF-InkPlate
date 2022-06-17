@@ -5,4 +5,5 @@ LIST(FILTER inkplate_include_dirs EXCLUDE REGEX ".*/README$")
 idf_component_register(
     SRCS ${inkplate_srcs}
     INCLUDE_DIRS ${inkplate_include_dirs}
+    REQUIRES fatfs nvs_flash esp_http_client
 )
