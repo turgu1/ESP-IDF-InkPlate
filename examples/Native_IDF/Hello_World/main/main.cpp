@@ -32,7 +32,7 @@ void mainTask(void * param)
   display.setTextSize(4);             // Set text to be 4 times bigger than classic 5x7 px text
 
   // Prepare message text and position
-  char[] message = "Hello World";
+  char message[] = "Hello World";
   int w = display.width();
   int h = display.height();
   int cursor_x = (w / 2) - (strlen(message) / 2);
