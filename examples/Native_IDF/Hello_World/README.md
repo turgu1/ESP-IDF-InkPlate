@@ -16,12 +16,12 @@ Either download the Inkplate library or link it as a git submodule and place it 
 
 ```sh
 # to make it a submodule of your repository
-git submodule add -b v0.9.6 https://github.com/turgu1/ESP-IDF-InkPlate.git components/inkplate
+git submodule add -b master https://github.com/turgu1/ESP-IDF-InkPlate.git components/inkplate
 
 # or
 
-# to use a different version of the library, modify the submodule's branch accordingly
-git submodule add -b master https://github.com/turgu1/ESP-IDF-InkPlate.git components/inkplate
+# to use a specific version of the library, modify the submodule's branch accordingly
+git submodule add -b v0.9.6 https://github.com/turgu1/ESP-IDF-InkPlate.git components/inkplate
 ```
 
 ## Compile and run
