@@ -8,7 +8,7 @@ The program will only display a message "Hello World" in the center of the scree
 
 ## Configuration
 
-`sdkconfig` should be already preconfigured for the InkPlate ESP32 board. What requires your attention is the variant of your InkPlate device. This example targets InkPlate 10. If you are using a different InkPlate variant, modify the project compile definitions in [CMakeLists.txt](./CMakeLists.txt) according to your device.
+`sdkconfig` should be already preconfigured for the Inkplate 10 device. To change your Inkplate variant, go to `Component config --> Inkplate --> Choose your Inkplate variant` and change it accordingly.
 
 ## Installation
 

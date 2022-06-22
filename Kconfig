@@ -1,0 +1,12 @@
+menu "Inkplate"
+    choice INKPLATE_VARIANT_CHOOSE
+        prompt "Choose your Inkplate variant"
+        default INKPLATE_VARIANT_10
+        config INKPLATE_VARIANT_10
+            bool "Inkplate 10"
+        config INKPLATE_VARIANT_6
+            bool "Inkplate 6"
+        config INKPLATE_VARIANT_6PLUS
+            bool "Inkplate 6Plus"
+    endchoice
+endmenu
