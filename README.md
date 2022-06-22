@@ -1,4 +1,8 @@
-# ESP-IDF-InkPlate Library Version 0.9.6
+# ESP-IDF-InkPlate Library Version 0.9.7
+
+(June 21st, 2022)
+
+Added support for `idf.py` development, as provided by tajnymag.
 
 (April 27th, 2022)
 
