@@ -4,7 +4,7 @@ The purpose of this example is to show how to use the ESP-IDF-InkPlate library w
 
 The program will only display a message "Hello World" in the center of the screen and then exit the program. It includes freertos, idf and inkplate headers and can stand as a simple test whether your esp-idf installation is working correctly.
 
-**The example was tested only with ESP-IDF version 4.4.1.** However, as the library and example itself are made as universal as they could, past and future versions should work as well. If not, please open a new [issue](https://github.com/turgu1/ESP-IDF-InkPlate/issues) and let us know.
+**The example was tested only with ESP-IDF version 4.4.1.** However, as the library and example itself were made as universal as they could, past and future versions should work as well. If not, please open a new [issue](https://github.com/turgu1/ESP-IDF-InkPlate/issues) and let us know.
 
 ## Configuration
 
@@ -12,7 +12,7 @@ The program will only display a message "Hello World" in the center of the scree
 
 ## Installation
 
-Either download the inkplate library or link it as a git submodule and place it in the components/ folder.
+Either download the Inkplate library or link it as a git submodule and place it in the components/ folder.
 
 ```sh
 # to make it a submodule of your repository
