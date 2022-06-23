@@ -32,6 +32,10 @@ Distributed as-is; no warranty is given.
 
 #include "esp_http_client.h"
 
+#if CONFIG_MBEDTLS_CERTIFICATE_BUNDLE
+#include "esp_crt_bundle.h"
+#endif
+
 static constexpr char const * TAG = "NetworkClient";
 
 static const uint8_t ESP_MAXIMUM_RETRY = 6;
@@ -260,6 +264,10 @@ NetworkClient::downloadFile(const char * url, int32_t * defaultLen)
   
   config.url = url;
   config.event_handler = http_event_handler;
+
+  #if CONFIG_MBEDTLS_CERTIFICATE_BUNDLE
+  config.crt_bundle_attach = esp_crt_bundle_attach;
+  #endif
   
   esp_http_client_handle_t client = esp_http_client_init(&config);
   esp_err_t err = esp_http_client_perform(client);
