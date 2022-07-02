@@ -1297,6 +1297,14 @@ CONFIG_WPA_MBEDTLS_CRYPTO=y
 # CONFIG_WPA_WPS_STRICT is not set
 # CONFIG_WPA_11KV_SUPPORT is not set
 # end of Supplicant
+
+#
+# Inkplate
+#
+CONFIG_INKPLATE_VARIANT_10=y
+# CONFIG_INKPLATE_VARIANT_6 is not set
+# CONFIG_INKPLATE_VARIANT_6PLUS is
+# end of Inkplate
 # end of Component config
 
 #
