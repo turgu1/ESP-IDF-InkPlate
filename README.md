@@ -1,4 +1,9 @@
-# ESP-IDF-InkPlate Library Version 0.9.7
+# ESP-IDF-InkPlate Library Version 0.9.8
+
+(August 18th, 2022)
+
+Added support for waveform in EEPROM retrieval for Inkplate-10.
+Default waveform updated to the Arduino library version. When the EEPROM version is not loadable, this is the waveform table to be used.
 
 (June 21st, 2022)
 

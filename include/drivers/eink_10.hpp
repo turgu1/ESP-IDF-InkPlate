@@ -45,6 +45,11 @@ Distributed as-is; no warranty is given.
 
 class EInk10 : public EInk, NonCopyable
 {
+  static const uint8_t INKPLATE10_WAVEFORM_DEFAULT = 0;
+  static const uint8_t INKPLATE10_WAVEFORM1 = 20;
+  static const uint8_t INKPLATE10_WAVEFORM2 = 21;
+  static const uint8_t INKPLATE10_WAVEFORM3 = 22;
+
   public:
     EInk10(MCP23017 & mcp_i, MCP23017 & mcp_e) : EInk(mcp_i), mcp_ext(mcp_e)
       { }  // Private constructor
@@ -103,9 +108,23 @@ class EInk10 : public EInk, NonCopyable
         uint8_t * get_data() { return data; }
     };
 
-    void clean(PixelState pixel_state, uint8_t repeat_count);
+    void    clean(PixelState pixel_state, uint8_t repeat_count);
+    uint8_t calculate_checksum(struct waveformData * w);
+    bool    get_waveform_from_EEPROM(struct waveformData * w);
+    void    calculate_LUTs();
 
-    static const uint8_t  WAVEFORM_3BIT[8][8]; 
+    struct waveformData {
+        uint8_t header = 'W';
+        uint8_t waveform_id;
+        uint8_t waveform[8][9];
+        uint8_t temp = 20;
+        uint8_t checksum;
+    } waveform_EEPROM;
+
+    uint8_t               waveform_3bit[8][9];
+    uint8_t               current_waveform_id;
+
+    static const uint8_t  DEFAULT_WAVEFORM_3BIT[8][9]; 
     static const uint8_t  LUT2[16];
     static const uint8_t  LUTW[16];
     static const uint8_t  LUTB[16];

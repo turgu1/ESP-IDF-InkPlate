@@ -5,7 +5,6 @@
 #include "wire.hpp"
 #include "esp.hpp"
 #include "sd_card.hpp"
-
 #include "esp_sleep.h"
 
 #include "driver/rtc_io.h"
@@ -20,6 +19,8 @@ bool
 #endif
 {
   wire.setup();
+
+  nvs_mgr.setup();
 
   // Setup the display
   if (!e_ink.setup()) return false;

@@ -29,14 +29,15 @@ Distributed as-is; no warranty is given.
 #include "wire.hpp"
 #include "mcp23017.hpp"
 #include "esp.hpp"
+#include "nvs_mgr.hpp"
 
 #include <iostream>
 
-const uint8_t EInk10::WAVEFORM_3BIT[8][8] = {
-  {0, 0, 0, 0, 0, 0, 1, 0}, {0, 0, 2, 2, 2, 1, 1, 0}, 
-  {0, 2, 1, 1, 2, 2, 1, 0}, {1, 2, 2, 1, 2, 2, 1, 0},
-  {0, 2, 1, 2, 2, 2, 1, 0}, {2, 2, 2, 2, 2, 2, 1, 0}, 
-  {0, 0, 0, 0, 2, 1, 2, 0}, {0, 0, 2, 2, 2, 2, 2, 0}};
+const uint8_t EInk10::DEFAULT_WAVEFORM_3BIT[8][9] = {
+  {0, 0, 0, 0, 0, 0, 0, 1, 0}, {0, 0, 0, 2, 2, 2, 1, 1, 0},
+  {0, 0, 2, 1, 1, 2, 2, 1, 0}, {0, 1, 2, 2, 1, 2, 2, 1, 0},
+  {0, 0, 2, 1, 2, 2, 2, 1, 0}, {0, 2, 2, 2, 2, 2, 2, 1, 0},
+  {0, 0, 0, 0, 0, 2, 1, 2, 0}, {0, 0, 0, 2, 2, 2, 2, 2, 0}};
 
 const uint8_t EInk10::LUT2[16] = {
   0xAA, 0xA9, 0xA6, 0xA5, 0x9A, 0x99, 0x96, 0x95,
@@ -71,6 +72,19 @@ EInk10::setup()
 
   Wire::enter();
   
+  if ( get_waveform_from_EEPROM(&waveform_EEPROM) && 
+      (waveform_EEPROM.waveform_id >= INKPLATE10_WAVEFORM1) &&
+      (waveform_EEPROM.waveform_id <= INKPLATE10_WAVEFORM3)    ) {
+    memcpy(waveform_3bit, waveform_EEPROM.waveform, sizeof(waveform_3bit));
+    current_waveform_id = waveform_EEPROM.waveform_id;
+    ESP_LOGI(TAG, "Waveform %d loaded from EEPROM", current_waveform_id);
+  }
+  else {
+    memcpy(waveform_3bit, DEFAULT_WAVEFORM_3BIT, sizeof(waveform_3bit));
+    current_waveform_id = INKPLATE10_WAVEFORM_DEFAULT;
+    ESP_LOGI(TAG, "Wavefrom load failed! Upload new waveform in EEPROM. Using default waveform.");
+  }
+
   mcp_int.set_direction(VCOM,         MCP23017::PinMode::OUTPUT);
   mcp_int.set_direction(PWRUP,        MCP23017::PinMode::OUTPUT);
   mcp_int.set_direction(WAKEUP,       MCP23017::PinMode::OUTPUT); 
@@ -135,8 +149,8 @@ EInk10::setup()
   d_memory_new = new_frame_buffer_1bit();
   p_buffer     = (uint8_t *) malloc(BITMAP_SIZE_1BIT * 2);
 
-  GLUT  = (uint32_t *) malloc(256 * 8 * sizeof(uint32_t));
-  GLUT2 = (uint32_t *) malloc(256 * 8 * sizeof(uint32_t));
+  GLUT  = (uint32_t *) malloc(256 * 9 * sizeof(uint32_t));
+  GLUT2 = (uint32_t *) malloc(256 * 9 * sizeof(uint32_t));
   
   ESP_LOGD(TAG, "Memory allocation for bitmap buffers.");
   ESP_LOGD(TAG, "d_memory_new: %08x p_buffer: %08x.", (unsigned int)d_memory_new, (unsigned int)p_buffer);
@@ -153,14 +167,7 @@ EInk10::setup()
   d_memory_new->clear();
   memset(p_buffer, 0, BITMAP_SIZE_1BIT * 2);
 
-  for (int i = 0; i < 8; ++i) {
-    for (uint32_t j = 0; j < 256; ++j) {
-      uint8_t z = (WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i]);
-      GLUT[i * 256 + j] = PIN_LUT[z];
-      z = ((WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i])) << 4;
-      GLUT2[i * 256 + j] = PIN_LUT[z];
-    }
-  }
+  calculate_LUTs();
 
   initialized = true;
 
@@ -174,19 +181,38 @@ EInk10::update(FrameBuffer1Bit & frame_buffer)
  
   const uint8_t * ptr;
   uint8_t         dram;
+  uint8_t         repeat;
 
   Wire::enter();
 
   turn_on();
 
-  clean(PixelState::WHITE, 10);
-  clean(PixelState::BLACK, 10);
-  clean(PixelState::WHITE, 10);
-  clean(PixelState::BLACK, 10);
+  if (current_waveform_id != INKPLATE10_WAVEFORM1) {
+    clean(PixelState::WHITE,     1);
+    clean(PixelState::BLACK,    12);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::WHITE,     9);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::BLACK,    12);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::WHITE,     9);
+    repeat = 3;
+  }
+  else {
+    clean(PixelState::WHITE,     1);
+    clean(PixelState::BLACK,    10);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::WHITE,    10);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::BLACK,    10);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::WHITE,    10);
+    repeat = 5;
+  }
 
   uint8_t * data = frame_buffer.get_data();
 
-  for (int k = 0; k < 5; k++) {
+  for (int k = 0; k < repeat; k++) {
 
     ptr = &data[BITMAP_SIZE_1BIT - 1];
 
@@ -235,14 +261,30 @@ EInk10::update(FrameBuffer3Bit & frame_buffer)
   Wire::enter();
   turn_on();
 
-  clean(PixelState::WHITE, 10);
-  clean(PixelState::BLACK, 10);
-  clean(PixelState::WHITE, 10);
-  clean(PixelState::BLACK, 10);
+  if (current_waveform_id != INKPLATE10_WAVEFORM1) {
+    clean(PixelState::BLACK,     1);
+    clean(PixelState::WHITE,     7);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::BLACK,    12);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::WHITE,     7);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::BLACK,    12);
+  }
+  else {
+    clean(PixelState::BLACK,     1);
+    clean(PixelState::WHITE,    10);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::BLACK,    10);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::WHITE,    10);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::BLACK,    10);
+  }
 
   uint8_t * data = frame_buffer.get_data();
 
-  for (int k = 0, kk = 0; k < 8; k++, kk += 256) {
+  for (int k = 0, kk = 0; k < 9; k++, kk += 256) {
 
     const uint8_t * dp = &data[BITMAP_SIZE_3BIT - 2];
 
@@ -313,7 +355,9 @@ EInk10::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 
   turn_on();
 
-  for (int k = 0; k < 5; k++) {
+  uint8_t repeat = (current_waveform_id != INKPLATE10_WAVEFORM1) ? 4 : 5;
+ 
+  for (int k = 0; k < repeat; k++) {
     vscan_start();
     n = BITMAP_SIZE_1BIT * 2 - 1;
 
@@ -347,7 +391,6 @@ EInk10::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 void
 EInk10::clean(PixelState pixel_state, uint8_t repeat_count)
 {
-
   turn_on();
 
   uint32_t send = PIN_LUT[(uint8_t) pixel_state];
@@ -377,6 +420,60 @@ EInk10::clean(PixelState pixel_state, uint8_t repeat_count)
 
     ESP::delay_microseconds(230);
   }
+}
+
+/**
+ * @brief       Calculation of LUTs for fast conversion pixels to waveform
+ */
+void 
+EInk10::calculate_LUTs()
+{
+  for (int i = 0; i < 9; ++i) {
+    for (uint32_t j = 0; j < 256; ++j) {
+      uint8_t z = (WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i]);
+      GLUT[i * 256 + j] = PIN_LUT[z];
+      z = ((WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i])) << 4;
+      GLUT2[i * 256 + j] = PIN_LUT[z];
+    }
+  }
+}
+
+/**
+ * @brief       Function calculates checksum of wavefrom data read from nvs
+ *
+ * @param       struct waveformData * w
+ *              Structure for waveform data read from nvs. 
+ *              Struct can be found in eink_10.hpp class definition.
+ *
+ * @return      Value of checksum from data read from nvs 'eeprom' segment
+ */
+uint8_t 
+EInk10::calculate_checksum(struct waveformData * w)
+{
+  uint8_t * d   = (uint8_t *) w;
+  uint16_t  sum = 0;
+
+  for (int i = 0; i < sizeof(struct waveformData) - 1; i++) {
+    sum += d[i];
+  }
+  return sum % 256;
+}
+
+/**
+ * @brief       Function reads waveform data from nvs 'eeprom' segment and checks it's validity.
+ *
+ * @param       struct waveformData * w
+ *              Pointer to structure for waveform data read from nvs 'eeprom'. 
+ *              Struct can be found in eink_10.hpp class definition.
+ *
+ * @return      True if data is vaild, false if not
+ */
+bool 
+EInk10::get_waveform_from_EEPROM(struct waveformData * w)
+{
+  if (!nvs_mgr.get("eeprom", (uint8_t *) w, sizeof(struct waveformData))) return false;
+
+  return calculate_checksum(w) == w->checksum;
 }
 
 #endif
