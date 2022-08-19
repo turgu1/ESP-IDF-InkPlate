@@ -430,9 +430,9 @@ EInk10::calculate_LUTs()
 {
   for (int i = 0; i < 9; ++i) {
     for (uint32_t j = 0; j < 256; ++j) {
-      uint8_t z = (WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i]);
+      uint8_t z = (waveform_3bit[j & 0x07][i] << 2) | (waveform_3bit[(j >> 4) & 0x07][i]);
       GLUT[i * 256 + j] = PIN_LUT[z];
-      z = ((WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i])) << 4;
+      z = ((waveform_3bit[j & 0x07][i] << 2) | (waveform_3bit[(j >> 4) & 0x07][i])) << 4;
       GLUT2[i * 256 + j] = PIN_LUT[z];
     }
   }
@@ -441,19 +441,19 @@ EInk10::calculate_LUTs()
 /**
  * @brief       Function calculates checksum of wavefrom data read from nvs
  *
- * @param       struct waveformData * w
+ * @param       waveformData * w
  *              Structure for waveform data read from nvs. 
  *              Struct can be found in eink_10.hpp class definition.
  *
  * @return      Value of checksum from data read from nvs 'eeprom' segment
  */
 uint8_t 
-EInk10::calculate_checksum(struct waveformData * w)
+EInk10::calculate_checksum(waveformData * w)
 {
   uint8_t * d   = (uint8_t *) w;
   uint16_t  sum = 0;
 
-  for (int i = 0; i < sizeof(struct waveformData) - 1; i++) {
+  for (int i = 0; i < sizeof(waveformData) - 1; i++) {
     sum += d[i];
   }
   return sum % 256;
@@ -462,16 +462,16 @@ EInk10::calculate_checksum(struct waveformData * w)
 /**
  * @brief       Function reads waveform data from nvs 'eeprom' segment and checks it's validity.
  *
- * @param       struct waveformData * w
+ * @param       waveformData * w
  *              Pointer to structure for waveform data read from nvs 'eeprom'. 
  *              Struct can be found in eink_10.hpp class definition.
  *
  * @return      True if data is vaild, false if not
  */
 bool 
-EInk10::get_waveform_from_EEPROM(struct waveformData * w)
+EInk10::get_waveform_from_EEPROM(waveformData * w)
 {
-  if (!nvs_mgr.get("eeprom", (uint8_t *) w, sizeof(struct waveformData))) return false;
+  if (!nvs_mgr.get("eeprom", (uint8_t *) w, sizeof(waveformData))) return false;
 
   return calculate_checksum(w) == w->checksum;
 }

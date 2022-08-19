@@ -6,6 +6,7 @@
 #include "esp.hpp"
 #include "sd_card.hpp"
 #include "esp_sleep.h"
+#include "nvs_mgr.hpp"
 
 #include "driver/rtc_io.h"
 

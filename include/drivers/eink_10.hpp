@@ -108,11 +108,6 @@ class EInk10 : public EInk, NonCopyable
         uint8_t * get_data() { return data; }
     };
 
-    void    clean(PixelState pixel_state, uint8_t repeat_count);
-    uint8_t calculate_checksum(struct waveformData * w);
-    bool    get_waveform_from_EEPROM(struct waveformData * w);
-    void    calculate_LUTs();
-
     struct waveformData {
         uint8_t header = 'W';
         uint8_t waveform_id;
@@ -120,6 +115,11 @@ class EInk10 : public EInk, NonCopyable
         uint8_t temp = 20;
         uint8_t checksum;
     } waveform_EEPROM;
+
+    void    clean(PixelState pixel_state, uint8_t repeat_count);
+    uint8_t calculate_checksum(waveformData * w);
+    bool    get_waveform_from_EEPROM(waveformData * w);
+    void    calculate_LUTs();
 
     uint8_t               waveform_3bit[8][9];
     uint8_t               current_waveform_id;
