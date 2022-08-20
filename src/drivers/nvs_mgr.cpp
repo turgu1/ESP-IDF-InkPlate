@@ -112,7 +112,12 @@ NVSMgr::put(char * segment_name, size_t segment_size, uint8_t * data, size_t dat
         memset(segment_data, 0, segment_size);
         memcpy(segment_data, data, data_size);
         if ((err = nvs_set_blob(nvs_handle, segment_name, segment_data, segment_size)) == ESP_OK) {
-          result = true;
+          if ((err = nvs_commit(nvs_handle)) == ESP_OK) {
+            result = true;
+          }
+          else {
+            ESP_LOGE(TAG, "Unable to commit NVS data: %s.", esp_err_to_name(err));
+          }
         }
         else {
           ESP_LOGE(TAG, "Unable to write NVS data: %s.", esp_err_to_name(err));

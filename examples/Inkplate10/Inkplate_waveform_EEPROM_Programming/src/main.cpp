@@ -122,7 +122,7 @@ void showGradient(int _selected)
 }
 
 
-#define STACK_SIZE 10000
+#define STACK_SIZE 20000
 
 extern "C" {
 
