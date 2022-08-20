@@ -16,6 +16,7 @@ class NVSMgr
     bool setup(bool force_erase = false);
     bool get(char * segment_name, uint8_t * data, size_t size); 
     bool put(char * segment_name, size_t segment_size, uint8_t * data, size_t data_size); 
+    inline void set_initialized(bool value) { initialized = value; }
 
   private:
     static constexpr char const * TAG            = "NVSMgr";

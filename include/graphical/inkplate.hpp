@@ -23,18 +23,32 @@ Distributed as-is; no warranty is given.
 #include "network_client.hpp"
 #include "sd_card.hpp"
 
+#if defined(INKPLATE_10)
+  typedef EInk10::waveformData waveformData;
+  #define INKPLATE10_WAVEFORM1 EInk10::WAVEFORM1
+  #define INKPLATE10_WAVEFORM2 EInk10::WAVEFORM2
+  #define INKPLATE10_WAVEFORM3 EInk10::WAVEFORM3
+#endif
+
+#define PAD1 0
+#define PAD2 1
+#define PAD3 2
+
 class Inkplate : public Graphics
 {
+  private:
+    bool nvs_init;
+
   public:
 
-    Inkplate(DisplayMode mode);
+    Inkplate(DisplayMode mode, bool init_nvs = true);
 
     #if defined(INKPLATE_6PLUS)
       void begin(bool sd_card_init = false, void (*touch_screen_handler)(void *) = nullptr) { 
-        inkplate_platform.setup(sd_card_init, touch_screen_handler);
+        inkplate_platform.setup(sd_card_init, touch_screen_handler, nvs_init);
       }
     #else
-      void begin(bool sd_card_init = false) { inkplate_platform.setup(sd_card_init); }
+      void begin(bool sd_card_init = false) { inkplate_platform.setup(sd_card_init, nvs_init); }
     #endif
 
     inline void             einkOn() { e_ink.turn_on();                          }
@@ -50,6 +64,8 @@ class Inkplate : public Graphics
     inline uint16_t      einkWidth() { return e_ink.get_width();                 }
     inline uint16_t     einkHeight() { return e_ink.get_height();                }
 
+    inline bool            initNVS(bool force_erase = false ) { return nvs_mgr.setup(force_erase); }
+    inline void  setNVSInitialized(bool value) { nvs_mgr.set_initialized(value); }
 
     inline bool lightSleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num, int level) { 
       return inkplate_platform.light_sleep(minutes_to_sleep, gpio_num, level); 
@@ -86,6 +102,14 @@ class Inkplate : public Graphics
 
       inline void    frontlight(bool enable)      { enable ? front_light.enable() : front_light.disable(); }
       inline void    setFrontlight(uint8_t level) { front_light.set_level(level); }
+    #endif
+
+    #if defined(INKPLATE_10)
+      inline bool getWaveformFromEEPROM(waveformData * w) { return e_ink.get_waveform_from_EEPROM(w); }
+      inline bool burnWaveformToEEPROM(waveformData * w, size_t eeprom_size = 512) {
+        return e_ink.burn_waveform_to_EEPROM(w, eeprom_size);
+      }
+      inline void changeWaveform(uint8_t * w) { e_ink.change_waveform(w); }
     #endif
 };
 

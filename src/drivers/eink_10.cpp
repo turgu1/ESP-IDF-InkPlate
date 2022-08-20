@@ -73,15 +73,15 @@ EInk10::setup()
   Wire::enter();
   
   if ( get_waveform_from_EEPROM(&waveform_EEPROM) && 
-      (waveform_EEPROM.waveform_id >= INKPLATE10_WAVEFORM1) &&
-      (waveform_EEPROM.waveform_id <= INKPLATE10_WAVEFORM3)    ) {
+      (waveform_EEPROM.waveform_id >= WAVEFORM1) &&
+      (waveform_EEPROM.waveform_id <= WAVEFORM3)    ) {
     memcpy(waveform_3bit, waveform_EEPROM.waveform, sizeof(waveform_3bit));
     current_waveform_id = waveform_EEPROM.waveform_id;
     ESP_LOGI(TAG, "Waveform %d loaded from EEPROM", current_waveform_id);
   }
   else {
     memcpy(waveform_3bit, DEFAULT_WAVEFORM_3BIT, sizeof(waveform_3bit));
-    current_waveform_id = INKPLATE10_WAVEFORM_DEFAULT;
+    current_waveform_id = WAVEFORM_DEFAULT;
     ESP_LOGI(TAG, "Wavefrom load failed! Upload new waveform in EEPROM. Using default waveform.");
   }
 
@@ -187,7 +187,7 @@ EInk10::update(FrameBuffer1Bit & frame_buffer)
 
   turn_on();
 
-  if (current_waveform_id != INKPLATE10_WAVEFORM1) {
+  if (current_waveform_id != WAVEFORM1) {
     clean(PixelState::WHITE,     1);
     clean(PixelState::BLACK,    12);
     clean(PixelState::DISCHARGE, 1);
@@ -261,7 +261,7 @@ EInk10::update(FrameBuffer3Bit & frame_buffer)
   Wire::enter();
   turn_on();
 
-  if (current_waveform_id != INKPLATE10_WAVEFORM1) {
+  if (current_waveform_id != WAVEFORM1) {
     clean(PixelState::BLACK,     1);
     clean(PixelState::WHITE,     7);
     clean(PixelState::DISCHARGE, 1);
@@ -355,7 +355,7 @@ EInk10::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 
   turn_on();
 
-  uint8_t repeat = (current_waveform_id != INKPLATE10_WAVEFORM1) ? 4 : 5;
+  uint8_t repeat = (current_waveform_id != WAVEFORM1) ? 4 : 5;
  
   for (int k = 0; k < repeat; k++) {
     vscan_start();
@@ -460,7 +460,7 @@ EInk10::calculate_checksum(waveformData * w)
 }
 
 /**
- * @brief       Function reads waveform data from nvs 'eeprom' segment and checks it's validity.
+ * @brief       Reads waveform data from nvs 'eeprom' segment and checks it's validity.
  *
  * @param       waveformData * w
  *              Pointer to structure for waveform data read from nvs 'eeprom'. 
@@ -476,6 +476,19 @@ EInk10::get_waveform_from_EEPROM(waveformData * w)
   return calculate_checksum(w) == w->checksum;
 }
 
+/**
+ * @brief       Write waveform data to nvs 'eeprom' segment.
+ *
+ * @param       waveformData * w
+ *              Pointer to structure for waveform data read from nvs 'eeprom'. 
+ *              Struct can be found in eink_10.hpp class definition.
+ *              The structure checksum is updated before writing.
+ * 
+ * @param       size_t eeprom_size
+ *              The size to use for the 'eeprom' segment. Optional. Default to 512 bytes.
+ *
+ * @return      True if data is vaild, false if not
+ */
 bool 
 EInk10::burn_waveform_to_EEPROM(waveformData * w, size_t eeprom_size)
 {

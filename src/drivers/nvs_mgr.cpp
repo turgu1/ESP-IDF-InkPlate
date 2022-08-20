@@ -49,7 +49,7 @@ NVSMgr::get(char * segment_name, uint8_t * data, size_t data_size)
   size_t segment_size;
   bool result = false;
 
-  ESP_LOGI(TAG, "Reading data size %d from segment %s of size %d...", data_size, segment_name, segment_size);
+  ESP_LOGI(TAG, "Reading data size %d from segment %s...", data_size, segment_name);
 
   if (!initialized) {
     ESP_LOGE(TAG, "NVS not initialized.");

@@ -45,10 +45,6 @@ Distributed as-is; no warranty is given.
 
 class EInk10 : public EInk, NonCopyable
 {
-  static const uint8_t INKPLATE10_WAVEFORM_DEFAULT = 0;
-  static const uint8_t INKPLATE10_WAVEFORM1 = 20;
-  static const uint8_t INKPLATE10_WAVEFORM2 = 21;
-  static const uint8_t INKPLATE10_WAVEFORM3 = 22;
 
   public:
     EInk10(MCP23017 & mcp_i, MCP23017 & mcp_e) : EInk(mcp_i), mcp_ext(mcp_e)
@@ -60,6 +56,11 @@ class EInk10 : public EInk, NonCopyable
     static const uint32_t BITMAP_SIZE_3BIT = ((uint32_t) WIDTH * HEIGHT) >> 1; // In bytes
     static const uint16_t LINE_SIZE_1BIT   = WIDTH >> 3;                       // In bytes
     static const uint16_t LINE_SIZE_3BIT   = WIDTH >> 1;                       // In bytes
+
+    static const uint8_t WAVEFORM_DEFAULT = 0;
+    static const uint8_t WAVEFORM1 = 20;
+    static const uint8_t WAVEFORM2 = 21;
+    static const uint8_t WAVEFORM3 = 22;
 
     inline int16_t  get_width() { return WIDTH;  }
     inline int16_t get_height() { return HEIGHT; }

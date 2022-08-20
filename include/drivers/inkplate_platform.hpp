@@ -28,6 +28,7 @@ Distributed as-is; no warranty is given.
 #include "eink_6plus.hpp"
 #include "eink_10.hpp"
 #include "rtc_pcf85063.hpp" 
+#include "nvs_mgr.hpp"
 
 #if defined(EXTENDED_CASE) && (defined(INKPLATE_6) || defined(INKPLATE_10))
   #include "press_keys.hpp"

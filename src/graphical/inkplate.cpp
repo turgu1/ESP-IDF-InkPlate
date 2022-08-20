@@ -17,11 +17,12 @@ Distributed as-is; no warranty is given.
 #include "inkplate.hpp"
 #include "inkplate_platform.hpp"
 
-Inkplate::Inkplate(DisplayMode mode) : 
+Inkplate::Inkplate(DisplayMode mode, bool init_nvs) : 
   Adafruit_GFX(e_ink.get_width(), e_ink.get_height()), 
       Graphics(e_ink.get_width(), e_ink.get_height())
 {
   setDisplayMode(mode);
+  nvs_init = init_nvs;
 }
 
 #if defined(INKPLATE_6PLUS)
