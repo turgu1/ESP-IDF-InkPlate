@@ -2,9 +2,9 @@
 
 (August 20th, 2022)
 
-Added support for waveform in EEPROM retrieval for Inkplate-10:
-- A new class, `NVSMgr`, has been added to support the use of a *virtual* EEPROM, as per the Arduino environment. The library does initialize the access to the nvs partition unless the users' application disable it using the new parameter to the Inkplate constructor named `bool init_nvm`. If so, the end user's application must call the Inkplate::setNVSInitialized(true) once the nvs initilization has been done in it's own code. This is to insure access to the EEPROM content by the Inkplate10 driver.
-- Methods to support the EEPROM retrieval and burning has been added and available to the user's applications (from the inkplate.hpp include file). The burnWaveformToEEPROM takes an additionnal optional parameter to override the default EEPROM size of 512. It also compute the checksum of the waveformData structure before writing it to the EEPROM:
+Added support for the waveform in EEPROM retrieval for Inkplate-10:
+- A new class, `NVSMgr`, has been added to support the use of a *virtual* EEPROM, as per the Arduino environment. The library does initialize the access to the nvs partition unless the users' application disables it using the new parameter to the Inkplate constructor named `bool init_nvm`. If so, the end user's application must call the Inkplate::setNVSInitialized(true) once the nvs initialization has been done in its code. This is to ensure access to the EEPROM content by the Inkplate10 driver.
+- Methods to support the EEPROM retrieval and burning have been added and available to the user's applications (from the inkplate.hpp include file). The burnWaveformToEEPROM takes an additional optional parameter to override the default EEPROM size of 512. It also computes the checksum of the waveformData structure before writing it to the EEPROM:
 
 ```
   bool getWaveformFromEEPROM(waveformData * w);
