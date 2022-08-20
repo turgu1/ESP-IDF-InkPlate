@@ -1,9 +1,19 @@
 # ESP-IDF-InkPlate Library Version 0.9.8
 
-(August 18th, 2022)
+(August 20th, 2022)
 
-Added support for waveform in EEPROM retrieval for Inkplate-10.
-Default waveform updated to the Arduino library version. When the EEPROM version is not loadable, this is the waveform table to be used.
+Added support for waveform in EEPROM retrieval for Inkplate-10:
+- A new class, `NVSMgr`, has been added to support the use of a *virtual* EEPROM, as per the Arduino environment. The library does initialize the access to the nvs partition unless the users' application disable it using the new parameter to the Inkplate constructor named `bool init_nvm`. If so, the end user's application must call the Inkplate::setNVSInitialized(true) once the nvs initilization has been done in it's own code. This is to insure access to the EEPROM content by the Inkplate10 driver.
+- Methods to support the EEPROM retrieval and burning has been added and available to the user's applications (from the inkplate.hpp include file). The burnWaveformToEEPROM takes an additionnal optional parameter to override the default EEPROM size of 512. It also compute the checksum of the waveformData structure before writing it to the EEPROM:
+
+```
+  bool getWaveformFromEEPROM(waveformData * w);
+  bool burnWaveformToEEPROM(waveformData * w, size_t eeprom_size = 512);
+  void changeWaveform(uint8_t * w);
+```
+
+- The application Inkplate_Waveform_EEPROM_Programming from the Arduino library has been adjusted and added [here](https://github.com/turgu1/ESP-IDF-InkPlate/tree/v0.9.8/examples/Inkplate10/Inkplate_waveform_EEPROM_Programming).
+- Default waveform updated as per the Arduino library version. When the EEPROM version is not loadable, this is the waveform table to be used.
 
 (June 21st, 2022)
 
