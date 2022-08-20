@@ -116,9 +116,9 @@ class InkPlatePlatform : NonCopyable
      * @return false - Some device not initialized properly
      */
     #if defined(INKPLATE_6PLUS)
-      bool setup(bool sd_card_init = false, TouchScreen::ISRHandlerPtr touch_screen_handler = nullptr);
+      bool setup(bool sd_card_init = false, TouchScreen::ISRHandlerPtr touch_screen_handler = nullptr, bool nvs_init = true);
     #else
-      bool setup(bool sd_card_init = false);
+      bool setup(bool sd_card_init = false, bool nvs_init = true);
     #endif
 
     bool light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num = (gpio_num_t) 0, int level = 1);

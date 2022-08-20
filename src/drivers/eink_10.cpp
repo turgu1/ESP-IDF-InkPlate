@@ -423,7 +423,7 @@ EInk10::clean(PixelState pixel_state, uint8_t repeat_count)
 }
 
 /**
- * @brief       Calculation of LUTs for fast conversion pixels to waveform
+ * @brief Calculation of LUTs for fast conversion pixels to waveform
  */
 void 
 EInk10::calculate_LUTs()
@@ -471,9 +471,30 @@ EInk10::calculate_checksum(waveformData * w)
 bool 
 EInk10::get_waveform_from_EEPROM(waveformData * w)
 {
-  if (!nvs_mgr.get("eeprom", (uint8_t *) w, sizeof(waveformData))) return false;
+  if (!nvs_mgr.get((char *) "eeprom", (uint8_t *) w, sizeof(waveformData))) return false;
 
   return calculate_checksum(w) == w->checksum;
+}
+
+bool 
+EInk10::burn_waveform_to_EEPROM(waveformData * w, size_t eeprom_size)
+{
+  w->checksum = calculate_checksum(w);
+  return nvs_mgr.put((char *) "eeprom", eeprom_size, (uint8_t *) w, sizeof(waveformData));
+}
+
+/**
+ * Function allows grayscale waveform to be changed
+ *
+ * @param       uint8_t * w
+ *              Waveform array with 8 rows where every row represents one color and 9 columns where every column
+ *              represents one phase or frame of each color.
+ */
+void 
+EInk10::change_waveform(uint8_t * w)
+{
+  memcpy(waveform_3bit, w, sizeof(waveform_3bit));
+  calculate_LUTs();
 }
 
 #endif

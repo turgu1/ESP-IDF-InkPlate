@@ -14,14 +14,14 @@ InkPlatePlatform InkPlatePlatform::singleton;
 
 bool
 #if defined(INKPLATE_6PLUS)
-  InkPlatePlatform::setup(bool sd_card_init, TouchScreen::ISRHandlerPtr touch_screen_handler)
+  InkPlatePlatform::setup(bool sd_card_init, TouchScreen::ISRHandlerPtr touch_screen_handler, bool nvs_init)
 #else
-  InkPlatePlatform::setup(bool sd_card_init)
+  InkPlatePlatform::setup(bool sd_card_init, bool nvs_init)
 #endif
 {
   wire.setup();
 
-  nvs_mgr.setup();
+  if (nvs_init) nvs_mgr.setup();
 
   // Setup the display
   if (!e_ink.setup()) return false;

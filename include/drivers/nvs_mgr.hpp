@@ -15,14 +15,14 @@ class NVSMgr
 
     bool setup(bool force_erase = false);
     bool get(char * segment_name, uint8_t * data, size_t size); 
-    bool put(char * segment_name, uint8_t * data, size_t size); 
+    bool put(char * segment_name, size_t segment_size, uint8_t * data, size_t data_size); 
 
   private:
     static constexpr char const * TAG            = "NVSMgr";
     static constexpr char const * PARTITION_NAME = "nvs";
 
-   nvs_handle_t nvs_handle;
-    bool         initialized;
+    nvs_handle_t nvs_handle;
+    bool initialized;
 };
 
 #if __NVS_MGR__

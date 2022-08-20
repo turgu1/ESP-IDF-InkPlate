@@ -85,6 +85,18 @@ class EInk10 : public EInk, NonCopyable
 
     void partial_update(FrameBuffer1Bit & frame_buffer, bool force = false);
     
+    struct waveformData {
+      uint8_t header = 'W';
+      uint8_t waveform_id;
+      uint8_t waveform[8][9];
+      uint8_t temp = 20;
+      uint8_t checksum;
+    } waveform_EEPROM;
+
+    bool get_waveform_from_EEPROM(waveformData * w);
+    bool burn_waveform_to_EEPROM(waveformData * w, size_t eeprom_size = 512);
+    void change_waveform(uint8_t * w);
+
   private:
     static constexpr char const * TAG = "EInk10";
 
@@ -108,17 +120,8 @@ class EInk10 : public EInk, NonCopyable
         uint8_t * get_data() { return data; }
     };
 
-    struct waveformData {
-        uint8_t header = 'W';
-        uint8_t waveform_id;
-        uint8_t waveform[8][9];
-        uint8_t temp = 20;
-        uint8_t checksum;
-    } waveform_EEPROM;
-
     void    clean(PixelState pixel_state, uint8_t repeat_count);
     uint8_t calculate_checksum(waveformData * w);
-    bool    get_waveform_from_EEPROM(waveformData * w);
     void    calculate_LUTs();
 
     uint8_t               waveform_3bit[8][9];
