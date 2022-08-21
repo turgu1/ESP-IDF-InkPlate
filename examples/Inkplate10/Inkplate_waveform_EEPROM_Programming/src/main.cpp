@@ -53,44 +53,48 @@ void mainTask(void * params)
 {
     display.begin();   // Init library (you should call this function ONLY ONCE)
 
-    // Display all shades of gray on epaper with first waveform
-    showGradient(currentWaveform);
+    while (true) {
+        // Display all shades of gray on epaper with current waveform
+        showGradient(currentWaveform);
 
-    // Until "Load" key is not pressed, user can select one of the waveforms
-    while (!display.readTouchpad(PAD2))
-    {
-        // Select and show next waveform
-        if (display.readTouchpad(PAD3))
+        // Until "Load" key is not pressed, user can select one of the waveforms
+        while (!display.readTouchpad(PAD2))
         {
-            currentWaveform++;
-            if (currentWaveform > waveformListSize - 1)
-                currentWaveform = 0;
-            showGradient(currentWaveform);
+            // Select and show next waveform
+            if (display.readTouchpad(PAD3))
+            {
+                currentWaveform++;
+                if (currentWaveform > waveformListSize - 1)
+                    currentWaveform = 0;
+                showGradient(currentWaveform);
+            }
+
+            // Select and show prev. waveform
+            if (display.readTouchpad(PAD1))
+            {
+                currentWaveform--;
+                if (currentWaveform < 0)
+                    currentWaveform = waveformListSize - 1;
+                showGradient(currentWaveform);
+            }
         }
 
-        // Select and show prev. waveform
-        if (display.readTouchpad(PAD1))
-        {
-            currentWaveform--;
-            if (currentWaveform < 0)
-                currentWaveform = waveformListSize - 1;
-            showGradient(currentWaveform);
-        }
+        // Load waveform in EEPROM memory of ESP32
+        waveformEEPROM.waveform_id = INKPLATE10_WAVEFORM1 + currentWaveform;
+        memcpy(&waveformEEPROM.waveform, waveformList[currentWaveform], sizeof(waveformEEPROM.waveform));
+        //waveformEEPROM.checksum = display.calculateChecksum(waveformEEPROM);
+        display.burnWaveformToEEPROM(&waveformEEPROM);
+
+        // Show message on the display
+        display.clearDisplay();
+        display.setCursor(10, 100);
+        display.print("Waveform");
+        display.print(currentWaveform + 1, DEC);
+        display.print(" selected & programmed into ESP32 EEPROM");
+        display.display();
+
+        ESP::delay(5000);
     }
-
-    // Load waveform in EEPROM memory of ESP32
-    waveformEEPROM.waveform_id = INKPLATE10_WAVEFORM1 + currentWaveform;
-    memcpy(&waveformEEPROM.waveform, waveformList[currentWaveform], sizeof(waveformEEPROM.waveform));
-    //waveformEEPROM.checksum = display.calculateChecksum(waveformEEPROM);
-    display.burnWaveformToEEPROM(&waveformEEPROM);
-
-    // Show message on the display
-    display.clearDisplay();
-    display.setCursor(10, 100);
-    display.print("Waveform");
-    display.print(currentWaveform + 1, DEC);
-    display.print(" selected & programmed into ESP32 EEPROM");
-    display.display();
 }
 
 // Prints gradient lines and currently selected waveform
