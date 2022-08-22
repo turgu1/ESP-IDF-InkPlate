@@ -3,8 +3,8 @@
 (August 20th, 2022)
 
 Added support for the waveform in EEPROM retrieval for Inkplate-10:
-- A new class, `NVSMgr`, has been added to support the use of a *virtual* EEPROM, as per the Arduino environment. The library does initialize the access to the nvs partition unless the users' application disables it using the new parameter to the Inkplate constructor named `bool init_nvm`. If so, the end user's application must call the Inkplate::setNVSInitialized(true) once the nvs initialization has been done in its code. This is to ensure access to the EEPROM content by the Inkplate10 driver.
-- Methods to support the EEPROM retrieval and burning have been added and available to the user's applications (from the inkplate.hpp include file). The burnWaveformToEEPROM takes an additional optional parameter to override the default EEPROM size of 512. It also computes the checksum of the waveformData structure before writing it to the EEPROM:
+- A new class, `NVSMgr`, has been added to support the use of a *virtual* EEPROM, as per the Arduino environment. The library does initialize the access to the nvs partition unless the users' application disables it using the new parameter to the Inkplate constructor named `bool init_nvm`. If so, the end user's application must call the Inkplate::setNVSInitialized(true) once the nvs initialization has been done in its code. This is to ensure access to the EEPROM content by the Inkplate10 driver. This class, by itself is generic and very simple. 
+- Methods to support the EEPROM content retrieval and burning have been added and available to the user's applications (from the inkplate.hpp include file). The burnWaveformToEEPROM takes an additional optional parameter to override the default EEPROM size of 512. It also computes the checksum of the waveformData structure before writing it to the EEPROM:
 
 ```
   bool getWaveformFromEEPROM(waveformData * w);
@@ -14,6 +14,7 @@ Added support for the waveform in EEPROM retrieval for Inkplate-10:
 
 - The application Inkplate_Waveform_EEPROM_Programming from the Arduino library has been adjusted and added [here](https://github.com/turgu1/ESP-IDF-InkPlate/tree/v0.9.8/examples/Inkplate10/Inkplate_waveform_EEPROM_Programming).
 - Default waveform updated as per the Arduino library version. When the EEPROM version is not loadable, this is the waveform table to be used.
+- The *virtual* EEPROM on the Arduino uses the NVS partition that is usually located at offset 0x9000 and of length 0x5000 (20k). To ensure compatibility between Arduino-based apps and ESP-IDF-based apps, the NVS partition must be defined to be at the same offset and length. If not, its content (the saved waveform) may be lost when installing an application that redefines the NVS location and/or size. All partitions definitions in the ESP-IDF-Inkplate library have been updated to use such NVS location and size.
 
 (June 21st, 2022)
 
