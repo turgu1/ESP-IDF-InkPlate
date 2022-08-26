@@ -47,7 +47,7 @@ void Image::readBmpHeaderFromFile(FILE * f, bitmapHeader * h)
         fread(buff, totalColors * 4 + 100, 1, f);
 
         readBmpHeader(buff, h);
-        free(buff);
+        delete[] buff;
     }
     else
     {

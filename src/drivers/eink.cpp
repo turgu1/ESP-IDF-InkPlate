@@ -54,7 +54,7 @@ EInk::turn_off()
     oe_clear();
   gmod_clear();
 
-  GPIO.out &= ~(DATA | LE | CL);
+  GPIO.out = GPIO.out & ~(DATA | LE | CL);
   
    ckv_clear();
    sph_clear();
