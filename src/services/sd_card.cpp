@@ -5,6 +5,7 @@
 #include "esp_vfs_fat.h"
 #include "driver/sdmmc_host.h"
 #include "driver/sdspi_host.h"
+#include "driver/spi_master.h"
 #include "sdmmc_cmd.h"
 
 SDCard::SDCardState SDCard::state = SDCardState::UNINITIALIZED;
@@ -29,21 +30,25 @@ SDCard::setup()
   static const gpio_num_t PIN_NUM_CLK  = GPIO_NUM_14;
   static const gpio_num_t PIN_NUM_CS   = GPIO_NUM_15;
 
-  sdmmc_host_t        host        = SDSPI_HOST_DEFAULT();
-  sdspi_slot_config_t slot_config = SDSPI_SLOT_CONFIG_DEFAULT();
+  sdmmc_host_t        host          = SDSPI_HOST_DEFAULT();
+  sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
 
   host.flags = SDMMC_HOST_FLAG_SPI;
 
-  slot_config.gpio_miso = PIN_NUM_MISO;
-  slot_config.gpio_mosi = PIN_NUM_MOSI;
-  slot_config.gpio_sck  = PIN_NUM_CLK;
-  slot_config.gpio_cs   = PIN_NUM_CS;
+  slot_config.gpio_cs = PIN_NUM_CS;
 
-  esp_vfs_fat_sdmmc_mount_config_t mount_config = {
-    .format_if_mount_failed = false,
-    .max_files = 5,
-    .allocation_unit_size = 16 * 1024
-  };
+  spi_bus_config_t bus_config = {};
+  bus_config.mosi_io_num = PIN_NUM_MOSI;
+  bus_config.miso_io_num = PIN_NUM_MISO;
+  bus_config.sclk_io_num = PIN_NUM_CLK;
+
+  ESP_ERROR_CHECK(spi_bus_initialize(SPI_HOST, &bus_config, SPI_DMA_CH_AUTO));
+  ESP_ERROR_CHECK(sdspi_host_init_device(&slot_config, nullptr));
+
+  esp_vfs_fat_sdmmc_mount_config_t mount_config = {};
+  mount_config.format_if_mount_failed = false;
+  mount_config.max_files = 5;
+  mount_config.allocation_unit_size = 16 * 1024;
 
   state = SDCardState::FAILED;
 

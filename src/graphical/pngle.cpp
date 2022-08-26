@@ -785,7 +785,7 @@ static int pngle_feed_internal(pngle_t *pngle, const uint8_t *buf, size_t len)
 		return 8;
 
 	case PNGLE_STATE_HANDLE_CHUNK: {
-      len = std::min(len, pngle->chunk_remain);
+      len = std::min<uint32_t>(len, pngle->chunk_remain);
 
       int consumed = pngle_handle_chunk(pngle, buf, len);
 

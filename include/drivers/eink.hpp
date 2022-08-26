@@ -3,6 +3,7 @@
 #include "frame_buffer.hpp"
 #include "mcp23017.hpp"
 #include "wire.hpp"
+#include "hal/gpio_ll.h"
 
 class EInk
 {

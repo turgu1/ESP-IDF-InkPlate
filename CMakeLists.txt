@@ -13,7 +13,7 @@ endif()
 idf_component_register(
     SRCS ${inkplate_srcs}
     INCLUDE_DIRS ${inkplate_include_dirs}
-    REQUIRES fatfs nvs_flash esp_http_client
+    REQUIRES fatfs nvs_flash esp_http_client esp_timer esp_adc esp_wifi mbedtls
 )
 
 target_compile_definitions(${COMPONENT_LIB} PUBLIC ${INKPLATE_VARIANT})

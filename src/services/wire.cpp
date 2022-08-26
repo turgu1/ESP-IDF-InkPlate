@@ -74,7 +74,7 @@ Wire::end_transmission()
     ESP_ERROR_CHECK(i2c_master_write_byte(cmd, (address << 1) | I2C_MASTER_WRITE, 1));
     if (index > 0) ESP_ERROR_CHECK(i2c_master_write(cmd, buffer, index, 1));
     ESP_ERROR_CHECK(i2c_master_stop(cmd));
-    result = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000 / portTICK_RATE_MS);
+    result = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
     index = 0;
 
@@ -120,7 +120,7 @@ Wire::request_from(uint8_t addr, uint8_t size)
 
     ESP_ERROR_CHECK(i2c_master_stop(cmd));
 
-    esp_err_t result = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000 / portTICK_RATE_MS);
+    esp_err_t result = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
     size_to_read = size;
     index = 0;
