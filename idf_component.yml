@@ -1,4 +1,4 @@
-version: "idf-v5.0-support"
+version: "0.9.8"
 description: "A porting effort to the ESP-IDF framework for the e-Radionica InkPlate software."
 dependencies:
   idf:
