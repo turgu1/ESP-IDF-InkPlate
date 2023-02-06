@@ -21,6 +21,9 @@ Distributed as-is; no warranty is given.
 */
 
 #define __MCP__ 1
+
+#include <cinttypes>
+
 #include "mcp23017.hpp"
 #include "esp_log.h"
 
@@ -32,7 +35,7 @@ Distributed as-is; no warranty is given.
 bool
 MCP23017::check_presence()
 {
-  if (!present) ESP_LOGE(TAG, "The MCP at address 0x%X has not been detected.", mcp_address);
+  if (!present) ESP_LOGE(TAG, "The MCP at address 0x%" PRIX8 " has not been detected.", mcp_address);
   return present;
 }
 
@@ -69,7 +72,7 @@ MCP23017::setup()
   wire.begin_transmission(mcp_address);
   present = wire.end_transmission() == ESP_OK;
   
-  ESP_LOGI(TAG, "MCP at address 0x%X has%s been detected", mcp_address, present ? "" : " NOT");
+  ESP_LOGI(TAG, "MCP at address 0x%" PRIX8 " has%s been detected", mcp_address, present ? "" : " NOT");
 
   read_all_registers();
   registers[Reg::IODIRA] = 0xff;
