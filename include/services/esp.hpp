@@ -64,7 +64,7 @@ class ESP
         mem = heap_caps_malloc(size, MALLOC_CAP_SPIRAM); 
       }
       if (mem == nullptr) {
-        ESP_LOGE(TAG, "Not enough memory on PSRAM!!! (Asking %u bytes)", size);
+        ESP_LOGE(TAG, "Not enough memory on PSRAM!!! (Asking %lu bytes)", size);
       }
       return mem;
     }

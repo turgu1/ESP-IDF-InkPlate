@@ -19,6 +19,7 @@ Distributed as-is; no warranty is given.
 #include "esp_log.h"
 
 #include <string.h>
+#include <cinttypes>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -60,7 +61,7 @@ static void sta_event_handler(void            * arg,
                               int32_t           event_id, 
                               void            * event_data)
 {
-  ESP_LOGI(TAG, "STA Event, Base: %08x, Event: %d.", (unsigned int) event_base, event_id);
+  ESP_LOGI(TAG, "STA Event, Base: %08x, Event: %" PRIu32 ".", (unsigned int) event_base, event_id);
 
   if (event_base == WIFI_EVENT) {
     if (event_id == WIFI_EVENT_STA_START) {
@@ -212,7 +213,7 @@ static esp_err_t http_event_handler(esp_http_client_event_t * evt)
       //ESP_LOGI(TAG, "key = %s, value = %s", evt->header_key, evt->header_value);
       if (strcmp("Content-Length", evt->header_key) == 0) {
         buffer_size = atoi(evt->header_value);
-        ESP_LOGI(TAG, "Donwload file size: %d", buffer_size);
+        ESP_LOGI(TAG, "Donwload file size: %" PRIi32, buffer_size);
       }
       break;
     case HTTP_EVENT_ON_DATA:
@@ -276,7 +277,7 @@ NetworkClient::downloadFile(const char * url, int32_t * defaultLen)
   esp_err_t err = esp_http_client_perform(client);
 
   if (err == ESP_OK) {
-    ESP_LOGI(TAG, "Status = %d, content_length = %d",
+    ESP_LOGI(TAG, "Status = %d, content_length = %" PRIi64,
             esp_http_client_get_status_code(client),
             esp_http_client_get_content_length(client));
   }
