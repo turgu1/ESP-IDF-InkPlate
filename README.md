@@ -1,5 +1,9 @@
 # ESP-IDF-InkPlate Library Version 0.9.7
 
+(February 7th, 2023)
+
+A branch named idf-v5.0-support has been created some time ago to permit changes related to ESP-IDF V5.0. Please note that you can try to use it if required. Testing is ongoing to merge it with the upcoming new version.
+
 (June 21st, 2022)
 
 Added support for `idf.py` development, as provided by tajnymag.
