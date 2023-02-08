@@ -23,6 +23,16 @@ Distributed as-is; no warranty is given.
 #include "network_client.hpp"
 #include "sd_card.hpp"
 
+#if defined(INKPLATE_10)
+  #define INKPLATE_VARIANT "INKPLATE_10"
+#elif defined(INKPLATE_6PLUS)
+    #define INKPLATE_VARIANT "INKPLATE_6PLUS"
+#elif defined(INKPLATE_6)
+    #define INKPLATE_VARIANT "INKPLATE_6"
+#else
+    #define INKPLATE_VARIANT "UNDEFINED"
+#endif
+
 class Inkplate : public Graphics
 {
   public:
