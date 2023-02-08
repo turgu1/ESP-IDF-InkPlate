@@ -32,11 +32,23 @@ void mainTask(void * param)
   display.setTextSize(4);             // Set text to be 4 times bigger than classic 5x7 px text
 
   // Prepare message text and position
-  char message[] = "Hello World";
-  int w = display.width();
-  int h = display.height();
-  int cursor_x = (w / 2) - (strlen(message) / 2);
-  int cursor_y = h / 2;
+  const char message[] = "Hello World";
+
+  // Initializing these is effectively meaningless in this context
+  int16_t current_x = 0;
+  int16_t current_y = 0;
+  uint16_t message_width = 0;
+  uint16_t message_height = 0;
+  
+  // Not used but necessary to invoke getTextBounds
+  int16_t boundary_x = 0;
+  int16_t boundary_y = 0;
+
+  // Determine the dimensions of the text given our display configuration 
+  display.getTextBounds(message, current_x, current_y, &boundary_x, &boundary_y, &message_width, &message_height);
+
+  int cursor_x = (display.width() / 2) - (message_width / 2);
+  int cursor_y = (display.height() / 2) - (message_height / 2);
 
   ESP_LOGI(TAG, "Display size: width: %d, height: %d", w, h);
 
