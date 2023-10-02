@@ -26,6 +26,7 @@ class NetworkClient
 
     bool joinAP(const char * ssid, const char * pass);
     void disconnect();
+    void forceDisconnect();
 
     inline bool isConnected() { return connected; }
 

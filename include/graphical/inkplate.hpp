@@ -58,6 +58,7 @@ class Inkplate : public Graphics
     inline uint8_t   readPowerGood() { return e_ink.read_power_good();           }
     inline int8_t  readTemperature() { return e_ink.read_temperature();          }
     inline void         disconnect() { network_client.disconnect();              }
+    inline void         forceDisconnect() { network_client.forceDisconnect();   }
     inline bool        isConnected() { return network_client.isConnected();      }
     inline int        _getRotation() { return Graphics::getRotation();           }
     inline bool         sdCardInit() { return SDCard::setup();                   }

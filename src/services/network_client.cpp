@@ -181,16 +181,7 @@ void
 NetworkClient::disconnect()
 {
   if (connected) {
-    
-    ESP_ERROR_CHECK(esp_event_handler_unregister(ESP_EVENT_ANY_BASE, ESP_EVENT_ANY_ID, &sta_event_handler));
-    ESP_ERROR_CHECK(esp_event_loop_delete_default());
-    esp_netif_destroy_default_wifi(wifi_sta_netif);
-
-    vEventGroupDelete(wifi_event_group);
-
-    esp_wifi_disconnect();
-    esp_wifi_restore();
-
+    forceDisconnect();
     connected = false;
   }
 }
@@ -289,4 +280,21 @@ NetworkClient::downloadFile(const char * url, int32_t * defaultLen)
   *defaultLen = buffer_size;
 
   return buffer;
+}
+
+void NetworkClient::forceDisconnect() {
+    esp_err_t err;
+
+    err = esp_event_handler_unregister(ESP_EVENT_ANY_BASE, ESP_EVENT_ANY_ID, &sta_event_handler);
+    if (err != ESP_ERR_INVALID_STATE) ESP_ERROR_CHECK(err);
+
+    err = esp_event_loop_delete_default();
+    if (err != ESP_ERR_INVALID_STATE) ESP_ERROR_CHECK(err);
+
+    esp_netif_destroy_default_wifi(wifi_sta_netif);
+
+    vEventGroupDelete(wifi_event_group);
+
+    esp_wifi_disconnect();
+    esp_wifi_restore();
 }
