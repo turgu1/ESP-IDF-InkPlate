@@ -3,7 +3,7 @@ eink_6.hpp
 Inkplate 6 ESP-IDF
 
 Modified by Guy Turcotte 
-November 12, 2020
+July 20, 2024
 
 from the Arduino Library:
 
@@ -29,8 +29,13 @@ Distributed as-is; no warranty is given.
 
 #include "non_copyable.hpp"
 #include "driver/gpio.h"
-#include "mcp23017.hpp"
 #include "eink.hpp"
+
+#if PCAL6416
+  #include "pcal6416.hpp"
+#else
+  #include "mcp23017.hpp"
+#endif
 
 /**
  * @brief Low level e-Ink display
@@ -46,7 +51,7 @@ Distributed as-is; no warranty is given.
 class EInk6 : public EInk, NonCopyable
 {
   public:
-    EInk6(MCP23017 & mcp) : EInk(mcp)
+    EInk6(IOExpander & io_expander) : EInk(io_expander)
       { }
 
     static const uint16_t WIDTH  = 800; // In pixels

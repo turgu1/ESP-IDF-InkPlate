@@ -27,9 +27,9 @@ TouchScreen::setup(bool power_on, ISRHandlerPtr isr_handler)
 
   Wire::enter();
 
-  mcp.set_direction(TOUCHSCREEN_ENABLE, MCP23017::PinMode::OUTPUT );
-  mcp.set_direction(TOUCHSCREEN_RESET,  MCP23017::PinMode::OUTPUT );
-  mcp.digital_write(TOUCHSCREEN_ENABLE, MCP23017::SignalLevel::LOW); // on
+  io_expander.set_direction(TOUCHSCREEN_ENABLE, IOExpander::PinMode::OUTPUT );
+  io_expander.set_direction(TOUCHSCREEN_RESET,  IOExpander::PinMode::OUTPUT );
+  io_expander.digital_write(TOUCHSCREEN_ENABLE, IOExpander::SignalLevel::LOW); // on
 
   gpio_config_t io_conf;
 
@@ -75,8 +75,8 @@ void
 TouchScreen::hardware_reset()
 {
   Wire::enter();
-  mcp.digital_write(TOUCHSCREEN_RESET, MCP23017::SignalLevel::LOW ); ESP::delay(15);
-  mcp.digital_write(TOUCHSCREEN_RESET, MCP23017::SignalLevel::HIGH); ESP::delay(15); 
+  io_expander.digital_write(TOUCHSCREEN_RESET, IOExpander::SignalLevel::LOW ); ESP::delay(15);
+  io_expander.digital_write(TOUCHSCREEN_RESET, IOExpander::SignalLevel::HIGH); ESP::delay(15); 
   Wire::leave();
 }
 
@@ -220,7 +220,7 @@ void
 TouchScreen::shutdown()
 {
   Wire::enter();
-  mcp.digital_write(TOUCHSCREEN_ENABLE, MCP23017::SignalLevel::HIGH); // off
+  io_expander.digital_write(TOUCHSCREEN_ENABLE, IOExpander::SignalLevel::HIGH); // off
   Wire::leave();
 
   ready = false;

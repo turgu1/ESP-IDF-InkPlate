@@ -3,7 +3,7 @@ eink_6.cpp
 Inkplate 6 ESP-IDF
 
 Modified by Guy Turcotte 
-December 23, 2020
+July 20, 2024
 
 from the Arduino Library:
 
@@ -27,7 +27,6 @@ Distributed as-is; no warranty is given.
 #include "esp_log.h"
 
 #include "wire.hpp"
-#include "mcp23017.hpp"
 #include "esp.hpp"
 
 #include <iostream>
@@ -59,7 +58,7 @@ EInk6::setup()
 
   wire.setup();
   
-  if (!mcp_int.setup()) {
+  if (!io_expander_int.setup()) {
     ESP_LOGE(TAG, "Initialization not completed (MCP Issue).");
     return false;
   }
@@ -69,11 +68,11 @@ EInk6::setup()
 
   Wire::enter();
   
-  mcp_int.set_direction(VCOM,         MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(PWRUP,        MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(WAKEUP,       MCP23017::PinMode::OUTPUT); 
-  mcp_int.set_direction(GPIO0_ENABLE, MCP23017::PinMode::OUTPUT);
-  mcp_int.digital_write(GPIO0_ENABLE, MCP23017::SignalLevel::HIGH);
+  io_expander_int.set_direction(VCOM,         IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(PWRUP,        IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(WAKEUP,       IOExpander::PinMode::OUTPUT); 
+  io_expander_int.set_direction(GPIO0_ENABLE, IOExpander::PinMode::OUTPUT);
+  io_expander_int.digital_write(GPIO0_ENABLE, IOExpander::SignalLevel::HIGH);
 
   wakeup_set(); 
  
@@ -99,9 +98,9 @@ EInk6::setup()
   gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT);
 
-  mcp_int.set_direction(OE,      MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(GMOD,    MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(SPV,     MCP23017::PinMode::OUTPUT);
+  io_expander_int.set_direction(OE,      IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(GMOD,    IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(SPV,     IOExpander::PinMode::OUTPUT);
 
   // DATA PINS
   gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_OUTPUT); // D0

@@ -2,12 +2,16 @@
 
 #if defined(INKPLATE_6PLUS)
 
-#include "mcp23017.hpp"
+#if PCAL6416
+  #include "pcal6416.hpp"
+#else
+  #include "mcp23017.hpp"
+#endif
 
 class FrontLight
 {
   public:
-    FrontLight(MCP23017 & _mcp) : mcp(_mcp) {}
+    FrontLight(IOExpander & _io_expander) : io_expander(_io_expander) {}
     bool setup();
     void set_level(uint8_t level);
     void enable();
@@ -16,9 +20,9 @@ class FrontLight
   private:
     static constexpr char const * TAG = "FrontLight";
     
-    MCP23017 & mcp;
+    IOExpander & io_expander;
 
-    const MCP23017::Pin FRONTLIGHT_EN = MCP23017::Pin::IOPIN_11;
+    const IOExpander::Pin FRONTLIGHT_EN = IOExpander::Pin::IOPIN_11;
 
     static const uint8_t FRONTLIGHT_ADDRESS = 0x2E;
 };

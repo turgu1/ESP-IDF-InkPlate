@@ -1,8 +1,13 @@
 #pragma once
 
 #include "frame_buffer.hpp"
-#include "mcp23017.hpp"
 #include "wire.hpp"
+
+#if PCAL6416
+  #include "pcal6416.hpp"
+#else
+  #include "mcp23017.hpp"
+#endif
 
 class EInk
 {
@@ -46,8 +51,8 @@ class EInk
 
   protected:                     
     
-    EInk(MCP23017 & mcp) : 
-      mcp_int(mcp),
+    EInk(IOExpander & io_expander) : 
+      io_expander_int(io_expander),
       panel_state(PanelState::OFF), 
       initialized(false),
       partial_allowed(false) {}
@@ -55,7 +60,7 @@ class EInk
     static const uint8_t PWRMGR_ADDRESS = 0x48;
     static const uint8_t PWR_GOOD_OK    = 0b11111010;
 
-    MCP23017 & mcp_int;
+    IOExpander & io_expander_int;
 
     PanelState panel_state;
     bool       initialized;
@@ -87,15 +92,15 @@ class EInk
     uint32_t        * GLUT;
     uint32_t        * GLUT2;
 
-    const MCP23017::Pin OE             = MCP23017::Pin::IOPIN_0;
-    const MCP23017::Pin GMOD           = MCP23017::Pin::IOPIN_1;
-    const MCP23017::Pin SPV            = MCP23017::Pin::IOPIN_2;
+    const IOExpander::Pin OE             = IOExpander::Pin::IOPIN_0;
+    const IOExpander::Pin GMOD           = IOExpander::Pin::IOPIN_1;
+    const IOExpander::Pin SPV            = IOExpander::Pin::IOPIN_2;
 
-    const MCP23017::Pin WAKEUP         = MCP23017::Pin::IOPIN_3;
-    const MCP23017::Pin PWRUP          = MCP23017::Pin::IOPIN_4;
-    const MCP23017::Pin VCOM           = MCP23017::Pin::IOPIN_5;
+    const IOExpander::Pin WAKEUP         = IOExpander::Pin::IOPIN_3;
+    const IOExpander::Pin PWRUP          = IOExpander::Pin::IOPIN_4;
+    const IOExpander::Pin VCOM           = IOExpander::Pin::IOPIN_5;
     
-    const MCP23017::Pin GPIO0_ENABLE   = MCP23017::Pin::IOPIN_8;
+    const IOExpander::Pin GPIO0_ENABLE   = IOExpander::Pin::IOPIN_8;
   
     inline void cl_set()       { GPIO.out_w1ts = CL; }
     inline void cl_clear()     { GPIO.out_w1tc = CL; }
@@ -109,22 +114,22 @@ class EInk
     inline void le_set()       { GPIO.out_w1ts = LE; }
     inline void le_clear()     { GPIO.out_w1tc = LE; }
 
-    inline void oe_set()       { mcp_int.digital_write(OE,     MCP23017::SignalLevel::HIGH); }
-    inline void oe_clear()     { mcp_int.digital_write(OE,     MCP23017::SignalLevel::LOW ); }
+    inline void oe_set()       { io_expander_int.digital_write(OE,     IOExpander::SignalLevel::HIGH); }
+    inline void oe_clear()     { io_expander_int.digital_write(OE,     IOExpander::SignalLevel::LOW ); }
 
-    inline void gmod_set()     { mcp_int.digital_write(GMOD,   MCP23017::SignalLevel::HIGH); }
-    inline void gmod_clear()   { mcp_int.digital_write(GMOD,   MCP23017::SignalLevel::LOW ); }
+    inline void gmod_set()     { io_expander_int.digital_write(GMOD,   IOExpander::SignalLevel::HIGH); }
+    inline void gmod_clear()   { io_expander_int.digital_write(GMOD,   IOExpander::SignalLevel::LOW ); }
 
-    inline void spv_set()      { mcp_int.digital_write(SPV,    MCP23017::SignalLevel::HIGH); }
-    inline void spv_clear()    { mcp_int.digital_write(SPV,    MCP23017::SignalLevel::LOW ); }
+    inline void spv_set()      { io_expander_int.digital_write(SPV,    IOExpander::SignalLevel::HIGH); }
+    inline void spv_clear()    { io_expander_int.digital_write(SPV,    IOExpander::SignalLevel::LOW ); }
 
-    inline void wakeup_set()   { mcp_int.digital_write(WAKEUP, MCP23017::SignalLevel::HIGH); }
-    inline void wakeup_clear() { mcp_int.digital_write(WAKEUP, MCP23017::SignalLevel::LOW ); }
+    inline void wakeup_set()   { io_expander_int.digital_write(WAKEUP, IOExpander::SignalLevel::HIGH); }
+    inline void wakeup_clear() { io_expander_int.digital_write(WAKEUP, IOExpander::SignalLevel::LOW ); }
 
-    inline void pwrup_set()    { mcp_int.digital_write(PWRUP,  MCP23017::SignalLevel::HIGH); }
-    inline void pwrup_clear()  { mcp_int.digital_write(PWRUP,  MCP23017::SignalLevel::LOW ); }
+    inline void pwrup_set()    { io_expander_int.digital_write(PWRUP,  IOExpander::SignalLevel::HIGH); }
+    inline void pwrup_clear()  { io_expander_int.digital_write(PWRUP,  IOExpander::SignalLevel::LOW ); }
 
-    inline void vcom_set()     { mcp_int.digital_write(VCOM,   MCP23017::SignalLevel::HIGH); }
-    inline void vcom_clear()   { mcp_int.digital_write(VCOM,   MCP23017::SignalLevel::LOW ); }
+    inline void vcom_set()     { io_expander_int.digital_write(VCOM,   IOExpander::SignalLevel::HIGH); }
+    inline void vcom_clear()   { io_expander_int.digital_write(VCOM,   IOExpander::SignalLevel::LOW ); }
 };
 

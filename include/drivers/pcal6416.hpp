@@ -1,26 +1,22 @@
 /*
-mcp23017.hpp
+
+pcal6416.hpp
 Inkplate ESP-IDF
 
-Modified by Guy Turcotte 
-July 20, 2024
+Created by Guy Turcotte 
+July 15, 2024
 
-from the Arduino Library:
+This is a driver for the IO Expander PCAL6416. The driver has been designed to be
+as close as possible to the MCP23017 driver interface, such that it will be
+interchangeable for the rest of the ESP-IDF-Inkplate project.
 
-David Zovko, Borna Biro, Denis Vajak, Zvonimir Haramustek @ e-radionica.com
-September 24, 2020
-https://github.com/e-radionicacom/Inkplate-6-Arduino-library
+As such, both MCP23017 and PCAL6416 driver classes are named IOExpander. The
+right driver is being expanded as needed through the macro definitions PCAL6416 or MCP23017.
+As such, only one of the two macros must be defined to be equal to 1
 
-For support, please reach over forums: forum.e-radionica.com/en
-For more info about the product, please check: www.inkplate.io
-
-This code is released under the GNU Lesser General Public License v3.0: https://www.gnu.org/licenses/lgpl-3.0.en.html
-Please review the LICENSE file included with this example.
-If you have any questions about licensing, please contact techsupport@e-radionica.com
-Distributed as-is; no warranty is given.
 */
 
-#if MCP23017
+#if PCAL6416
 
 #pragma once
 
@@ -48,34 +44,42 @@ public:
 class IOExpander : NonCopyable
 {
   private:
-    static constexpr char const * TAG = "MCP23017";
-    enum class Reg : uint8_t {
-      IODIRA   = 0x00,
-      IODIRB   = 0x01,
-      IPOLA    = 0x02,
-      IPOLB    = 0x03,
-      GPINTENA = 0x04,
-      GPINTENB = 0x05,
-      DEFVALA  = 0x06,
-      DEFVALB  = 0x07,
-      INTCONA  = 0x08,
-      INTCONB  = 0x09,
-      IOCONA   = 0x0A,
-      IOCONB   = 0x0B,
-      GPPUA    = 0x0C,
-      GPPUB    = 0x0D,
-      INTFA    = 0x0E,
-      INTFB    = 0x0F,
-      INTCAPA  = 0x10,
-      INTCAPB  = 0x11,
-      GPIOA    = 0x12,
-      GPIOB    = 0x13, 
-      OLATA    = 0x14,
-      OLATB    = 0x15 
+    static constexpr char const * TAG = "PCAL6416";
+
+    uint8_t reg_addresses[23] = {
+      0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x40, 0x41, 
+      0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 
+      0x4c, 0x4d, 0x4f
     };
 
-    const uint8_t mcp_address;
-    enum_array<Reg, uint8_t, 22> registers;
+    enum class Reg : uint8_t {
+      INA        = 0x00,
+      INB        = 0x01,
+      OUTA       = 0x02,
+      OUTB       = 0x03,
+      INVERTA    = 0x04,
+      INVERTB    = 0x05,
+      CONFA      = 0x06,
+      CONFB      = 0x07,
+      STRENGHTAL = 0x08,
+      STRENGTHAH = 0x09,
+      STRENGTHBL = 0x10,
+      STRENGTHBH = 0x11,
+      INLATCHA   = 0x12,
+      INLATCHB   = 0x13,
+      PULLENA    = 0x14,
+      PULLENB    = 0x15,
+      PULLA      = 0x16,
+      PULLB      = 0x17,
+      IMASKA     = 0x18,
+      IMASKB     = 0x19,
+      ISTATA     = 0x20,
+      ISTATB     = 0x21,
+      OUTCONF    = 0x22
+    };
+
+    const uint8_t pcal_address;
+    enum_array<Reg, uint8_t, 23> registers;
 
     bool present;
  
@@ -92,7 +96,7 @@ class IOExpander : NonCopyable
 
   public:
 
-    IOExpander(uint8_t address) : mcp_address(address), present(false) { 
+    IOExpander(uint8_t address) : pcal_address(address), present(false) { 
       std::fill(registers.begin(), registers.end(), 0); 
     }
 

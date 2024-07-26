@@ -1,6 +1,9 @@
 /*
 inkplate_platform.hpp
 
+Modified by Guy Turcotte
+July 20, 2024
+
 Inkplate 6 Arduino library
 David Zovko, Borna Biro, Denis Vajak, Zvonimir Haramustek @ e-radionica.com
 September 24, 2020
@@ -21,13 +24,18 @@ Distributed as-is; no warranty is given.
 
 #include "non_copyable.hpp"
 
-#include "mcp23017.hpp"
 #include "battery.hpp"
 #include "eink.hpp"
 #include "eink_6.hpp"
 #include "eink_6plus.hpp"
 #include "eink_10.hpp"
 #include "rtc_pcf85063.hpp" 
+
+#if PCAL6416
+  #include "pcal6416.hpp"
+#else
+  #include "mcp23017.hpp"
+#endif
 
 #if defined(EXTENDED_CASE) && (defined(INKPLATE_6) || defined(INKPLATE_10))
   #include "press_keys.hpp"
@@ -39,32 +47,32 @@ Distributed as-is; no warranty is given.
 #endif
 
 #if __INKPLATE_PLATFORM__
-  MCP23017  mcp_int(0x20);
-  Battery   battery(mcp_int);
+  IOExpander  io_expander_int(0x20);
+  Battery   battery(io_expander_int);
   #if defined(EXTENDED_CASE) && (defined(INKPLATE_6) || defined(INKPLATE_10))
-    PressKeys press_keys(mcp_int);
+    PressKeys press_keys(io_expander_int);
   #elif defined(INKPLATE_6) || defined(INKPLATE_10)
-    TouchKeys touch_keys(mcp_int);
+    TouchKeys touch_keys(io_expander_int);
   #elif defined(INKPLATE_6PLUS)
-    TouchScreen touch_screen(mcp_int);
-    FrontLight   front_light(mcp_int);
+    TouchScreen touch_screen(io_expander_int);
+    FrontLight   front_light(io_expander_int);
   #endif
 
   #if defined(INKPLATE_6)
-    EInk6     e_ink(mcp_int);
+    EInk6     e_ink(io_expander_int);
   #elif defined(INKPLATE_10)
-    MCP23017  mcp_ext(0x22);
-    EInk10    e_ink(mcp_int, mcp_ext);
+    IOExpander  io_expander_ext(0x22);
+    EInk10    e_ink(io_expander_int, io_expander_ext);
   #elif defined(INKPLATE_6PLUS)
-    MCP23017  mcp_ext(0x22);
-    EInk6PLUS e_ink(mcp_int, mcp_ext);
+    IOExpander  io_expander_ext(0x22);
+    EInk6PLUS e_ink(io_expander_int, io_expander_ext);
   #else
     #error "One of INKPLATE_6, INKPLATE_10, INKPLATE_6PLUS must be defined."
   #endif
   
   RTC       rtc(0x51);
 #else
-  extern MCP23017  mcp_int;
+  extern IOExpander  io_expander_int;
   extern Battery   battery;
   #if defined(EXTENDED_CASE)
     extern PressKeys press_keys;
@@ -78,10 +86,10 @@ Distributed as-is; no warranty is given.
   #if defined(INKPLATE_6)
     extern EInk6     e_ink;
   #elif defined(INKPLATE_10)
-    extern MCP23017  mcp_ext;
+    extern IOExpander  io_expander_ext;
     extern EInk10    e_ink;
   #elif defined(INKPLATE_6PLUS)
-    extern MCP23017  mcp_ext;
+    extern IOExpander  io_expander_ext;
     extern EInk6PLUS e_ink;
   #else
     #error "One of INKPLATE_6, INKPLATE_10, INKPLATE_6PLUS must be defined."

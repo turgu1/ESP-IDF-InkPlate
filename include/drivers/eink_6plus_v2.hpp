@@ -1,5 +1,5 @@
 /*
-eink_6plus.hpp
+eink_6plus_v2.hpp
 Inkplate 6PLUS ESP-IDF
 
 Modified by Guy Turcotte 
@@ -20,7 +20,7 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#if defined(INKPLATE_6PLUS)
+#if defined(INKPLATE_6PLUS_V2)
 
 #pragma once
 
@@ -48,10 +48,10 @@ Distributed as-is; no warranty is given.
  * below. It also cannot be copied through the NonCopyable derivation.
  */
 
-class EInk6PLUS : public EInk, NonCopyable
+class EInk6PLUSV2 : public EInk, NonCopyable
 {
   public:
-    EInk6PLUS(IOExpander & io_expander_i, IOExpander & io_expander_e) : EInk(io_expander_i), io_expander_ext(io_expander_e)
+    EInk6PLUSV2(PCAL6416 & pcal_i, PCAL6416 & pcal_e) : EInk(pcal_i), pcal_ext(pcal_e)
       { }  // Private constructor
 
     static const uint16_t WIDTH  = 1024; // In pixels
@@ -86,9 +86,9 @@ class EInk6PLUS : public EInk, NonCopyable
     void partial_update(FrameBuffer1Bit & frame_buffer, bool force = false);
     
   private:
-    static constexpr char const * TAG = "EInk6PLUS";
+    static constexpr char const * TAG = "EInk6PLUSV2";
 
-    IOExpander & io_expander_ext;
+    PCAL6416 & pcal_ext;
     
     class FrameBuffer1BitX : public FrameBuffer1Bit {
       private:

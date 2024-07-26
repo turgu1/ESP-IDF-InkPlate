@@ -201,9 +201,9 @@ EInk::pins_z_state()
   gpio_set_direction(GPIO_NUM_32, GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_INPUT);
 
-  mcp_int.set_direction(OE,   MCP23017::PinMode::INPUT);
-  mcp_int.set_direction(GMOD, MCP23017::PinMode::INPUT);
-  mcp_int.set_direction(SPV,  MCP23017::PinMode::INPUT);
+  io_expander_int.set_direction(OE,   IOExpander::PinMode::INPUT);
+  io_expander_int.set_direction(GMOD, IOExpander::PinMode::INPUT);
+  io_expander_int.set_direction(SPV,  IOExpander::PinMode::INPUT);
 
   gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_5,  GPIO_MODE_INPUT);
@@ -223,9 +223,9 @@ EInk::pins_as_outputs()
   gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT);
 
-  mcp_int.set_direction(OE,   MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(GMOD, MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(SPV,  MCP23017::PinMode::OUTPUT);
+  io_expander_int.set_direction(OE,   IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(GMOD, IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(SPV,  IOExpander::PinMode::OUTPUT);
 
   gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_5,  GPIO_MODE_OUTPUT);

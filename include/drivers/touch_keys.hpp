@@ -1,7 +1,12 @@
 #pragma once
 
 #include "non_copyable.hpp"
-#include "mcp23017.hpp"
+
+#if PCAL6416
+  #include "pcal6416.hpp"
+#else
+  #include "mcp23017.hpp"
+#endif
 
 class TouchKeys : NonCopyable 
 {
@@ -10,7 +15,7 @@ class TouchKeys : NonCopyable
 
     static const gpio_num_t INTERRUPT_PIN = GPIO_NUM_34;
 
-   TouchKeys(MCP23017 & _mcp) : mcp(_mcp) {}
+   TouchKeys(IOExpander & _io_expander) : io_expander(_io_expander) {}
     bool setup();
 
     /**
@@ -32,10 +37,10 @@ class TouchKeys : NonCopyable
 
   private:
     static constexpr char const * TAG = "TouchKeys";
-    MCP23017 & mcp;
+    IOExpander & io_expander;
 
-    const MCP23017::Pin TOUCH_0 = MCP23017::Pin::IOPIN_10;
-    const MCP23017::Pin TOUCH_1 = MCP23017::Pin::IOPIN_11;
-    const MCP23017::Pin TOUCH_2 = MCP23017::Pin::IOPIN_12;
+    const IOExpander::Pin TOUCH_0 = IOExpander::Pin::IOPIN_10;
+    const IOExpander::Pin TOUCH_1 = IOExpander::Pin::IOPIN_11;
+    const IOExpander::Pin TOUCH_2 = IOExpander::Pin::IOPIN_12;
 
 };

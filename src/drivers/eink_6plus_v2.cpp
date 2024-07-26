@@ -1,6 +1,6 @@
 /*
 eink_6plus.cpp
-Inkplate 6PLUS ESP-IDF
+Inkplate 6PLUS V2 ESP-IDF
 
 Modified by Guy Turcotte 
 July 20, 2024
@@ -20,10 +20,10 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#if defined(INKPLATE_6PLUS)
+#if defined(INKPLATE_6PLUS_V2)
 
 #define __EINK6PLUS__ 1
-#include "eink_6plus.hpp"
+#include "eink_6plus_v2.hpp"
 #include "esp_log.h"
 
 #include "wire.hpp"
@@ -54,23 +54,23 @@ EInk6PLUS::setup()
 
   wire.setup();
   
-  if (!io_expander_int.setup()) {
-    ESP_LOGE(TAG, "Initialization not completed (Main MCP Issue).");
+  if (!pcal_int.setup()) {
+    ESP_LOGE(TAG, "Initialization not completed (Main pcal Issue).");
     return false;
   }
   else {
-    ESP_LOGD(TAG, "MCP initialized.");
+    ESP_LOGD(TAG, "pcal initialized.");
   }
 
-  io_expander_ext.setup();
+  pcal_ext.setup();
 
   Wire::enter();
   
-  io_expander_int.set_direction(VCOM,         IOExpander::PinMode::OUTPUT);
-  io_expander_int.set_direction(PWRUP,        IOExpander::PinMode::OUTPUT);
-  io_expander_int.set_direction(WAKEUP,       IOExpander::PinMode::OUTPUT); 
-  io_expander_int.set_direction(GPIO0_ENABLE, IOExpander::PinMode::OUTPUT);
-  io_expander_int.digital_write(GPIO0_ENABLE, IOExpander::SignalLevel::HIGH);
+  pcal_int.set_direction(VCOM,         PCAL6416::PinMode::OUTPUT);
+  pcal_int.set_direction(PWRUP,        PCAL6416::PinMode::OUTPUT);
+  pcal_int.set_direction(WAKEUP,       PCAL6416::PinMode::OUTPUT); 
+  pcal_int.set_direction(GPIO0_ENABLE, PCAL6416::PinMode::OUTPUT);
+  pcal_int.digital_write(GPIO0_ENABLE, PCAL6416::SignalLevel::HIGH);
 
   wakeup_set(); 
  
@@ -92,20 +92,20 @@ EInk6PLUS::setup()
 
   // Set all pins of seconds I/O expander to outputs, low.
   // For some reason, it draw more current in deep sleep when pins are set as inputs...
-  if (io_expander_ext.is_present()) {
+  if (pcal_ext.is_present()) {
     for (int i = 0; i < 15; i++) {
-      io_expander_ext.set_direction((IOExpander::Pin) i, IOExpander::PinMode::OUTPUT);
-      io_expander_ext.digital_write((IOExpander::Pin) i, IOExpander::SignalLevel::LOW);
+      pcal_ext.set_direction((PCAL6416::Pin) i, PCAL6416::PinMode::OUTPUT);
+      pcal_ext.digital_write((PCAL6416::Pin) i, PCAL6416::SignalLevel::LOW);
     }
   }
 
   // For same reason, unused pins of first I/O expander have to be also set as outputs, low.
-  io_expander_int.set_direction(IOExpander::Pin::IOPIN_13, IOExpander::PinMode::OUTPUT);
-  io_expander_int.set_direction(IOExpander::Pin::IOPIN_14, IOExpander::PinMode::OUTPUT);  
-  io_expander_int.set_direction(IOExpander::Pin::IOPIN_15, IOExpander::PinMode::OUTPUT);  
-  io_expander_int.digital_write(IOExpander::Pin::IOPIN_13, IOExpander::SignalLevel::LOW);
-  io_expander_int.digital_write(IOExpander::Pin::IOPIN_14, IOExpander::SignalLevel::LOW);
-  io_expander_int.digital_write(IOExpander::Pin::IOPIN_15, IOExpander::SignalLevel::LOW);
+  pcal_int.set_direction(PCAL6416::Pin::IOPIN_13, PCAL6416::PinMode::OUTPUT);
+  pcal_int.set_direction(PCAL6416::Pin::IOPIN_14, PCAL6416::PinMode::OUTPUT);  
+  pcal_int.set_direction(PCAL6416::Pin::IOPIN_15, PCAL6416::PinMode::OUTPUT);  
+  pcal_int.digital_write(PCAL6416::Pin::IOPIN_13, PCAL6416::SignalLevel::LOW);
+  pcal_int.digital_write(PCAL6416::Pin::IOPIN_14, PCAL6416::SignalLevel::LOW);
+  pcal_int.digital_write(PCAL6416::Pin::IOPIN_15, PCAL6416::SignalLevel::LOW);
 
   // CONTROL PINS
   gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_OUTPUT);
@@ -113,9 +113,9 @@ EInk6PLUS::setup()
   gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT);
 
-  io_expander_int.set_direction(OE,      IOExpander::PinMode::OUTPUT);
-  io_expander_int.set_direction(GMOD,    IOExpander::PinMode::OUTPUT);
-  io_expander_int.set_direction(SPV,     IOExpander::PinMode::OUTPUT);
+  pcal_int.set_direction(OE,      PCAL6416::PinMode::OUTPUT);
+  pcal_int.set_direction(GMOD,    PCAL6416::PinMode::OUTPUT);
+  pcal_int.set_direction(SPV,     PCAL6416::PinMode::OUTPUT);
 
   // DATA PINS
   gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_OUTPUT); // D0

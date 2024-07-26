@@ -3,7 +3,7 @@ eink_10.cpp
 Inkplate 10 ESP-IDF
 
 Modified by Guy Turcotte 
-December 27, 2020
+July 20, 2024
 
 from the Arduino Library:
 
@@ -27,7 +27,6 @@ Distributed as-is; no warranty is given.
 #include "esp_log.h"
 
 #include "wire.hpp"
-#include "mcp23017.hpp"
 #include "esp.hpp"
 
 #include <iostream>
@@ -59,7 +58,7 @@ EInk10::setup()
 
   wire.setup();
   
-  if (!mcp_int.setup()) {
+  if (!io_expander_int.setup()) {
     ESP_LOGE(TAG, "Initialization not completed (Main MCP Issue).");
     return false;
   }
@@ -67,15 +66,15 @@ EInk10::setup()
     ESP_LOGD(TAG, "MCP initialized.");
   }
 
-  mcp_ext.setup();
+  io_expander_ext.setup();
 
   Wire::enter();
   
-  mcp_int.set_direction(VCOM,         MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(PWRUP,        MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(WAKEUP,       MCP23017::PinMode::OUTPUT); 
-  mcp_int.set_direction(GPIO0_ENABLE, MCP23017::PinMode::OUTPUT);
-  mcp_int.digital_write(GPIO0_ENABLE, MCP23017::SignalLevel::HIGH);
+  io_expander_int.set_direction(VCOM,         IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(PWRUP,        IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(WAKEUP,       IOExpander::PinMode::OUTPUT); 
+  io_expander_int.set_direction(GPIO0_ENABLE, IOExpander::PinMode::OUTPUT);
+  io_expander_int.digital_write(GPIO0_ENABLE, IOExpander::SignalLevel::HIGH);
 
   wakeup_set(); 
  
@@ -97,20 +96,20 @@ EInk10::setup()
 
   // Set all pins of seconds I/O expander to outputs, low.
   // For some reason, it draw more current in deep sleep when pins are set as inputs...
-  if (mcp_ext.is_present()) {
+  if (io_expander_ext.is_present()) {
     for (int i = 0; i < 15; i++) {
-      mcp_ext.set_direction((MCP23017::Pin) i, MCP23017::PinMode::OUTPUT);
-      mcp_ext.digital_write((MCP23017::Pin) i, MCP23017::SignalLevel::LOW);
+      io_expander_ext.set_direction((IOExpander::Pin) i, IOExpander::PinMode::OUTPUT);
+      io_expander_ext.digital_write((IOExpander::Pin) i, IOExpander::SignalLevel::LOW);
     }
   }
 
   // For same reason, unused pins of first I/O expander have to be also set as outputs, low.
-  mcp_int.set_direction(MCP23017::Pin::IOPIN_13, MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(MCP23017::Pin::IOPIN_14, MCP23017::PinMode::OUTPUT);  
-  mcp_int.set_direction(MCP23017::Pin::IOPIN_15, MCP23017::PinMode::OUTPUT);  
-  mcp_int.digital_write(MCP23017::Pin::IOPIN_13, MCP23017::SignalLevel::LOW);
-  mcp_int.digital_write(MCP23017::Pin::IOPIN_14, MCP23017::SignalLevel::LOW);
-  mcp_int.digital_write(MCP23017::Pin::IOPIN_15, MCP23017::SignalLevel::LOW);
+  io_expander_int.set_direction(IOExpander::Pin::IOPIN_13, IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(IOExpander::Pin::IOPIN_14, IOExpander::PinMode::OUTPUT);  
+  io_expander_int.set_direction(IOExpander::Pin::IOPIN_15, IOExpander::PinMode::OUTPUT);  
+  io_expander_int.digital_write(IOExpander::Pin::IOPIN_13, IOExpander::SignalLevel::LOW);
+  io_expander_int.digital_write(IOExpander::Pin::IOPIN_14, IOExpander::SignalLevel::LOW);
+  io_expander_int.digital_write(IOExpander::Pin::IOPIN_15, IOExpander::SignalLevel::LOW);
 
   // CONTROL PINS
   gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_OUTPUT);
@@ -118,9 +117,9 @@ EInk10::setup()
   gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT);
 
-  mcp_int.set_direction(OE,      MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(GMOD,    MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(SPV,     MCP23017::PinMode::OUTPUT);
+  io_expander_int.set_direction(OE,      IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(GMOD,    IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(SPV,     IOExpander::PinMode::OUTPUT);
 
   // DATA PINS
   gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_OUTPUT); // D0

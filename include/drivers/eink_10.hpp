@@ -3,7 +3,7 @@ eink_10.hpp
 Inkplate 10 ESP-IDF
 
 Modified by Guy Turcotte 
-December 23, 2020
+July 20, 2024
 
 from the Arduino Library:
 
@@ -29,8 +29,13 @@ Distributed as-is; no warranty is given.
 
 #include "non_copyable.hpp"
 #include "driver/gpio.h"
-#include "mcp23017.hpp"
 #include "eink.hpp"
+
+#if PCAL6416
+  #include "pcal6416.hpp"
+#else
+  #include "mcp23017.hpp"
+#endif
 
 /**
  * @brief Low level e-Ink display
@@ -46,7 +51,7 @@ Distributed as-is; no warranty is given.
 class EInk10 : public EInk, NonCopyable
 {
   public:
-    EInk10(MCP23017 & mcp_i, MCP23017 & mcp_e) : EInk(mcp_i), mcp_ext(mcp_e)
+    EInk10(IOExpander & io_expander_i, IOExpander & io_expander_e) : EInk(io_expander_i), io_expander_ext(io_expander_e)
       { }  // Private constructor
 
     static const uint16_t WIDTH  = 1200; // In pixels
@@ -83,7 +88,7 @@ class EInk10 : public EInk, NonCopyable
   private:
     static constexpr char const * TAG = "EInk10";
 
-    MCP23017 & mcp_ext;
+    IOExpander & io_expander_ext;
     
     class FrameBuffer1BitX : public FrameBuffer1Bit {
       private:

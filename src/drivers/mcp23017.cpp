@@ -3,7 +3,7 @@ mcp23017.cpp
 Inkplate ESP-IDF
 
 Modified by Guy Turcotte 
-December 26, 2020
+July 20, 2024
 
 from the Arduino Library:
 
@@ -20,7 +20,8 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#define __MCP__ 1
+#if MCP23017
+
 #include "mcp23017.hpp"
 #include "esp_log.h"
 
@@ -30,14 +31,14 @@ Distributed as-is; no warranty is given.
 // LOW LEVEL:
 
 bool
-MCP23017::check_presence()
+IOExpander::check_presence()
 {
   if (!present) ESP_LOGE(TAG, "The MCP at address 0x%X has not been detected.", mcp_address);
   return present;
 }
 
 void 
-MCP23017::test()
+IOExpander::test()
 {
   if (!check_presence()) return;
 
@@ -62,7 +63,7 @@ MCP23017::test()
 }
 
 bool 
-MCP23017::setup()
+IOExpander::setup()
 {
   ESP_LOGD(TAG, "Initializing...");
   
@@ -80,7 +81,7 @@ MCP23017::setup()
 }
 
 void 
-MCP23017::read_all_registers()
+IOExpander::read_all_registers()
 {
   if (!check_presence()) return;
 
@@ -94,7 +95,7 @@ MCP23017::read_all_registers()
 }
 
 void 
-MCP23017::read_registers(Reg first_reg, uint8_t count)
+IOExpander::read_registers(Reg first_reg, uint8_t count)
 {
   if (!check_presence()) return;
 
@@ -109,7 +110,7 @@ MCP23017::read_registers(Reg first_reg, uint8_t count)
 }
 
 uint8_t 
-MCP23017::read_register(Reg reg)
+IOExpander::read_register(Reg reg)
 {
   if (!check_presence()) return 0;
 
@@ -123,7 +124,7 @@ MCP23017::read_register(Reg reg)
 }
 
 void 
-MCP23017::update_all_registers()
+IOExpander::update_all_registers()
 {
   if (!check_presence()) return;
 
@@ -136,7 +137,7 @@ MCP23017::update_all_registers()
 }
 
 void 
-MCP23017::update_register(Reg reg, uint8_t value)
+IOExpander::update_register(Reg reg, uint8_t value)
 {
   if (!check_presence()) return;
 
@@ -147,7 +148,7 @@ MCP23017::update_register(Reg reg, uint8_t value)
 }
 
 void 
-MCP23017::update_registers(Reg first_reg, uint8_t count)
+IOExpander::update_registers(Reg first_reg, uint8_t count)
 {
   if (!check_presence()) return;
 
@@ -162,7 +163,7 @@ MCP23017::update_registers(Reg first_reg, uint8_t count)
 // HIGH LEVEL:
 
 void
-MCP23017::set_direction(Pin pin, PinMode mode)
+IOExpander::set_direction(Pin pin, PinMode mode)
 {
   uint8_t port = ((uint8_t)pin >> 3) & 1;
   uint8_t p    =  (uint8_t)pin & 7;
@@ -194,7 +195,7 @@ MCP23017::set_direction(Pin pin, PinMode mode)
 }
 
 void 
-MCP23017::digital_write(Pin pin, SignalLevel state)
+IOExpander::digital_write(Pin pin, SignalLevel state)
 {
   uint8_t port = ((uint8_t)pin >> 3) & 1;
   uint8_t p    =  (uint8_t)pin & 7;
@@ -205,8 +206,8 @@ MCP23017::digital_write(Pin pin, SignalLevel state)
   update_register(R(Reg::GPIOA, port), registers[R(Reg::GPIOA, port)]);
 }
 
-MCP23017::SignalLevel 
-MCP23017::digital_read(Pin pin)
+IOExpander::SignalLevel 
+IOExpander::digital_read(Pin pin)
 {
   uint8_t port = ((uint8_t)pin >> 3) & 1;
   uint8_t p    =  (uint8_t)pin & 7;
@@ -216,7 +217,7 @@ MCP23017::digital_read(Pin pin)
 }
 
 void 
-MCP23017::set_int_output(IntPort intPort, bool mirroring, bool openDrain, SignalLevel polarity)
+IOExpander::set_int_output(IntPort intPort, bool mirroring, bool openDrain, SignalLevel polarity)
 {
   Reg reg = intPort == IntPort::INTPORTA ? Reg::IOCONA : Reg::IOCONB;
 
@@ -228,7 +229,7 @@ MCP23017::set_int_output(IntPort intPort, bool mirroring, bool openDrain, Signal
 }
 
 void 
-MCP23017::set_int_pin(Pin pin, IntMode mode)
+IOExpander::set_int_pin(Pin pin, IntMode mode)
 {
   uint8_t port = ((uint8_t)pin >> 3) & 1;
   uint8_t p    =  (uint8_t)pin & 7;
@@ -253,7 +254,7 @@ MCP23017::set_int_pin(Pin pin, IntMode mode)
 }
 
 void 
-MCP23017::remove_int_pin(Pin pin)
+IOExpander::remove_int_pin(Pin pin)
 {
   uint8_t port = ((uint8_t)pin >> 3) & 1;
   uint8_t p    =  (uint8_t)pin & 7;
@@ -262,21 +263,21 @@ MCP23017::remove_int_pin(Pin pin)
 }
 
 uint16_t 
-MCP23017::get_int()
+IOExpander::get_int()
 {
   read_registers(Reg::INTFA, 2);
   return ((registers[Reg::INTFB] << 8) | registers[Reg::INTFA]);
 }
 
 uint16_t 
-MCP23017::get_int_state()
+IOExpander::get_int_state()
 {
   read_registers(Reg::INTCAPA, 2);
   return ((registers[Reg::INTCAPB] << 8) | registers[Reg::INTCAPA]);
 }
 
 void 
-MCP23017::set_ports(uint16_t values)
+IOExpander::set_ports(uint16_t values)
 {
   registers[Reg::GPIOA] = values & 0xff;
   registers[Reg::GPIOB] = (values >> 8) & 0xff;
@@ -284,8 +285,10 @@ MCP23017::set_ports(uint16_t values)
 }
 
 uint16_t 
-MCP23017::get_ports()
+IOExpander::get_ports()
 {
   read_registers(Reg::GPIOA, 2);
   return ((registers[Reg::GPIOB] << 8) | (registers[Reg::GPIOA]));
 }
+
+#endif

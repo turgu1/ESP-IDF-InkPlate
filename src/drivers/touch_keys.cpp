@@ -6,9 +6,9 @@ bool
 TouchKeys::setup() 
 {
   Wire::enter();
-  mcp.set_direction(TOUCH_0, MCP23017::PinMode::INPUT);
-  mcp.set_direction(TOUCH_1, MCP23017::PinMode::INPUT);
-  mcp.set_direction(TOUCH_2, MCP23017::PinMode::INPUT);
+  io_expander.set_direction(TOUCH_0, IOExpander::PinMode::INPUT);
+  io_expander.set_direction(TOUCH_1, IOExpander::PinMode::INPUT);
+  io_expander.set_direction(TOUCH_2, IOExpander::PinMode::INPUT);
 
   // Prepare the MCP device to allow for interrupts
   // coming from any of the touchkeys. Interrupts will be raised
@@ -16,11 +16,11 @@ TouchKeys::setup()
   // must be programmed as per the ESP-IDF documentation to get
   // some interrupts.
 
-  mcp.set_int_pin(TOUCH_0, MCP23017::IntMode::RISING);
-  mcp.set_int_pin(TOUCH_1, MCP23017::IntMode::RISING);
-  mcp.set_int_pin(TOUCH_2, MCP23017::IntMode::RISING);
+  io_expander.set_int_pin(TOUCH_0, IOExpander::IntMode::RISING);
+  io_expander.set_int_pin(TOUCH_1, IOExpander::IntMode::RISING);
+  io_expander.set_int_pin(TOUCH_2, IOExpander::IntMode::RISING);
 
-  mcp.set_int_output(MCP23017::IntPort::INTPORTB, false, false, MCP23017::SignalLevel::HIGH);
+  io_expander.set_int_output(IOExpander::IntPort::INTPORTB, false, false, IOExpander::SignalLevel::HIGH);
   Wire::leave();  
 
   return true;
@@ -30,7 +30,7 @@ uint8_t
 TouchKeys::read_all_keys()
 {
   Wire::enter();
-  uint16_t value = mcp.get_ports();
+  uint16_t value = io_expander.get_ports();
   Wire::leave();
   return (value >> 10) & 7;  // Not clean
 }
@@ -39,8 +39,8 @@ uint8_t
 TouchKeys::read_key(Key key)
 {
   Wire::enter();
-  MCP23017::SignalLevel value = mcp.digital_read((MCP23017::Pin)(((uint8_t)key & 3) + 10)); // Not clean
+  IOExpander::SignalLevel value = io_expander.digital_read((IOExpander::Pin)(((uint8_t)key & 3) + 10)); // Not clean
   Wire::leave();
 
-  return value == MCP23017::SignalLevel::HIGH ? 1 : 0;
+  return value == IOExpander::SignalLevel::HIGH ? 1 : 0;
 }

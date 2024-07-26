@@ -3,11 +3,10 @@
 
 #include "wire.hpp"
 
-
 bool
 Battery::setup()
 {
-  mcp.set_direction(BATTERY_SWITCH, MCP23017::PinMode::OUTPUT);
+  io_expander.set_direction(BATTERY_SWITCH, IOExpander::PinMode::OUTPUT);
 
   return true;
 }
@@ -16,7 +15,7 @@ double
 Battery::read_level()
 {
   Wire::enter();
-  mcp.digital_write(BATTERY_SWITCH, MCP23017::SignalLevel::HIGH);
+  io_expander.digital_write(BATTERY_SWITCH, IOExpander::SignalLevel::HIGH);
   Wire::leave();
 
   ESP::delay(1);
@@ -27,7 +26,7 @@ Battery::read_level()
   int16_t adc = ESP::analog_read(ADC1_CHANNEL_7); // ADC 1 Channel 7 is GPIO port 35
   
   Wire::enter();
-  mcp.digital_write(BATTERY_SWITCH, MCP23017::SignalLevel::LOW);
+  io_expander.digital_write(BATTERY_SWITCH, IOExpander::SignalLevel::LOW);
   Wire::leave();
 
   return (double(adc) * 1.1 * 3.548133892 * 2) / 4095.0;

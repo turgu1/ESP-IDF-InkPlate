@@ -1,7 +1,12 @@
 #pragma once
 
 #include "non_copyable.hpp"
-#include "mcp23017.hpp"
+
+#if PCAL6416
+  #include "pcal6416.hpp"
+#else
+  #include "mcp23017.hpp"
+#endif
 
 class PressKeys : NonCopyable 
 {
@@ -10,7 +15,7 @@ class PressKeys : NonCopyable
 
     static const gpio_num_t INTERRUPT_PIN = GPIO_NUM_34;
 
-    PressKeys(MCP23017 & _mcp) : mcp(_mcp) {}
+    PressKeys(IOExpander & _io_expander) : io_expander(_io_expander) {}
     bool setup();
 
     /**
@@ -32,13 +37,13 @@ class PressKeys : NonCopyable
 
   private:
     static constexpr char const * TAG = "PressKeys";
-    MCP23017 & mcp;
+    IOExpander & io_expander;
 
-    const MCP23017::Pin PRESS_0 = MCP23017::Pin::IOPIN_10;
-    const MCP23017::Pin PRESS_1 = MCP23017::Pin::IOPIN_11;
-    const MCP23017::Pin PRESS_2 = MCP23017::Pin::IOPIN_12;
-    const MCP23017::Pin PRESS_3 = MCP23017::Pin::IOPIN_13;
-    const MCP23017::Pin PRESS_4 = MCP23017::Pin::IOPIN_14;
-    const MCP23017::Pin PRESS_5 = MCP23017::Pin::IOPIN_15;
+    const IOExpander::Pin PRESS_0 = IOExpander::Pin::IOPIN_10;
+    const IOExpander::Pin PRESS_1 = IOExpander::Pin::IOPIN_11;
+    const IOExpander::Pin PRESS_2 = IOExpander::Pin::IOPIN_12;
+    const IOExpander::Pin PRESS_3 = IOExpander::Pin::IOPIN_13;
+    const IOExpander::Pin PRESS_4 = IOExpander::Pin::IOPIN_14;
+    const IOExpander::Pin PRESS_5 = IOExpander::Pin::IOPIN_15;
 
 };

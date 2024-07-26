@@ -3,14 +3,19 @@
 #if defined(INKPLATE_6PLUS)
 
 #include "non_copyable.hpp"
-#include "mcp23017.hpp"
+
+#if PCAL6416
+  #include "pcal6416.hpp"
+#else
+  #include "mcp23017.hpp"
+#endif
 
 #include <array>
 
 class TouchScreen : NonCopyable 
 {
   public:
-    TouchScreen(MCP23017 & _mcp) : mcp(_mcp), ready(false) {}
+    TouchScreen(IOExpander & _io_expander) : io_expander(_io_expander), ready(false) {}
 
     typedef void (* ISRHandlerPtr)(void * value);
 
@@ -36,12 +41,12 @@ class TouchScreen : NonCopyable
 
   private:
     static constexpr char const * TAG = "TouchScreen";
-    MCP23017 & mcp;
+    IOExpander & io_expander;
 
     uint16_t x_resolution, y_resolution;
 
-    const MCP23017::Pin TOUCHSCREEN_ENABLE = MCP23017::Pin::IOPIN_12;
-    const MCP23017::Pin TOUCHSCREEN_RESET  = MCP23017::Pin::IOPIN_10;
+    const IOExpander::Pin TOUCHSCREEN_ENABLE = IOExpander::Pin::IOPIN_12;
+    const IOExpander::Pin TOUCHSCREEN_RESET  = IOExpander::Pin::IOPIN_10;
 
     static const uint8_t    TOUCHSCREEN_ADDRESS       = 0x15;
 
