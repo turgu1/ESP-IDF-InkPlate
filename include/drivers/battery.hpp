@@ -1,6 +1,7 @@
 #pragma once
 
 #include "non_copyable.hpp"
+#include "esp_adc/adc_oneshot.h"
 
 #if PCAL6416
   #include "pcal6416.hpp"
@@ -21,4 +22,9 @@ class Battery : NonCopyable
     IOExpander & io_expander;
 
     const IOExpander::Pin BATTERY_SWITCH = IOExpander::Pin::IOPIN_9;
+
+    adc_oneshot_unit_handle_t adc_handle;
+    adc_oneshot_unit_init_cfg_t adc_unit_config;
+    adc_oneshot_chan_cfg_t adc_channel_config;
+
 };

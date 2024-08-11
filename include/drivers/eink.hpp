@@ -2,6 +2,7 @@
 
 #include "frame_buffer.hpp"
 #include "wire.hpp"
+#include "soc/gpio_struct.h"
 
 #if PCAL6416
   #include "pcal6416.hpp"

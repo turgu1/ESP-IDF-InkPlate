@@ -2,6 +2,9 @@
 
 #include <cinttypes>
 
+#include "esp_vfs_fat.h"
+#include "sdmmc_cmd.h"
+
 class SDCard
 {
   public:
@@ -20,4 +23,6 @@ class SDCard
     static constexpr char const * TAG = "SDCard";
     enum class SDCardState : uint8_t { UNINITIALIZED, INITIALIZED, FAILED };
     static SDCardState state;
+    static sdmmc_card_t *card;
+
 };

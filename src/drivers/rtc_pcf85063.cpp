@@ -130,8 +130,8 @@ RTC::get_date_time(time_t * t)
 {
   if (!present) return;
   struct tm time;
-  uint16_t year;
-  RTC::WeekDay wd;
+  uint16_t year = 2024;
+  RTC::WeekDay wd = RTC::WeekDay::SUN;
 
   memset(&time, 0, sizeof(time));
   get_date_time(year,                     (uint8_t &) time.tm_mon, (uint8_t &) time.tm_mday,
