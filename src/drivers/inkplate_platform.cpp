@@ -13,7 +13,7 @@
 InkPlatePlatform InkPlatePlatform::singleton;
 
 bool
-#if defined(INKPLATE_6PLUS)
+#if INKPLATE_6PLUS || INKPLATE_6PLUS_V2
   InkPlatePlatform::setup(bool sd_card_init, TouchScreen::ISRHandlerPtr touch_screen_handler)
 #else
   InkPlatePlatform::setup(bool sd_card_init)
@@ -27,13 +27,13 @@ bool
   // Battery
   if (!battery.setup()) return false;
   
-  #if defined(EXTENDED_CASE) && (defined(INKPLATE_6) || defined(INKPLATE_10))
+  #if EXTENDED_CASE && (INKPLATE_6 || INKPLATE_10)
     // Setup Press keys
     if (!press_keys.setup()) return false;
-  #elif defined(INKPLATE_6) || defined(INKPLATE_10)
+  #elif INKPLATE_6 || INKPLATE_10
     // Setup Touch keys
     if (!touch_keys.setup()) return false;
-  #elif defined(INKPLATE_6PLUS)
+  #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2
     if (!touch_screen.setup(true, touch_screen_handler)) return false;
     if (!front_light.setup()) return false;
   #endif

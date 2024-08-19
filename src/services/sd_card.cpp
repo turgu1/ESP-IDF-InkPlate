@@ -96,7 +96,7 @@ SDCard::setup()
     .use_one_fat = false,
   };
 
-  ret = esp_vfs_fat_sdmmc_mount("/sdcard", &host, &slot_config, &mount_config, &card);
+  ret = esp_vfs_fat_sdspi_mount("/sdcard", &host, &slot_config, &mount_config, &card);
 
   if (ret != ESP_OK) {
     if (ret == ESP_FAIL) {

@@ -20,7 +20,7 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#if defined(INKPLATE_6PLUS_V2)
+#if INKPLATE_6PLUS_V2
 
 #pragma once
 
@@ -31,11 +31,7 @@ Distributed as-is; no warranty is given.
 #include "driver/gpio.h"
 #include "eink.hpp"
 
-#if PCAL6416
-  #include "pcal6416.hpp"
-#else
-  #include "mcp23017.hpp"
-#endif
+#include "pcal6416.hpp"
 
 /**
  * @brief Low level e-Ink display
@@ -51,7 +47,7 @@ Distributed as-is; no warranty is given.
 class EInk6PLUSV2 : public EInk, NonCopyable
 {
   public:
-    EInk6PLUSV2(PCAL6416 & pcal_i, PCAL6416 & pcal_e) : EInk(pcal_i), pcal_ext(pcal_e)
+    EInk6PLUSV2(IOExpander & io_expander_i, IOExpander & io_expander_e) : EInk(io_expander_i), io_expander_ext(io_expander_e)
       { }  // Private constructor
 
     static const uint16_t WIDTH  = 1024; // In pixels
@@ -88,7 +84,7 @@ class EInk6PLUSV2 : public EInk, NonCopyable
   private:
     static constexpr char const * TAG = "EInk6PLUSV2";
 
-    PCAL6416 & pcal_ext;
+    IOExpander & io_expander_ext;
     
     class FrameBuffer1BitX : public FrameBuffer1Bit {
       private:

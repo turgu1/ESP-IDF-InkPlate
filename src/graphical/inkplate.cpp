@@ -24,7 +24,7 @@ Inkplate::Inkplate(DisplayMode mode) :
   setDisplayMode(mode);
 }
 
-#if defined(INKPLATE_6PLUS)
+#if INKPLATE_6PLUS || INKPLATE_6PLUS_V2
 
   // The drivers are rotation agnostic. This method is doing proper rotation for touch screen coordinates.
   void 

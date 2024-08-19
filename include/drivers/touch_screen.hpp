@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(INKPLATE_6PLUS)
+#if INKPLATE_6PLUS || INKPLATE_6PLUS_V2
 
 #include "non_copyable.hpp"
 

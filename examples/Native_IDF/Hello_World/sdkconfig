@@ -1299,15 +1299,6 @@ CONFIG_WPA_MBEDTLS_CRYPTO=y
 # end of Supplicant
 
 #
-# Inkplate
-#
-CONFIG_INKPLATE_VARIANT_10=y
-# CONFIG_INKPLATE_VARIANT_6 is not set
-# CONFIG_INKPLATE_VARIANT_6PLUS is
-# end of Inkplate
-# end of Component config
-
-#
 # Compatibility options
 #
 # CONFIG_LEGACY_INCLUDE_COMMON_HEADERS is not set

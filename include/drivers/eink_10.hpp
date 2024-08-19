@@ -20,7 +20,7 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#if defined(INKPLATE_10)
+#if INKPLATE_10
 
 #pragma once
 

@@ -20,7 +20,7 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#if defined(INKPLATE_6PLUS_V2)
+#if INKPLATE_6PLUS_V2
 
 #define __EINK6PLUS__ 1
 #include "eink_6plus_v2.hpp"
@@ -31,22 +31,22 @@ Distributed as-is; no warranty is given.
 
 #include <iostream>
 
-const uint8_t EInk6PLUS::WAVEFORM_3BIT[8][9] = {
+const uint8_t EInk6PLUSV2::WAVEFORM_3BIT[8][9] = {
   {0, 0, 0, 0, 0, 2, 1, 1, 0}, {0, 0, 2, 1, 1, 1, 2, 1, 0}, 
   {0, 2, 2, 2, 1, 1, 2, 1, 0}, {0, 0, 2, 2, 2, 1, 2, 1, 0}, 
   {0, 0, 0, 0, 2, 2, 2, 1, 0}, {0, 0, 2, 1, 2, 1, 1, 2, 0},
   {0, 0, 2, 2, 2, 1, 1, 2, 0}, {0, 0, 0, 0, 2, 2, 2, 2, 0}};
 
-const uint8_t EInk6PLUS::LUTW[16] = {
+const uint8_t EInk6PLUSV2::LUTW[16] = {
   0xFF, 0xFE, 0xFB, 0xFA, 0xEF, 0xEE, 0xEB, 0xEA,
   0xBF, 0xBE, 0xBB, 0xBA, 0xAF, 0xAE, 0xAB, 0xAA };
 
-const uint8_t EInk6PLUS::LUTB[16] = {
+const uint8_t EInk6PLUSV2::LUTB[16] = {
   0xFF, 0xFD, 0xF7, 0xF5, 0xDF, 0xDD, 0xD7, 0xD5,
   0x7F, 0x7D, 0x77, 0x75, 0x5F, 0x5D, 0x57, 0x55 };
 
 bool 
-EInk6PLUS::setup()
+EInk6PLUSV2::setup()
 {
   if (initialized) return true;
 
@@ -54,7 +54,7 @@ EInk6PLUS::setup()
 
   wire.setup();
   
-  if (!pcal_int.setup()) {
+  if (!io_expander_int.setup()) {
     ESP_LOGE(TAG, "Initialization not completed (Main pcal Issue).");
     return false;
   }
@@ -62,15 +62,15 @@ EInk6PLUS::setup()
     ESP_LOGD(TAG, "pcal initialized.");
   }
 
-  pcal_ext.setup();
+  io_expander_ext.setup();
 
   Wire::enter();
   
-  pcal_int.set_direction(VCOM,         PCAL6416::PinMode::OUTPUT);
-  pcal_int.set_direction(PWRUP,        PCAL6416::PinMode::OUTPUT);
-  pcal_int.set_direction(WAKEUP,       PCAL6416::PinMode::OUTPUT); 
-  pcal_int.set_direction(GPIO0_ENABLE, PCAL6416::PinMode::OUTPUT);
-  pcal_int.digital_write(GPIO0_ENABLE, PCAL6416::SignalLevel::HIGH);
+  io_expander_int.set_direction(VCOM,         IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(PWRUP,        IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(WAKEUP,       IOExpander::PinMode::OUTPUT); 
+  io_expander_int.set_direction(GPIO0_ENABLE, IOExpander::PinMode::OUTPUT);
+  io_expander_int.digital_write(GPIO0_ENABLE, IOExpander::SignalLevel::HIGH);
 
   wakeup_set(); 
  
@@ -92,20 +92,20 @@ EInk6PLUS::setup()
 
   // Set all pins of seconds I/O expander to outputs, low.
   // For some reason, it draw more current in deep sleep when pins are set as inputs...
-  if (pcal_ext.is_present()) {
+  if (io_expander_ext.is_present()) {
     for (int i = 0; i < 15; i++) {
-      pcal_ext.set_direction((PCAL6416::Pin) i, PCAL6416::PinMode::OUTPUT);
-      pcal_ext.digital_write((PCAL6416::Pin) i, PCAL6416::SignalLevel::LOW);
+      io_expander_ext.set_direction((IOExpander::Pin) i, IOExpander::PinMode::OUTPUT);
+      io_expander_ext.digital_write((IOExpander::Pin) i, IOExpander::SignalLevel::LOW);
     }
   }
 
   // For same reason, unused pins of first I/O expander have to be also set as outputs, low.
-  pcal_int.set_direction(PCAL6416::Pin::IOPIN_13, PCAL6416::PinMode::OUTPUT);
-  pcal_int.set_direction(PCAL6416::Pin::IOPIN_14, PCAL6416::PinMode::OUTPUT);  
-  pcal_int.set_direction(PCAL6416::Pin::IOPIN_15, PCAL6416::PinMode::OUTPUT);  
-  pcal_int.digital_write(PCAL6416::Pin::IOPIN_13, PCAL6416::SignalLevel::LOW);
-  pcal_int.digital_write(PCAL6416::Pin::IOPIN_14, PCAL6416::SignalLevel::LOW);
-  pcal_int.digital_write(PCAL6416::Pin::IOPIN_15, PCAL6416::SignalLevel::LOW);
+  io_expander_int.set_direction(IOExpander::Pin::IOPIN_13, IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(IOExpander::Pin::IOPIN_14, IOExpander::PinMode::OUTPUT);  
+  io_expander_int.set_direction(IOExpander::Pin::IOPIN_15, IOExpander::PinMode::OUTPUT);  
+  io_expander_int.digital_write(IOExpander::Pin::IOPIN_13, IOExpander::SignalLevel::LOW);
+  io_expander_int.digital_write(IOExpander::Pin::IOPIN_14, IOExpander::SignalLevel::LOW);
+  io_expander_int.digital_write(IOExpander::Pin::IOPIN_15, IOExpander::SignalLevel::LOW);
 
   // CONTROL PINS
   gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_OUTPUT);
@@ -113,9 +113,9 @@ EInk6PLUS::setup()
   gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT);
 
-  pcal_int.set_direction(OE,      PCAL6416::PinMode::OUTPUT);
-  pcal_int.set_direction(GMOD,    PCAL6416::PinMode::OUTPUT);
-  pcal_int.set_direction(SPV,     PCAL6416::PinMode::OUTPUT);
+  io_expander_int.set_direction(OE,      IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(GMOD,    IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(SPV,     IOExpander::PinMode::OUTPUT);
 
   // DATA PINS
   gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_OUTPUT); // D0
@@ -163,7 +163,7 @@ EInk6PLUS::setup()
 }
 
 void
-EInk6PLUS::update(FrameBuffer1Bit & frame_buffer)
+EInk6PLUSV2::update(FrameBuffer1Bit & frame_buffer)
 {
   ESP_LOGD(TAG, "1bit Update...");
  
@@ -251,7 +251,7 @@ EInk6PLUS::update(FrameBuffer1Bit & frame_buffer)
 }
 
 void IRAM_ATTR
-EInk6PLUS::update(FrameBuffer3Bit & frame_buffer)
+EInk6PLUSV2::update(FrameBuffer3Bit & frame_buffer)
 {
   ESP_LOGD(TAG, "3bit Update...");
 
@@ -309,7 +309,7 @@ EInk6PLUS::update(FrameBuffer3Bit & frame_buffer)
 }
 
 void
-EInk6PLUS::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
+EInk6PLUSV2::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 {
   if (!is_partial_allowed() && !force) {
     update(frame_buffer);
@@ -368,7 +368,7 @@ EInk6PLUS::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 }
 
 void
-EInk6PLUS::clean(PixelState pixel_state, uint8_t repeat_count)
+EInk6PLUSV2::clean(PixelState pixel_state, uint8_t repeat_count)
 {
   turn_on();
 

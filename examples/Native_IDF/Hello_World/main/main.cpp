@@ -23,8 +23,6 @@ static const char * TAG = "Main";
 
 void mainTask(void * param)
 {
-  ESP_LOGI(TAG, "Main task has started, configured as %s", INKPLATE_VARIANT);
-
   display.begin();                    // Init Inkplate library (you should call this function ONLY ONCE)
   display.clearDisplay();             // Clear frame buffer of display
 

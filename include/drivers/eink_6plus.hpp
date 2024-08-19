@@ -20,7 +20,7 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#if defined(INKPLATE_6PLUS)
+#if INKPLATE_6PLUS
 
 #pragma once
 
@@ -31,11 +31,7 @@ Distributed as-is; no warranty is given.
 #include "driver/gpio.h"
 #include "eink.hpp"
 
-#if PCAL6416
-  #include "pcal6416.hpp"
-#else
-  #include "mcp23017.hpp"
-#endif
+#include "mcp23017.hpp"
 
 /**
  * @brief Low level e-Ink display

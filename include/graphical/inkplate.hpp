@@ -23,23 +23,13 @@ Distributed as-is; no warranty is given.
 #include "network_client.hpp"
 #include "sd_card.hpp"
 
-#if defined(INKPLATE_10)
-  #define INKPLATE_VARIANT "INKPLATE_10"
-#elif defined(INKPLATE_6PLUS)
-    #define INKPLATE_VARIANT "INKPLATE_6PLUS"
-#elif defined(INKPLATE_6)
-    #define INKPLATE_VARIANT "INKPLATE_6"
-#else
-    #define INKPLATE_VARIANT "UNDEFINED"
-#endif
-
 class Inkplate : public Graphics
 {
   public:
 
     Inkplate(DisplayMode mode);
 
-    #if defined(INKPLATE_6PLUS)
+    #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2
       void begin(bool sd_card_init = false, void (*touch_screen_handler)(void *) = nullptr) { 
         inkplate_platform.setup(sd_card_init, touch_screen_handler);
       }
@@ -73,11 +63,11 @@ class Inkplate : public Graphics
       return network_client.joinAP(ssid, pass); 
     }
     
-    #if defined(EXTENDED_CASE) && (defined(INKPLATE_6) || defined(INKPLATE_10))
+    #if EXTENDED_CASE && (INKPLATE_6 || INKPLATE_10)
       inline uint8_t readPresskey(int c) { return press_keys.read_key((PressKeys::Key) c); }
-    #elif defined(INKPLATE_6) || defined(INKPLATE_10)
+    #elif INKPLATE_6 || INKPLATE_10
       inline uint8_t readTouchpad(int c) { return touch_keys.read_key((TouchKeys::Key) c); }
-    #elif defined(INKPLATE_6PLUS)
+    #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2
 
       void rotateFromPhy(TouchScreen::TouchPositions & xPos, TouchScreen::TouchPositions & yPos, uint8_t count);
 

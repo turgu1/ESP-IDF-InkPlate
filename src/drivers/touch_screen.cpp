@@ -1,4 +1,4 @@
-#if defined(INKPLATE_6PLUS)
+#if INKPLATE_6PLUS || INKPLATE_6PLUS_V2
 
 #include "touch_screen.hpp"
 #include "wire.hpp"

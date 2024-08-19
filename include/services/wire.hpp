@@ -7,7 +7,10 @@
 #include <cinttypes>
 
 #include "non_copyable.hpp"
+#include "driver/i2c_master.h"
 #include "driver/i2c.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 
 class Wire : NonCopyable
 {
