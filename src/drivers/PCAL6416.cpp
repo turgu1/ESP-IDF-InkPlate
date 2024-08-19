@@ -162,18 +162,20 @@ IOExpander::set_direction(Pin pin, PinMode mode)
       break;
 
   case PinMode::INPUT_PULLUP:
-      registers[R(Reg::IODIRA,  port)] |= 1 << p; // Set it to input
+      registers[R(Reg::CONFA,   port)] |= 1 << p; // Set it to input
       registers[R(Reg::PULLA,   port)] |= 1 << p; // Set it as pull-up
       registers[R(Reg::PULLENA, port)] |= 1 << p; // Enable pullup on that pin
-      update_register(R(Reg::IODIRA,  port), registers[R(Reg::IODIRA,  port)]);
+      update_register(R(Reg::CONFA,   port), registers[R(Reg::CONFA,   port)]);
       update_register(R(Reg::PULLA,   port), registers[R(Reg::PULLA,   port)]);
       update_register(R(Reg::PULLENA, port), registers[R(Reg::PULLENA, port)]);
       break;
 
   case PinMode::OUTPUT:
-      registers[R(Reg::CONFA, port)] &= ~(1 << p); // Set it to output
-      registers[R(Reg::PULLENA,  port)] &= ~(1 << p); // Disable pullup on that pin
+      registers[R(Reg::CONFA,   port)] &= ~(1 << p); // Set it to output
+      registers[R(Reg::OUTA,    port)] &= ~(1 << p); // Set its state to LOW
+      registers[R(Reg::PULLENA, port)] &= ~(1 << p); // Disable pullup on that pin
       update_register(R(Reg::CONFA,   port), registers[R(Reg::CONFA,   port)]);
+      update_register(R(Reg::OUTA,    port), registers[R(Reg::OUTA,    port)]);
       update_register(R(Reg::PULLENA, port), registers[R(Reg::PULLENA, port)]);
       break;
   }
@@ -204,13 +206,7 @@ IOExpander::digital_read(Pin pin)
 void 
 IOExpander::set_int_output(IntPort intPort, bool mirroring, bool openDrain, SignalLevel polarity)
 {
-  Reg reg = intPort == IntPort::INTPORTA ? Reg::IOCONA : Reg::IOCONB;
-
-  registers[reg] = (registers[reg] & ~(1 << 6)) | (mirroring << 6);
-  registers[reg] = (registers[reg] & ~(1 << 2)) | (openDrain << 2);
-  registers[reg] = (registers[reg] & ~(1 << 1)) | (polarity == SignalLevel::HIGH ? (1 << 1) : 0);
-  
-  update_register(reg, registers[reg]);
+  // Not supported for this chip
 }
 
 // Mode is not supported by the PCAL io extender. interrupts
@@ -222,7 +218,7 @@ IOExpander::set_int_pin(Pin pin, IntMode mode)
   uint8_t p    =  (uint8_t)pin & 7;
 
   registers[R(Reg::IMASKA, port)] &= ~(1 << p);
-  update_register(R(Reg::IMASKA, port));
+  update_register(R(Reg::IMASKA, port), registers[R(Reg::IMASKA, port)]);
 }
 
 void 
@@ -232,7 +228,7 @@ IOExpander::remove_int_pin(Pin pin)
   uint8_t p    =  (uint8_t)pin & 7;
 
   registers[R(Reg::IMASKA, port)] |= (1 << p);
-  update_register(R(Reg::IMASKA, port));
+  update_register(R(Reg::IMASKA, port), registers[R(Reg::IMASKA, port)]);
 }
 
 uint16_t 

@@ -63,19 +63,19 @@ class IOExpander : NonCopyable
       CONFB      = 0x07,
       STRENGHTAL = 0x08,
       STRENGTHAH = 0x09,
-      STRENGTHBL = 0x10,
-      STRENGTHBH = 0x11,
-      INLATCHA   = 0x12,
-      INLATCHB   = 0x13,
-      PULLENA    = 0x14,
-      PULLENB    = 0x15,
-      PULLA      = 0x16,
-      PULLB      = 0x17,
-      IMASKA     = 0x18,
-      IMASKB     = 0x19,
-      ISTATA     = 0x20,
-      ISTATB     = 0x21,
-      OUTCONF    = 0x22
+      STRENGTHBL = 0x0A,
+      STRENGTHBH = 0x0B,
+      INLATCHA   = 0x0C,
+      INLATCHB   = 0x0D,
+      PULLENA    = 0x0E,
+      PULLENB    = 0x0F,
+      PULLA      = 0x10,
+      PULLB      = 0x11,
+      IMASKA     = 0x12,
+      IMASKB     = 0x13,
+      ISTATA     = 0x14,
+      ISTATB     = 0x15,
+      OUTCONF    = 0x16
     };
 
     const uint8_t pcal_address;
