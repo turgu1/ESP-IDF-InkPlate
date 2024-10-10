@@ -1,6 +1,6 @@
 #pragma once
 
-#if INKPLATE_6PLUS || INKPLATE_6PLUS_V2
+#if INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
 
 #if PCAL6416
   #include "pcal6416.hpp"

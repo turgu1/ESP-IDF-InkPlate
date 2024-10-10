@@ -29,7 +29,7 @@ class Inkplate : public Graphics
 
     Inkplate(DisplayMode mode);
 
-    #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2
+    #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
       void begin(bool sd_card_init = false, void (*touch_screen_handler)(void *) = nullptr) { 
         inkplate_platform.setup(sd_card_init, touch_screen_handler);
       }
@@ -46,7 +46,7 @@ class Inkplate : public Graphics
     inline void         disconnect() { network_client.disconnect();              }
     inline bool        isConnected() { return network_client.isConnected();      }
     inline int        _getRotation() { return Graphics::getRotation();           }
-    inline bool         sdCardInit() { return SDCard::setup();                   }
+    inline bool         sdCardInit() { return sd_card.setup();                   }
     inline uint16_t      einkWidth() { return e_ink.get_width();                 }
     inline uint16_t     einkHeight() { return e_ink.get_height();                }
 
@@ -67,7 +67,7 @@ class Inkplate : public Graphics
       inline uint8_t readPresskey(int c) { return press_keys.read_key((PressKeys::Key) c); }
     #elif INKPLATE_6 || INKPLATE_10
       inline uint8_t readTouchpad(int c) { return touch_keys.read_key((TouchKeys::Key) c); }
-    #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2
+    #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
 
       void rotateFromPhy(TouchScreen::TouchPositions & xPos, TouchScreen::TouchPositions & yPos, uint8_t count);
 

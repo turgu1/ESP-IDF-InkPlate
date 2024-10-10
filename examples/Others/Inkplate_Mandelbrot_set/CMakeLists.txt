@@ -24,6 +24,11 @@ elseif(DEVICE MATCHES "^INKPLATE_6PLUS_V2$")
     add_compile_definitions(
         INKPLATE_6PLUS_V2=1 
         PCAL6416=1)
+elseif(DEVICE MATCHES "^INKPLATE_6FLICK$")
+    message("INKPLATE 6FLICK defined")
+    add_compile_definitions(
+        INKPLATE_6FLICK=1 
+        PCAL6416=1)
 elseif(DEVICE MATCHES "^INKPLATE_10$")
     message("INKPLATE 10 defined")
     add_compile_definitions(

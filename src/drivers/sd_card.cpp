@@ -1,34 +1,34 @@
 #define __SD_CARD__ 1
 #include "sd_card.hpp"
 #include "esp_log.h"
+#include "wire.hpp"
 
 #include "esp_vfs_fat.h"
 #include "driver/sdmmc_host.h"
 #include "driver/sdspi_host.h"
 #include "sdmmc_cmd.h"
 
-SDCard::SDCardState SDCard::state = SDCardState::UNINITIALIZED;
-sdmmc_card_t *SDCard::card = nullptr;
-
 bool
 SDCard::setup()
 {
-  switch (state)
-  {
-  case SDCardState::INITIALIZED:
-    ESP_LOGI(TAG, "SD card is already initialized");
-    return true;
-  case SDCardState::FAILED:
-    ESP_LOGI(TAG, "SD card setup has recently failed");
-    return false;
-  case SDCardState::UNINITIALIZED:
-    ESP_LOGI(TAG, "Setup SD card");
+  switch (state) {
+    case SDCardState::INITIALIZED:
+      ESP_LOGI(TAG, "SD card is already initialized");
+      return true;
+    case SDCardState::FAILED:
+      ESP_LOGI(TAG, "SD card setup has recently failed");
+      return false;
+    case SDCardState::UNINITIALIZED:
+      ESP_LOGI(TAG, "Setup SD card");
   }
 
-  static const gpio_num_t PIN_NUM_MISO = GPIO_NUM_12;
-  static const gpio_num_t PIN_NUM_MOSI = GPIO_NUM_13;
-  static const gpio_num_t PIN_NUM_CLK  = GPIO_NUM_14;
-  static const gpio_num_t PIN_NUM_CS   = GPIO_NUM_15;
+ #if INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
+    Wire::enter();
+    io_expander.set_direction(SD_POWER, IOExpander::PinMode::OUTPUT);
+    io_expander.digital_write(SD_POWER, IOExpander::SignalLevel::LOW);
+    ESP::delay(50);
+    Wire::leave();
+  #endif
 
 // The original SDSPI_HOST_DEFAULT() from 5.3 is lacking some entries that make it
 // not userfriendly to C++
@@ -81,7 +81,13 @@ SDCard::setup()
 
   state = SDCardState::FAILED;
 
+  gpio_dump_io_configuration(stdout, (1ULL << PIN_NUM_MISO) | (1ULL << PIN_NUM_MOSI));
+
   esp_err_t ret = spi_bus_initialize(HSPI_HOST, &bus_cfg, SDSPI_DEFAULT_DMA);
+
+  gpio_set_pull_mode(PIN_NUM_MISO, GPIO_FLOATING);
+
+  gpio_dump_io_configuration(stdout, (1ULL << PIN_NUM_MISO) | (1ULL << PIN_NUM_MOSI));
 
   if (ret != ESP_OK) {
       ESP_LOGE(TAG, "Failed to initialize SPI bus for SD Card.");
@@ -114,3 +120,19 @@ SDCard::setup()
 
   return true;
 }
+
+void SDCard::deepSleep() {
+  // Set SPI pins to input to reduce power consumption in deep sleep
+  gpio_set_direction(PIN_NUM_MISO,  GPIO_MODE_INPUT);
+  gpio_set_direction(PIN_NUM_MOSI,  GPIO_MODE_INPUT);
+  gpio_set_direction(PIN_NUM_CLK,   GPIO_MODE_INPUT);
+  gpio_set_direction(PIN_NUM_CS,    GPIO_MODE_INPUT);
+
+  #if INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
+    Wire::enter();
+    io_expander.digital_write(SD_POWER, IOExpander::SignalLevel::HIGH);
+    ESP::delay(50);
+    io_expander.set_direction(SD_POWER, IOExpander::PinMode::INPUT);
+    Wire::leave();
+  #endif
+} 

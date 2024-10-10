@@ -13,7 +13,7 @@
 InkPlatePlatform InkPlatePlatform::singleton;
 
 bool
-#if INKPLATE_6PLUS || INKPLATE_6PLUS_V2
+#if INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
   InkPlatePlatform::setup(bool sd_card_init, TouchScreen::ISRHandlerPtr touch_screen_handler)
 #else
   InkPlatePlatform::setup(bool sd_card_init)
@@ -33,7 +33,7 @@ bool
   #elif INKPLATE_6 || INKPLATE_10
     // Setup Touch keys
     if (!touch_keys.setup()) return false;
-  #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2
+  #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
     if (!touch_screen.setup(true, touch_screen_handler)) return false;
     if (!front_light.setup()) return false;
   #endif
@@ -41,7 +41,7 @@ bool
   rtc.setup();
 
   // Mount and check the SD Card
-  if (sd_card_init && !SDCard::setup()) return false;
+  if (sd_card_init && !sd_card.setup()) return false;
 
   // Good to go
   return true;
@@ -98,6 +98,7 @@ InkPlatePlatform::deep_sleep(gpio_num_t gpio_num, int level)
     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
   }
   
+  sd_card.deepSleep();
   rtc_gpio_isolate(GPIO_NUM_12);
   esp_deep_sleep_start();
 }

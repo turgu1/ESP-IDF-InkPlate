@@ -29,8 +29,10 @@ Distributed as-is; no warranty is given.
 #include "eink_6.hpp"
 #include "eink_6plus.hpp"
 #include "eink_6plus_v2.hpp"
+#include "eink_6flick.hpp"
 #include "eink_10.hpp"
 #include "rtc_pcf85063.hpp" 
+#include "sd_card.hpp"
 
 #if PCAL6416
   #include "pcal6416.hpp"
@@ -42,19 +44,24 @@ Distributed as-is; no warranty is given.
   #include "press_keys.hpp"
 #elif INKPLATE_6 || INKPLATE_10
   #include "touch_keys.hpp"
-#elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2
-  #include "touch_screen.hpp"
+#elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
+  #if INKPLATE_6FLICK
+    #include "touch_screen_cypress.hpp"
+  #else
+    #include "touch_screen_elan.hpp"
+  #endif
   #include "front_light.hpp"
 #endif
 
 #if __INKPLATE_PLATFORM__
   IOExpander  io_expander_int(0x20);
-  Battery   battery(io_expander_int);
+  Battery     battery(io_expander_int);
+  SDCard      sd_card(io_expander_int);
   #if EXTENDED_CASE && (INKPLATE_6 || INKPLATE_10)
     PressKeys press_keys(io_expander_int);
   #elif INKPLATE_6 || INKPLATE_10
     TouchKeys touch_keys(io_expander_int);
-  #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2
+  #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
     TouchScreen touch_screen(io_expander_int);
     FrontLight   front_light(io_expander_int);
   #endif
@@ -68,21 +75,25 @@ Distributed as-is; no warranty is given.
     IOExpander  io_expander_ext(0x22);
     EInk6PLUS e_ink(io_expander_int, io_expander_ext);
   #elif INKPLATE_6PLUS_V2
-    IOExpander  io_expander_ext(0x22);
+    IOExpander  io_expander_ext(0x21);
     EInk6PLUSV2 e_ink(io_expander_int, io_expander_ext);  
+  #elif INKPLATE_6FLICK
+    IOExpander  io_expander_ext(0x21);
+    EInk6FLICK e_ink(io_expander_int, io_expander_ext);    
   #else
-    #error "One of INKPLATE_6, INKPLATE_10, INKPLATE_6PLUS, INKPLATE_6PLUS_V2 must be defined."
+    #error "One of INKPLATE_6, INKPLATE_10, INKPLATE_6PLUS, INKPLATE_6PLUS_V2, INKPLATE_6FLICK must be defined."
   #endif
   
   RTC       rtc(0x51);
 #else
   extern IOExpander  io_expander_int;
-  extern Battery   battery;
+  extern Battery     battery;
+  extern SDCard      sd_card;
   #if EXTENDED_CASE
     extern PressKeys press_keys;
   #elif INKPLATE_6 || INKPLATE_10
     extern TouchKeys touch_keys;
-  #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2
+  #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
     extern TouchScreen touch_screen;
     extern FrontLight   front_light;
   #endif
@@ -98,8 +109,11 @@ Distributed as-is; no warranty is given.
   #elif INKPLATE_6PLUS_V2
     extern IOExpander  io_expander_ext;
     extern EInk6PLUSV2 e_ink;
+  #elif INKPLATE_6FLICK
+    extern IOExpander  io_expander_ext;
+    extern EInk6FLICK e_ink;
   #else
-    #error "One of INKPLATE_6, INKPLATE_10, INKPLATE_6PLUS, INKPLATE_6PLUS_V2 must be defined."
+    #error "One of INKPLATE_6, INKPLATE_10, INKPLATE_6PLUS, INKPLATE_6PLUS_V2, INKPLATE_6FLICK must be defined."
   #endif
  
   extern RTC       rtc;
@@ -130,7 +144,7 @@ class InkPlatePlatform : NonCopyable
      * @return true - All devices ready
      * @return false - Some device not initialized properly
      */
-    #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2
+    #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
       bool setup(bool sd_card_init = false, TouchScreen::ISRHandlerPtr touch_screen_handler = nullptr);
     #else
       bool setup(bool sd_card_init = false);

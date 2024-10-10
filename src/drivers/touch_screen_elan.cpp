@@ -1,6 +1,6 @@
 #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2
 
-#include "touch_screen.hpp"
+#include "touch_screen_elan.hpp"
 #include "wire.hpp"
 #include "esp.hpp"
 
@@ -130,6 +130,8 @@ TouchScreen::retrieve_resolution()
 
   Wire::leave();
 
+  ESP_LOGI(TAG, "Resolution: [%" PRIu16 ", %" PRIu16 "]", x_resolution, y_resolution);
+
   touchscreen_interrupt_happened = false;
 }
 
@@ -155,6 +157,9 @@ TouchScreen::get_position(TouchPositions & x_positions, TouchPositions & y_posit
   }
 
   touchscreen_interrupt_happened = false;
+
+  ESP_LOGI(TAG, "Pos: [%" PRIu16 ",%" PRIu16 "], [%" PRIu16 ",%" PRIu16 "], Fingers: %" PRIu8, 
+    x_positions[0], y_positions[0], x_positions[1], y_positions[1], fingers);
 
   return fingers;
 }

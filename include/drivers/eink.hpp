@@ -102,7 +102,7 @@ class EInk
     const IOExpander::Pin VCOM           = IOExpander::Pin::IOPIN_5;
     
     const IOExpander::Pin GPIO0_ENABLE   = IOExpander::Pin::IOPIN_8;
-  
+
     inline void cl_set()       { GPIO.out_w1ts = CL; }
     inline void cl_clear()     { GPIO.out_w1tc = CL; }
 
