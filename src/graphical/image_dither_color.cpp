@@ -1,7 +1,7 @@
 #include "image.hpp"
 #include "image_dither_color_kernels.hpp"
 
-#ifdef ARDUINO_INKPLATECOLOR
+#ifdef INKPLATE_COLOR
 int kernelWidth = sizeof kernel[0] / sizeof kernel[0][0];
 int kernelHeight = sizeof kernel / sizeof kernel[0];
 

@@ -30,7 +30,6 @@ Distributed as-is; no warranty is given.
 #include "non_copyable.hpp"
 #include "driver/gpio.h"
 #include "eink.hpp"
-
 #include "pcal6416.hpp"
 
 /**
@@ -47,11 +46,15 @@ Distributed as-is; no warranty is given.
 class EInk6FLICK : public EInk, NonCopyable
 {
   public:
-    EInk6FLICK(IOExpander & io_expander_i, IOExpander & io_expander_e) : EInk(io_expander_i), io_expander_ext(io_expander_e)
-      { }  // Private constructor
 
     static const uint16_t WIDTH  = 1024; // In pixels
     static const uint16_t HEIGHT =  758; // In pixels
+
+    EInk6FLICK(IOExpander & io_expander_i, IOExpander & io_expander_e) 
+      : EInk(io_expander_i, WIDTH), io_expander_ext(io_expander_e)
+        
+      { }  // Private constructor
+
     static const uint32_t BITMAP_SIZE_1BIT = (WIDTH * HEIGHT) >> 3;            // In bytes
     static const uint32_t BITMAP_SIZE_3BIT = ((uint32_t) WIDTH * HEIGHT) >> 1; // In bytes
     static const uint16_t LINE_SIZE_1BIT   = WIDTH >> 3;                       // In bytes
@@ -107,6 +110,7 @@ class EInk6FLICK : public EInk, NonCopyable
     void clean(PixelState pixel_state, uint8_t repeat_count);
 
     static const uint8_t  WAVEFORM_3BIT[8][9]; 
+    static const uint8_t  LUT2[16];
     static const uint8_t  LUTW[16];
     static const uint8_t  LUTB[16];
 };
