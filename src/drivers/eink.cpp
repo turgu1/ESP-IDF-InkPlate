@@ -1,6 +1,9 @@
 #define __EINK__
 #include "eink.hpp"
-#include "soc/gpio_sig_map.h"
+
+#if I2S_SUPPORT
+  #include "soc/gpio_sig_map.h"
+#endif
 
 // PIN_LUT built from the following:
 //
@@ -52,7 +55,6 @@ EInk::turn_off()
 {
   if (get_panel_state() == PanelState::OFF) return;
  
-  vcom_clear();
   oe_clear();
   gmod_clear();
 
@@ -65,22 +67,16 @@ EInk::turn_off()
   ckv_clear();
   sph_clear();
   spv_clear();
+
+  vcom_clear();
   pwrup_clear();
 
   unsigned long timer = ESP::millis();
-
   do {
     ESP::delay(1);
   } while ((read_power_good() != 0) && (ESP::millis() - timer) < 250);
 
-
-  #if !(INKPLATE_6PLUS || INKPLATE_6PLUSV2)
-    // Disable 3V3 to the panel
-    wire.begin_transmission(PWRMGR_ADDRESS);
-    wire.write(0x01);
-    wire.write(0x00);
-    wire.end_transmission();
-  #endif
+  wakeup_clear();
 
   pins_z_state();
   set_panel_state(PanelState::OFF);
@@ -90,20 +86,14 @@ EInk::turn_off()
 
 // Turn on supply for epaper display (TPS65186) 
 // [+15 VDC, -15VDC, +22VDC, -20VDC, +3.3VDC, VCOM]
-void 
+bool 
 EInk::turn_on()
 {
-  if (get_panel_state() == PanelState::ON) return;
+  if (get_panel_state() == PanelState::ON) return true;
 
   wakeup_set();
 
   ESP::delay(5);
-
-  // Enable all rails
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x01);
-  wire.write(0b00100000);
-  wire.end_transmission();
 
   // Modify power up sequence
   wire.begin_transmission(PWRMGR_ADDRESS);
@@ -111,15 +101,24 @@ EInk::turn_on()
   wire.write(0b11100100);
   wire.end_transmission();
 
-  // Modify power down sequence (VEE and VNEG are swapped)
+  // Enable all rails
   wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x0B);
-  wire.write(0b00011011);
+  wire.write(0x01);
+  wire.write(0b00100000);
   wire.end_transmission();
+
+  // // Modify power down sequence (VEE and VNEG are swapped)
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x0B);
+  // wire.write(0b00011011);
+  // wire.end_transmission();
+
+  pwrup_set();
 
   pins_as_outputs();
 
   le_clear();
+  oe_clear();
   
   #if !(INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK)
     cl_clear();
@@ -130,24 +129,25 @@ EInk::turn_on()
   spv_set();
   ckv_clear();
   oe_clear();
-  pwrup_set();
-  set_panel_state(PanelState::ON);
+  vcom_set();
 
   unsigned long timer = ESP::millis();
-
   do {
     ESP::delay(1);
   } while ((read_power_good() != PWR_GOOD_OK) && (ESP::millis() - timer) < 250);
 
   if ((ESP::millis() - timer) >= 250) {
-    turn_off();
-    return;
+    vcom_clear();
+    pwrup_clear();
+    return false;
   }
 
-  vcom_set();
   oe_set();
 
+  set_panel_state(PanelState::ON);
+
   ESP_LOGI(TAG, "EInk is on");
+  return true;
 }
 
 uint8_t 
@@ -220,7 +220,7 @@ EInk::pins_z_state()
   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_27, GPIO_MODE_INPUT);
 
-  #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
+  #if (INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK) && I2S_SUPPORT
     i2s_comms.stop_clock();
   #endif
 }
@@ -236,19 +236,20 @@ EInk::pins_as_outputs()
   io_expander_int.set_direction(GMOD, IOExpander::PinMode::OUTPUT);
   io_expander_int.set_direction(SPV,  IOExpander::PinMode::OUTPUT);
 
-  #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
+  #if (INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK) && I2S_SUPPORT
 
-    i2s_comms.set_pin( 0, I2S1O_BCK_OUT_IDX,   0);
-    i2s_comms.set_pin( 4, I2S1O_DATA_OUT0_IDX, 0);
-    i2s_comms.set_pin( 5, I2S1O_DATA_OUT1_IDX, 0);
-    i2s_comms.set_pin(18, I2S1O_DATA_OUT2_IDX, 0);
-    i2s_comms.set_pin(19, I2S1O_DATA_OUT3_IDX, 0);
-    i2s_comms.set_pin(23, I2S1O_DATA_OUT4_IDX, 0);
-    i2s_comms.set_pin(25, I2S1O_DATA_OUT5_IDX, 0);
-    i2s_comms.set_pin(26, I2S1O_DATA_OUT6_IDX, 0);
-    i2s_comms.set_pin(27, I2S1O_DATA_OUT7_IDX, 0);
+      i2s_comms.set_pin( 0, I2S1O_BCK_OUT_IDX,   0);
+      i2s_comms.set_pin( 4, I2S1O_DATA_OUT0_IDX, 0);
+      i2s_comms.set_pin( 5, I2S1O_DATA_OUT1_IDX, 0);
+      i2s_comms.set_pin(18, I2S1O_DATA_OUT2_IDX, 0);
+      i2s_comms.set_pin(19, I2S1O_DATA_OUT3_IDX, 0);
+      i2s_comms.set_pin(23, I2S1O_DATA_OUT4_IDX, 0);
+      i2s_comms.set_pin(25, I2S1O_DATA_OUT5_IDX, 0);
+      i2s_comms.set_pin(26, I2S1O_DATA_OUT6_IDX, 0);
+      i2s_comms.set_pin(27, I2S1O_DATA_OUT7_IDX, 0);
 
-    i2s_comms.start_clock();
+      i2s_comms.start_clock();
+    
   #else
     gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_OUTPUT);
     gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_OUTPUT);

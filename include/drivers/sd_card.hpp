@@ -31,7 +31,6 @@ class SDCard
   private:
     static constexpr char const * TAG = "SDCard";
 
-
     #if INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
       static constexpr IOExpander::Pin SD_POWER = IOExpander::Pin::IOPIN_13;
     #endif
