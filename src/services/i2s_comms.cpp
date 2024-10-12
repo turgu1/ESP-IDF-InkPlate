@@ -215,7 +215,7 @@
 
   void IRAM_ATTR I2SComms::init_lldesc()
   {
-    if (ready) {
+    if (lldesc != nullptr) {
       lldesc->size = line_buffer_size;
       lldesc->length = line_buffer_size;
       lldesc->offset = 0;
@@ -223,7 +223,7 @@
       lldesc->eof = 1;
       lldesc->owner = 1;
       lldesc->buf = line_buffer;
-      lldesc->empty = 0;
+      lldesc->qe.stqe_next = 0;
     }
   }
 

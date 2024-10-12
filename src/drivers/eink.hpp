@@ -4,9 +4,9 @@
 #include "wire.hpp"
 #include "soc/gpio_struct.h"
 
-#define I2S_SUPPORT 0
-
 #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
+  #define I2S_SUPPORT 1
+
   #if I2S_SUPPORT
     #include "i2s_comms.hpp"
   #endif
@@ -63,12 +63,10 @@ class EInk
 
   protected:                     
     
-    #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
+    #if (INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK) && I2S_SUPPORT
       EInk(IOExpander & io_expander, const int screen_width) : 
         io_expander_int(io_expander),
-        #if I2S_SUPPORT
-          i2s_comms(I2SComms(&I2S1, (screen_width / 4) + 16)),
-        #endif
+        i2s_comms(I2SComms((screen_width / 4) + 16)),
         panel_state(PanelState::OFF), 
         initialized(false),
         partial_allowed(false) {}
@@ -80,15 +78,13 @@ class EInk
         partial_allowed(false) {}
     #endif
 
-      static const uint8_t PWRMGR_ADDRESS = 0x48;
+    static const uint8_t PWRMGR_ADDRESS = 0x48;
     static const uint8_t PWR_GOOD_OK    = 0b11111010;
 
     IOExpander & io_expander_int;
 
-    #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
-      #if I2S_SUPPORT
-        I2SComms i2s_comms;
-      #endif
+    #if (INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK) && I2S_SUPPORT
+      I2SComms i2s_comms;
     #endif
 
     PanelState panel_state;

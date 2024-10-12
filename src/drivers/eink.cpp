@@ -98,13 +98,13 @@ EInk::turn_on()
   // Modify power up sequence
   wire.begin_transmission(PWRMGR_ADDRESS);
   wire.write(0x09);
-  wire.write(0b11100100);
+  wire.write(0b11100001);
   wire.end_transmission();
 
   // Enable all rails
   wire.begin_transmission(PWRMGR_ADDRESS);
   wire.write(0x01);
-  wire.write(0b00100000);
+  wire.write(0b00111111);
   wire.end_transmission();
 
   // // Modify power down sequence (VEE and VNEG are swapped)

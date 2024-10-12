@@ -29,11 +29,11 @@
 
   public:
 
-    I2SComms(i2s_dev_t * dev, const uint32_t buffer_size) 
-      : i2s_dev(dev), line_buffer_size(buffer_size) 
+    I2SComms(const uint32_t buffer_size) 
+      : i2s_dev(&I2S1), line_buffer_size(buffer_size) 
     {
       line_buffer = (uint8_t  *) heap_caps_malloc(buffer_size,      MALLOC_CAP_DMA);
-      lldesc      = (lldesc_s *) heap_caps_malloc(sizeof(lldesc_t), MALLOC_CAP_DMA);
+      lldesc      = (lldesc_s *) heap_caps_malloc(sizeof(lldesc_s), MALLOC_CAP_DMA);
 
       ready = (line_buffer != nullptr) && (lldesc != nullptr);
 
