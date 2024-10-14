@@ -5,11 +5,8 @@
 #include "soc/gpio_struct.h"
 
 #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
-  #define I2S_SUPPORT 1
-
-  #if I2S_SUPPORT
-    #include "i2s_comms.hpp"
-  #endif
+  #include "i2s_comms.hpp"
+  #include "soc/gpio_sig_map.h"
 #endif
 
 #if PCAL6416
@@ -63,7 +60,7 @@ class EInk
 
   protected:                     
     
-    #if (INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK) && I2S_SUPPORT
+    #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
       EInk(IOExpander & io_expander, const int screen_width) : 
         io_expander_int(io_expander),
         i2s_comms(I2SComms((screen_width / 4) + 16)),
@@ -83,7 +80,7 @@ class EInk
 
     IOExpander & io_expander_int;
 
-    #if (INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK) && I2S_SUPPORT
+    #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
       I2SComms i2s_comms;
     #endif
 

@@ -8,6 +8,7 @@ set(components
     nvs_flash
     esp_http_client
     esp_driver_i2c
+    esp_driver_i2s
     esp_adc
     esp_timer
     freertos

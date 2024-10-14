@@ -74,7 +74,7 @@ TouchScreen::setup(bool power_on, ISRHandlerPtr isr_handler)
       touchscreen_interrupt_happened = false;
       ready = true;
 
-      ESP_LOGI(TAG, "Initialization completed.");
+      ESP_LOGD(TAG, "Initialization completed.");
     }
     else {
       Wire::leave();
@@ -133,7 +133,7 @@ TouchScreen::get_position(TouchPositions & x_positions, TouchPositions & y_posit
 
   touchscreen_interrupt_happened = false;
 
-  ESP_LOGI(TAG, "Pos: [%" PRIu16 ",%" PRIu16 "], [%" PRIu16 ",%" PRIu16 "], Fingers: %" PRIu8, 
+  ESP_LOGD(TAG, "Pos: [%" PRIu16 ",%" PRIu16 "], [%" PRIu16 ",%" PRIu16 "], Fingers: %" PRIu8, 
     x_positions[0], y_positions[0], x_positions[1], y_positions[1], fingers);
 
   return fingers;

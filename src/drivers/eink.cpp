@@ -1,10 +1,6 @@
 #define __EINK__
 #include "eink.hpp"
 
-#if I2S_SUPPORT
-  #include "soc/gpio_sig_map.h"
-#endif
-
 // PIN_LUT built from the following:
 //
 // for (uint32_t i = 0; i < 256; i++) {
@@ -76,12 +72,15 @@ EInk::turn_off()
     ESP::delay(1);
   } while ((read_power_good() != 0) && (ESP::millis() - timer) < 250);
 
-  wakeup_clear();
+  // Do not disable WAKEUP if older Inkplate6Plus is used.
+  #if !INKPLATE_6PLUS
+    wakeup_clear();
+  #endif
 
   pins_z_state();
   set_panel_state(PanelState::OFF);
 
-  ESP_LOGI(TAG, "EInk is off");
+  ESP_LOGD(TAG, "EInk is off");
 }
 
 // Turn on supply for epaper display (TPS65186) 
@@ -95,7 +94,7 @@ EInk::turn_on()
 
   ESP::delay(5);
 
-  // Modify power up sequence
+  // Modify power up sequence  (VEE and VNEG are swapped)
   wire.begin_transmission(PWRMGR_ADDRESS);
   wire.write(0x09);
   wire.write(0b11100001);
@@ -143,10 +142,9 @@ EInk::turn_on()
   }
 
   oe_set();
-
   set_panel_state(PanelState::ON);
 
-  ESP_LOGI(TAG, "EInk is on");
+  ESP_LOGD(TAG, "EInk is on");
   return true;
 }
 
@@ -220,7 +218,7 @@ EInk::pins_z_state()
   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_27, GPIO_MODE_INPUT);
 
-  #if (INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK) && I2S_SUPPORT
+  #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
     i2s_comms.stop_clock();
   #endif
 }
@@ -236,7 +234,7 @@ EInk::pins_as_outputs()
   io_expander_int.set_direction(GMOD, IOExpander::PinMode::OUTPUT);
   io_expander_int.set_direction(SPV,  IOExpander::PinMode::OUTPUT);
 
-  #if (INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK) && I2S_SUPPORT
+  #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
 
       i2s_comms.set_pin( 0, I2S1O_BCK_OUT_IDX,   0);
       i2s_comms.set_pin( 4, I2S1O_DATA_OUT0_IDX, 0);
@@ -249,8 +247,9 @@ EInk::pins_as_outputs()
       i2s_comms.set_pin(27, I2S1O_DATA_OUT7_IDX, 0);
 
       i2s_comms.start_clock();
-    
+
   #else
+
     gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_OUTPUT);
     gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_OUTPUT);
     gpio_set_direction(GPIO_NUM_5,  GPIO_MODE_OUTPUT);
@@ -260,6 +259,7 @@ EInk::pins_as_outputs()
     gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
     gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
     gpio_set_direction(GPIO_NUM_27, GPIO_MODE_OUTPUT);
+    
   #endif
 }
 

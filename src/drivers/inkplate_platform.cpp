@@ -100,9 +100,11 @@ InkPlatePlatform::deep_sleep(gpio_num_t gpio_num, int level)
   
   #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
     touch_screen.shutdown();
+    front_light.disable();
   #endif
   
   sd_card.deepSleep();
   rtc_gpio_isolate(GPIO_NUM_12);
+
   esp_deep_sleep_start();
 }

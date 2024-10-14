@@ -92,6 +92,9 @@ EInk6FLICK::setup()
   io_expander_int.set_direction(IOExpander::Pin::IOPIN_14, IOExpander::PinMode::OUTPUT);  
   io_expander_int.set_direction(IOExpander::Pin::IOPIN_15, IOExpander::PinMode::OUTPUT);  
 
+  io_expander_int.digital_write(IOExpander::Pin::IOPIN_14, IOExpander::SignalLevel::LOW);
+  io_expander_int.digital_write(IOExpander::Pin::IOPIN_15, IOExpander::SignalLevel::LOW);
+
   // CONTROL PINS
   gpio_set_direction(GPIO_NUM_2,  GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
@@ -101,15 +104,13 @@ EInk6FLICK::setup()
   io_expander_int.set_direction(GMOD, IOExpander::PinMode::OUTPUT);
   io_expander_int.set_direction(SPV,  IOExpander::PinMode::OUTPUT);
 
-  #if I2S_SUPPORT
-    if (i2s_comms.is_ready()) { // instanciated through the EInk constructor
-      i2s_comms.init(4);
-    }
-    else {
-      ESP_LOGE(TAG, "I2SComms is not ready!!!");
-      return false;
-    }
-  #endif
+  if (i2s_comms.is_ready()) { // instanciated through the EInk constructor
+    i2s_comms.init(4);
+  }
+  else {
+    ESP_LOGE(TAG, "I2SComms is not ready!!!");
+    return false;
+  }
 
   d_memory_new = new_frame_buffer_1bit();
   p_buffer     = (uint8_t *) malloc(BITMAP_SIZE_1BIT * 2);
@@ -132,25 +133,12 @@ EInk6FLICK::setup()
   d_memory_new->clear();
   memset(p_buffer, 0, BITMAP_SIZE_1BIT * 2);
 
-  #if I2S_SUPPORT
-    for (int j = 0; j < 9; j++) {
-      for (uint32_t i = 0; i < 256; i++) {
-        GLUT [(j << 8) + i] =  (WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j]);
-        GLUT2[(j << 8) + i] = ((WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j])) << 4;
-      }
+  for (int j = 0; j < 9; j++) {
+    for (uint32_t i = 0; i < 256; i++) {
+      GLUT [(j << 8) + i] =  (WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j]);
+      GLUT2[(j << 8) + i] = ((WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j])) << 4;
     }
-  #else
-    for (int j = 0; j < 9; ++j) {
-        for (uint32_t i = 0; i < 256; ++i) {
-            uint8_t z = (WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j]);
-            GLUT[j * 256 + i] = ((z & 0b00000011) << 4) | (((z & 0b00001100) >> 2) << 18) |
-                                (((z & 0b00010000) >> 4) << 23) | (((z & 0b11100000) >> 5) << 25);
-            z = ((WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j])) << 4;
-            GLUT2[j * 256 + i] = ((z & 0b00000011) << 4) | (((z & 0b00001100) >> 2) << 18) |
-                                 (((z & 0b00010000) >> 4) << 23) | (((z & 0b11100000) >> 5) << 25);
-        }
-    }
-  #endif
+  }
 
   initialized = true;
 
@@ -182,147 +170,74 @@ EInk6FLICK::update(FrameBuffer1Bit & frame_buffer)
 
   uint8_t * data = frame_buffer.get_data();
 
-  #if I2S_SUPPORT
-    volatile uint8_t * line_buffer = i2s_comms.get_line_buffer();
+  volatile uint8_t * line_buffer = i2s_comms.get_line_buffer();
 
-    // Write only black pixels.
-    for (int k = 0; k < 4; k++) {
+  // Write only black pixels.
+  for (int k = 0; k < 4; k++) {
 
-      ptr = &data[BITMAP_SIZE_1BIT - 1];
+    ptr = &data[BITMAP_SIZE_1BIT - 1];
 
-      vscan_start();
+    vscan_start();
 
-      for (int i = 0; i < HEIGHT; i++) {
+    for (int i = 0; i < HEIGHT; i++) {
 
-        for (int n = 0; n < (WIDTH / 4); n += 4) {
-          uint8_t dram1 = *ptr--;
-          uint8_t dram2 = *ptr--;
-          line_buffer[n    ] = LUTB[(dram2 >> 4) & 0x0F]; // i + 2;
-          line_buffer[n + 1] = LUTB[ dram2       & 0x0F]; // i + 3;
-          line_buffer[n + 2] = LUTB[(dram1 >> 4) & 0x0F]; // i;
-          line_buffer[n + 3] = LUTB[ dram1       & 0x0F]; // i + 1;
-        }
-
-        i2s_comms.send_data();
-        vscan_end();
+      for (int n = 0; n < (WIDTH / 4); n += 4) {
+        uint8_t dram1 = *ptr--;
+        uint8_t dram2 = *ptr--;
+        line_buffer[n    ] = LUTB[(dram2 >> 4) & 0x0F]; // i + 2;
+        line_buffer[n + 1] = LUTB[ dram2       & 0x0F]; // i + 3;
+        line_buffer[n + 2] = LUTB[(dram1 >> 4) & 0x0F]; // i;
+        line_buffer[n + 3] = LUTB[ dram1       & 0x0F]; // i + 1;
       }
-      ESP::delay_microseconds(230);
+
+      i2s_comms.send_data();
+      vscan_end();
     }
+  }
 
-    // Now write both black and white pixels.
-    for (int k = 0; k < 1; k++) {
+  // Now write both black and white pixels.
+  for (int k = 0; k < 1; k++) {
 
-      ptr = &data[BITMAP_SIZE_1BIT - 1];
+    ptr = &data[BITMAP_SIZE_1BIT - 1];
 
-      vscan_start();
+    vscan_start();
 
-      for (int i = 0; i < HEIGHT; i++) {
+    for (int i = 0; i < HEIGHT; i++) {
 
-        for (int n = 0; n < (WIDTH / 4); n += 4) {
-          uint8_t dram1 = *ptr--;
-          uint8_t dram2 = *ptr--;
-          line_buffer[n    ] = LUT2[(dram2 >> 4) & 0x0F]; // i + 2;
-          line_buffer[n + 1] = LUT2[ dram2       & 0x0F]; // i + 3;
-          line_buffer[n + 2] = LUT2[(dram1 >> 4) & 0x0F]; // i;
-          line_buffer[n + 3] = LUT2[ dram1       & 0x0F]; // i + 1;
-        }
-
-        i2s_comms.send_data();
-        vscan_end();
+      for (int n = 0; n < (WIDTH / 4); n += 4) {
+        uint8_t dram1 = *ptr--;
+        uint8_t dram2 = *ptr--;
+        line_buffer[n    ] = LUT2[(dram2 >> 4) & 0x0F]; // i + 2;
+        line_buffer[n + 1] = LUT2[ dram2       & 0x0F]; // i + 3;
+        line_buffer[n + 2] = LUT2[(dram1 >> 4) & 0x0F]; // i;
+        line_buffer[n + 3] = LUT2[ dram1       & 0x0F]; // i + 1;
       }
-      ESP::delay_microseconds(230);
-    }
 
-    // Discharge sequence
-    for (int k = 0; k < 1; k++) {
-
-      vscan_start();
-
-      for (int i = 0; i < HEIGHT; i++) {
-
-        for (int n = 0; n < (WIDTH / 4); n += 4)
-        {
-          line_buffer[n    ] = 0; // i + 2;
-          line_buffer[n + 1] = 0; // i + 3;
-          line_buffer[n + 2] = 0; // i;
-          line_buffer[n + 3] = 0; // i + 1;
-        }
-
-        i2s_comms.send_data();
-        vscan_end();
-      }
-    }
-  #else
-
-    for (int k = 0; k < 8; k++) {
-
-      ptr = &data[BITMAP_SIZE_1BIT - 1];
-
-      vscan_start();
-
-      for (int i = 0; i < HEIGHT; i++) {
-
-        uint8_t dram = ~(*ptr--);
-
-        hscan_start(PIN_LUT[LUTW[(dram >> 4) & 0x0F]]);
-        GPIO.out_w1ts = CL | PIN_LUT[LUTW[dram & 0x0F]];
-        GPIO.out_w1tc = CL | DATA;
-
-        for (int j = 0; j < (LINE_SIZE_1BIT - 1); j++) {
-          dram = ~(*ptr--);
-          GPIO.out_w1ts = CL | PIN_LUT[LUTW[(dram >> 4) & 0x0F]];
-          GPIO.out_w1tc = CL | DATA;
-          GPIO.out_w1ts = CL | PIN_LUT[LUTW[dram & 0x0F]];
-          GPIO.out_w1tc = CL | DATA;
-        }
-
-        GPIO.out_w1ts = CL;
-        GPIO.out_w1tc = CL| DATA;
-
-        vscan_end();
-      }
-      ESP::delay_microseconds(230);
-    }
-
-    //ESP::delay(5000);
-
-    for (int k = 0; k < 1; k++) {
-
-      ptr = &data[BITMAP_SIZE_1BIT - 1];
-
-      vscan_start();
-
-      for (int i = 0; i < HEIGHT; i++) {
-
-        uint8_t dram = ~(*ptr--);
-
-        hscan_start(PIN_LUT[LUTB[(dram >> 4) & 0x0F]]);
-        GPIO.out_w1ts = CL | PIN_LUT[LUTB[dram & 0x0F]];
-        GPIO.out_w1tc = CL | DATA;
-
-        for (int j = 0; j < (LINE_SIZE_1BIT - 1); j++) {
-          dram = ~(*ptr--);
-          GPIO.out_w1ts = CL | PIN_LUT[LUTB[(dram >> 4) & 0x0F]];
-          GPIO.out_w1tc = CL | DATA;
-          GPIO.out_w1ts = CL | PIN_LUT[LUTB[dram & 0x0F]];
-          GPIO.out_w1tc = CL | DATA;
-        }
-
-        GPIO.out_w1ts = CL;
-        GPIO.out_w1tc = CL| DATA;
-
-        vscan_end();
-      }
+      i2s_comms.send_data();
+      vscan_end();
     }
     ESP::delay_microseconds(230);
+  }
 
-    //ESP::delay(5000);
+  // Discharge sequence
+  for (int k = 0; k < 1; k++) {
 
-    clean(PixelState::DISCHARGE, 2);
-    //clean(PixelState::SKIP,      1);
+    vscan_start();
 
-    //vscan_start();
-  #endif
+    for (int i = 0; i < HEIGHT; i++) {
+
+      for (int n = 0; n < (WIDTH / 4); n += 4)
+      {
+        line_buffer[n    ] = 0; // i + 2;
+        line_buffer[n + 1] = 0; // i + 3;
+        line_buffer[n + 2] = 0; // i;
+        line_buffer[n + 3] = 0; // i + 1;
+      }
+
+      i2s_comms.send_data();
+      vscan_end();
+    }
+  }
 
   turn_off();
   
@@ -352,65 +267,29 @@ EInk6FLICK::update(FrameBuffer3Bit & frame_buffer)
 
   uint8_t * data = frame_buffer.get_data();
 
-  #if I2S_SUPPORT
-    volatile uint8_t * line_buffer = i2s_comms.get_line_buffer();
+  volatile uint8_t * line_buffer = i2s_comms.get_line_buffer();
 
-    for (int k = 0, kk = 0; k < 9; k++, kk += 256) {
-      uint8_t * dp = &data[BITMAP_SIZE_3BIT] - 2;
+  for (int k = 0, kk = 0; k < 9; k++, kk += 256) {
+    uint8_t * dp = &data[BITMAP_SIZE_3BIT] - 2;
 
-      vscan_start();
-
-      for (int i = 0; i < HEIGHT; i++) {
-
-        for (int j = 0; j < (WIDTH / 4); j += 4) {
-          line_buffer[j + 2] = (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]); dp -= 2;
-          line_buffer[j + 3] = (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]); dp -= 2;
-          line_buffer[j    ] = (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]); dp -= 2;
-          line_buffer[j + 1] = (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]); dp -= 2;
-        }
-
-        i2s_comms.send_data();
-
-        vscan_end();
-      }
-    }
-    clean(PixelState::SKIP, 1);
-  #else
-    for (int k = 0, kk = 0; k < 9; k++, kk += 256) {
-
-      uint8_t * dp = &data[BITMAP_SIZE_3BIT - 2];
-
-      vscan_start();
-
-      for (int i = 0; i < HEIGHT; i++) {
-
-        hscan_start((GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]));
-        dp -= 2;
-
-        GPIO.out_w1ts = CL | (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]);
-        GPIO.out_w1tc = CL | DATA;
-        dp -= 2;
-
-        for (int j = 0; j < ((WIDTH / 8) - 1); j++) {
-            GPIO.out_w1ts = CL | (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]);
-            GPIO.out_w1tc = CL | DATA;
-            dp -= 2;
-            GPIO.out_w1ts = CL | (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]);
-            GPIO.out_w1tc = CL | DATA;
-            dp -= 2;
-        }
-
-        GPIO.out_w1ts = CL;
-        GPIO.out_w1tc = CL | DATA;
-
-        vscan_end();
-      }
-
-      ESP::delay_microseconds(230);
-    }
-    clean(PixelState::SKIP, 1);
     vscan_start();
-  #endif
+
+    for (int i = 0; i < HEIGHT; i++) {
+
+      for (int j = 0; j < (WIDTH / 4); j += 4) {
+        line_buffer[j + 2] = (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]); dp -= 2;
+        line_buffer[j + 3] = (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]); dp -= 2;
+        line_buffer[j    ] = (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]); dp -= 2;
+        line_buffer[j + 1] = (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]); dp -= 2;
+      }
+
+      i2s_comms.send_data();
+
+      vscan_end();
+    }
+  }
+
+  clean(PixelState::SKIP, 1);
 
   turn_off();
 
@@ -448,56 +327,31 @@ EInk6FLICK::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 
   if (!turn_on()) return;
 
-  #if I2S_SUPPORT
-    volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
-    i2s_comms.init_lldesc();
-    
-    if (line_buffer == nullptr) return;
+  volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
+  i2s_comms.init_lldesc();
+  
+  if (line_buffer == nullptr) return;
 
-    for (int k = 0; k < 5; k++) {
+  for (int k = 0; k < 5; k++) {
 
-      vscan_start();
-      n = (BITMAP_SIZE_1BIT * 2) - 1;
+    vscan_start();
+    n = (BITMAP_SIZE_1BIT * 2) - 1;
 
-      for (int i = 0; i < HEIGHT; i++) {
+    for (int i = 0; i < HEIGHT; i++) {
 
-        for (int j = 0; j < (WIDTH / 4); j += 4) {
-          line_buffer[j + 2] = p_buffer[n    ];
-          line_buffer[j + 3] = p_buffer[n - 1];
-          line_buffer[j    ] = p_buffer[n - 2];
-          line_buffer[j + 1] = p_buffer[n - 3];
-          n -= 4;
-        }
-
-        i2s_comms.send_data();
-
-        vscan_end();
-      }
-    }
-  #else
-    for (int k = 0; k < 5; k++) {
-
-      vscan_start();
-      n = (BITMAP_SIZE_1BIT * 2) - 1;
-
-      for (int i = 0; i < HEIGHT; i++) {
-
-        hscan_start(PIN_LUT[p_buffer[n--]]);
-
-        for (int j = 0; j < ((WIDTH / 4) - 1); j++) {
-          GPIO.out_w1ts = CL | PIN_LUT[p_buffer[n--]];
-          GPIO.out_w1tc = CL | DATA;
-        }
-
-        GPIO.out_w1ts = CL;
-        GPIO.out_w1tc = CL | DATA;
-
-        vscan_end();
+      for (int j = 0; j < (WIDTH / 4); j += 4) {
+        line_buffer[j + 2] = p_buffer[n    ];
+        line_buffer[j + 3] = p_buffer[n - 1];
+        line_buffer[j    ] = p_buffer[n - 2];
+        line_buffer[j + 1] = p_buffer[n - 3];
+        n -= 4;
       }
 
-      ESP::delay_microseconds(230);
+      i2s_comms.send_data();
+
+      vscan_end();
     }
-  #endif
+  }
 
   clean(PixelState::DISCHARGE, 2);
   clean(PixelState::SKIP,      1);
@@ -514,52 +368,22 @@ EInk6FLICK::clean(PixelState pixel_state, uint8_t repeat_count)
 {
   turn_on();
 
-  #if I2S_SUPPORT
-    volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
-    for (int i = 0; i < (WIDTH / 4); i++) {
-      line_buffer[i] = (uint8_t) pixel_state;
+  volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
+  for (int i = 0; i < (WIDTH / 4); i++) {
+    line_buffer[i] = (uint8_t) pixel_state;
+  }
+
+  i2s_comms.init_lldesc();
+
+  for (int8_t k = 0; k < repeat_count; k++) {
+
+    vscan_start();
+
+    for (int i = 0; i < HEIGHT; i++) {
+      i2s_comms.send_data();
+      vscan_end();
     }
-
-    i2s_comms.init_lldesc();
-
-    for (int8_t k = 0; k < repeat_count; k++) {
-
-      vscan_start();
-
-      for (int i = 0; i < HEIGHT; i++) {
-        i2s_comms.send_data();
-        vscan_end();
-      }
-    }
-  #else
-    uint32_t send = PIN_LUT[(uint8_t) pixel_state]; 
-
-    for (int8_t k = 0; k < repeat_count; k++) {
-
-      vscan_start();
-
-      for (int i = 0; i < HEIGHT; i++) {
-
-        hscan_start(send);
-
-        GPIO.out_w1ts = CL | send;
-        GPIO.out_w1tc = CL;
-
-        for (uint16_t j = 0; j < LINE_SIZE_1BIT - 1; j++) {
-          GPIO.out_w1ts = CL;
-          GPIO.out_w1tc = CL;
-          GPIO.out_w1ts = CL;
-          GPIO.out_w1tc = CL;
-        }
-        GPIO.out_w1ts = CL | send;
-        GPIO.out_w1tc = CL | DATA;
-
-        vscan_end();
-      }
-
-      ESP::delay_microseconds(230);
-    }
-  #endif
+  }
 }
 
 #endif

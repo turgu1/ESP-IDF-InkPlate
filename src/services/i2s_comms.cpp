@@ -1,143 +1,186 @@
 #if INKPLATE_6FLICK
 
+  #define __I2S_COMMS__ 1
+
   #include "i2s_comms.hpp"
-  
-  // #include "soc/i2s_periph.h"
-  // #include "soc/io_mux_reg.h"
-  // #include "soc/gpio_struct.h"
-  // #include "esp_private/periph_ctrl.h"
+
+  #define SPH 0x02 // GPIO33
+  #define SPH_SET                                                                                                        \
+      {                                                                                                                  \
+          GPIO.out1_w1ts.val = SPH;                                                                                      \
+      }
+  #define SPH_CLEAR                                                                                                      \
+      {                                                                                                                  \
+          GPIO.out1_w1tc.val = SPH;                                                                                      \
+      }
+
+  #define CKV 0x01
+  #define CKV_SET                                                                                                        \
+      {                                                                                                                  \
+          GPIO.out1_w1ts.val = CKV;                                                                                      \
+      }
+  #define CKV_CLEAR                                                                                                      \
+      {                                                                                                                  \
+          GPIO.out1_w1tc.val = CKV;                                                                                      \
+      }
+
+  /**
+   **************************************************
+  * @file        Esp.cpp
+  * @brief       File for ESP, currently empty
+  *
+  *              https://github.com/e-radionicacom/Inkplate-Arduino-library
+  *              For support, please reach over forums: forum.e-radionica.com/en
+  *              For more info about the product, please check: www.inkplate.io
+  *
+  *              This code is released under the GNU Lesser General Public
+  *License v3.0: https://www.gnu.org/licenses/lgpl-3.0.en.html Please review the
+  *LICENSE file included with this example. If you have any questions about
+  *licensing, please contact techsupport@e-radionica.com Distributed as-is; no
+  *warranty is given.
+  *
+  * @authors     Soldered
+  ***************************************************/
 
   /**
    * @brief       Function Intializes I2S driver of the ESP32
    *
-   * @param       i2s_dev_t *i2s_dev
+   * @param       i2s_dev_t *_i2sDev
    *              Pointer of the selected I2S driver
    *
    * @note        Function must be declared static to fit into Instruction RAM of the ESP32.
    */
-  void IRAM_ATTR I2SComms::init(uint8_t clock_divider)
+  void IRAM_ATTR my_I2SInit(i2s_dev_t *_i2sDev, uint8_t _clockDivider)
   {
     // Enable I2S peripheral and reset it.
     periph_module_enable(PERIPH_I2S1_MODULE);
     periph_module_reset(PERIPH_I2S1_MODULE);
 
     // Reset the FIFO Buffer in I2S module.
-    i2s_dev->conf.rx_fifo_reset = 1;
-    i2s_dev->conf.rx_fifo_reset = 0;
-    i2s_dev->conf.tx_fifo_reset = 1;
-    i2s_dev->conf.tx_fifo_reset = 0;
+    _i2sDev->conf.rx_fifo_reset = 1;
+    _i2sDev->conf.rx_fifo_reset = 0;
+    _i2sDev->conf.tx_fifo_reset = 1;
+    _i2sDev->conf.tx_fifo_reset = 0;
 
     // Reset I2S DMA controller.
-    i2s_dev->lc_conf.in_rst = 1;
-    i2s_dev->lc_conf.in_rst = 0;
-    i2s_dev->lc_conf.out_rst = 1;
-    i2s_dev->lc_conf.out_rst = 0;
+    _i2sDev->lc_conf.in_rst = 1;
+    _i2sDev->lc_conf.in_rst = 0;
+    _i2sDev->lc_conf.out_rst = 1;
+    _i2sDev->lc_conf.out_rst = 0;
 
     // Reset I2S TX and RX module.
-    i2s_dev->conf.rx_reset = 1;
-    i2s_dev->conf.tx_reset = 1;
-    i2s_dev->conf.rx_reset = 0;
-    i2s_dev->conf.tx_reset = 0;
+    _i2sDev->conf.rx_reset = 1;
+    _i2sDev->conf.tx_reset = 1;
+    _i2sDev->conf.rx_reset = 0;
+    _i2sDev->conf.tx_reset = 0;
 
     // Set LCD mode on I2S, setup delays on SD and WR lines.
-    i2s_dev->conf2.val = 0;
-    i2s_dev->conf2.lcd_en = 1;
-    i2s_dev->conf2.lcd_tx_wrx2_en = 1;
-    i2s_dev->conf2.lcd_tx_sdx2_en = 0;
+    _i2sDev->conf2.val = 0;
+    _i2sDev->conf2.lcd_en = 1;
+    _i2sDev->conf2.lcd_tx_wrx2_en = 1;
+    _i2sDev->conf2.lcd_tx_sdx2_en = 0;
 
-    i2s_dev->sample_rate_conf.val = 0;
-    i2s_dev->sample_rate_conf.rx_bits_mod = 8;
-    i2s_dev->sample_rate_conf.tx_bits_mod = 8;
-    i2s_dev->sample_rate_conf.rx_bck_div_num = 2;
-    i2s_dev->sample_rate_conf.tx_bck_div_num = 2;
+    _i2sDev->sample_rate_conf.val = 0;
+    _i2sDev->sample_rate_conf.rx_bits_mod = 8;
+    _i2sDev->sample_rate_conf.tx_bits_mod = 8;
+    _i2sDev->sample_rate_conf.rx_bck_div_num = 2;
+    _i2sDev->sample_rate_conf.tx_bck_div_num = 2;
 
     // Do not use APLL, divide by 5 by default, BCK should be ~16MHz.
-    i2s_dev->clkm_conf.val = 0;
-    i2s_dev->clkm_conf.clka_en = 0;
-    i2s_dev->clkm_conf.clkm_div_b = 0;
-    i2s_dev->clkm_conf.clkm_div_a = 1;
-    i2s_dev->clkm_conf.clkm_div_num = clock_divider;
+    _i2sDev->clkm_conf.val = 0;
+    _i2sDev->clkm_conf.clka_en = 0;
+    _i2sDev->clkm_conf.clkm_div_b = 0;
+    _i2sDev->clkm_conf.clkm_div_a = 1;
+    _i2sDev->clkm_conf.clkm_div_num = _clockDivider;
 
     // FIFO buffer setup. Byte packing for FIFO: 0A0B_0B0C = 0, 0A0B_0C0D = 1, 0A00_0B00 = 3. Use dual mono single data
-    i2s_dev->fifo_conf.val = 0;
-    i2s_dev->fifo_conf.rx_fifo_mod_force_en = 1;
-    i2s_dev->fifo_conf.tx_fifo_mod_force_en = 1;
-    i2s_dev->fifo_conf.tx_fifo_mod = 1; // byte packing 0A0B_0B0C = 0, 0A0B_0C0D = 1, 0A00_0B00 = 3. Use dual mono single data
-    i2s_dev->fifo_conf.rx_data_num = 1;
-    i2s_dev->fifo_conf.tx_data_num = 1;
-    i2s_dev->fifo_conf.dscr_en = 1;
+    _i2sDev->fifo_conf.val = 0;
+    _i2sDev->fifo_conf.rx_fifo_mod_force_en = 1;
+    _i2sDev->fifo_conf.tx_fifo_mod_force_en = 1;
+    _i2sDev->fifo_conf.tx_fifo_mod =
+        1; // byte packing 0A0B_0B0C = 0, 0A0B_0C0D = 1, 0A00_0B00 = 3. Use dual mono single data
+    _i2sDev->fifo_conf.rx_data_num = 1;
+    _i2sDev->fifo_conf.tx_data_num = 1;
+    _i2sDev->fifo_conf.dscr_en = 1;
 
     // Send BCK only when needed (needs to be powered on in einkOn() function and disabled in einkOff()).
-    i2s_dev->conf1.val = 0;
-    i2s_dev->conf1.tx_stop_en = 0;
-    i2s_dev->conf1.tx_pcm_bypass = 1;
+    _i2sDev->conf1.val = 0;
+    _i2sDev->conf1.tx_stop_en = 0;
+    _i2sDev->conf1.tx_pcm_bypass = 1;
 
-    i2s_dev->conf_chan.val = 0;
-    i2s_dev->conf_chan.tx_chan_mod = 1;
-    i2s_dev->conf_chan.rx_chan_mod = 1;
+    _i2sDev->conf_chan.val = 0;
+    _i2sDev->conf_chan.tx_chan_mod = 1;
+    _i2sDev->conf_chan.rx_chan_mod = 1;
 
-    i2s_dev->conf.tx_right_first = 0; //!!invert_clk; // should be false / 0
-    i2s_dev->conf.rx_right_first = 0; //!!invert_clk;
+    _i2sDev->conf.tx_right_first = 0; //!!invert_clk; // should be false / 0
+    _i2sDev->conf.rx_right_first = 0; //!!invert_clk;
 
-    i2s_dev->timing.val = 0;
+    _i2sDev->timing.val = 0;
   }
 
   /**
-   * @brief       Function sends data with I2S DMA driver.
+   * @brief       Function sedns data with I2S DMA driver.
+   *
+   * @param       i2s_dev_t *_i2sDev
+   *              Pointer of the selected I2S driver
+   *
+   *              lldesc_s *_dmaDecs
+   *              Pointer to the DMA descriptor.
    *
    * @note        Function must be declared static to fit into Instruction RAM of the ESP32. Also, DMA descriptor must be
-   *              already configured!
+   * already configured!
    */
-  void IRAM_ATTR I2SComms::send_data()
+  void IRAM_ATTR my_sendDataI2S(i2s_dev_t *_i2sDev, volatile lldesc_s *_dmaDecs)
   {
     // Stop any on-going transmission (just in case).
-    i2s_dev->out_link.stop = 1;
-    i2s_dev->out_link.start = 0;
-    i2s_dev->conf.tx_start = 0;
+    _i2sDev->out_link.stop = 1;
+    _i2sDev->out_link.start = 0;
+    _i2sDev->conf.tx_start = 0;
 
     // Reset the FIFO.
-    i2s_dev->conf.tx_fifo_reset = 1;
-    i2s_dev->conf.tx_fifo_reset = 0;
+    _i2sDev->conf.tx_fifo_reset = 1;
+    _i2sDev->conf.tx_fifo_reset = 0;
 
     // Reset the I2S DMA Controller.
-    i2s_dev->lc_conf.out_rst = 1;
-    i2s_dev->lc_conf.out_rst = 0;
+    _i2sDev->lc_conf.out_rst = 1;
+    _i2sDev->lc_conf.out_rst = 0;
 
     // Reset I2S TX module.
-    i2s_dev->conf.tx_reset = 1;
-    i2s_dev->conf.tx_reset = 0;
+    _i2sDev->conf.tx_reset = 1;
+    _i2sDev->conf.tx_reset = 0;
 
     // Setup a DMA descriptor.
-    i2s_dev->lc_conf.val = I2S_OUT_DATA_BURST_EN | I2S_OUTDSCR_BURST_EN;
-    i2s_dev->out_link.addr = (uint32_t)(lldesc) & 0x000FFFFF;
+    _i2sDev->lc_conf.val = I2S_OUT_DATA_BURST_EN | I2S_OUTDSCR_BURST_EN;
+    _i2sDev->out_link.addr = (uint32_t)(_dmaDecs)&0x000FFFFF;
 
     // Start sending the data
-    i2s_dev->out_link.start = 1;
+    _i2sDev->out_link.start = 1;
 
     // Pull SPH low -> Start pushing data into the row of EPD.
-    sph_clear();
+    SPH_CLEAR;
 
     // Set CKV to HIGH.
-    ckv_set();
+    CKV_SET;
 
     // Start sending I2S data out.
-    i2s_dev->conf.tx_start = 1;
+    _i2sDev->conf.tx_start = 1;
 
-    while (!i2s_dev->int_raw.out_total_eof)
+    while (!_i2sDev->int_raw.out_total_eof)
         ;
 
-    sph_set();
+    SPH_SET;
 
     // Clear the interrupt flags and stop the transmission.
-    i2s_dev->int_clr.val = i2s_dev->int_raw.val;
-    i2s_dev->out_link.stop = 1;
-    i2s_dev->out_link.start = 0;
+    _i2sDev->int_clr.val = _i2sDev->int_raw.val;
+    _i2sDev->out_link.stop = 1;
+    _i2sDev->out_link.start = 0;
   }
 
-  void IRAM_ATTR I2SComms::set_pin(uint32_t pin, uint32_t function, uint32_t inverted)
+  void IRAM_ATTR my_setI2S1pin(uint32_t _pin, uint32_t _function, uint32_t _inv)
   {
     // Check if valid pin is selected
-    if (pin > 39) return;
+    if (_pin > 39)
+        return;
 
     // Fast GPIO pin to MUX (maybe there is a better way to do this?).
     const uint32_t io_mux[] = {
@@ -180,51 +223,49 @@
       IO_MUX_GPIO36_REG,
       IO_MUX_GPIO37_REG,
       IO_MUX_GPIO38_REG,
-      IO_MUX_GPIO39_REG
-    };
+      IO_MUX_GPIO39_REG};
 
     // Wrong pin selected? Return!
-    if (io_mux[pin] == 0)
-        return;
+    if (io_mux[_pin] == -1) return;
 
     // Setup GPIO Matrix for selected pin signal
-    GPIO.func_out_sel_cfg[pin].func_sel = function; // Set the pin function
-    GPIO.func_out_sel_cfg[pin].inv_sel = inverted;  // Does pin logic needs to be inverted?
-    GPIO.func_out_sel_cfg[pin].oen_sel = 0;         // Force output enable if bit is set
+    GPIO.func_out_sel_cfg[_pin].func_sel = _function; // Set the pin function
+    GPIO.func_out_sel_cfg[_pin].inv_sel = _inv;       // Does pin logic needs to be inverted?
+    GPIO.func_out_sel_cfg[_pin].oen_sel = 0;          // Force output enable if bit is set
 
     // Registers are different for GPIOs from 0 to 32 and from 32 to 40.
-    if (pin < 32)
+    if (_pin < 32)
     {
         // Enable GPIO pin (set it as output).
-        GPIO.enable_w1ts = ((uint32_t)1 << pin);
+        GPIO.enable_w1ts = ((uint32_t)1 << _pin);
     }
     else
     {
         // Enable GPIO pin (set it as output).
-        GPIO.enable1_w1ts.data = ((uint32_t)1 << (32 - pin));
+        GPIO.enable1_w1ts.data = ((uint32_t)1 << (32 - _pin));
     }
 
-    // Set the highest drive strength.
     #define ESP_REG(addr) *((volatile uint32_t *)(addr))
 
-    ESP_REG(io_mux[pin]) = 0;
-    ESP_REG(io_mux[pin]) = ((3 << FUN_DRV_S) | (7 << MCU_SEL_S));
-
-    //REG_WRITE(io_mux[pin], ((3 << FUN_DRV_S) | (7 << MCU_SEL_S)));
+    // Set the highest drive strength.
+    ESP_REG(io_mux[_pin]) = 0;
+    ESP_REG(io_mux[_pin]) = ((3 << FUN_DRV_S) | (2 << MCU_SEL_S));
   }
 
-  void IRAM_ATTR I2SComms::init_lldesc()
+  void I2SComms::init_lldesc()
   {
     if (lldesc != nullptr) {
-      lldesc->size = line_buffer_size;
-      lldesc->length = line_buffer_size;
-      lldesc->offset = 0;
+      lldesc->size = line_buffer_size;    // Buffer size
+      lldesc->length = line_buffer_size;  // Number of bytes to transfer
+      lldesc->offset = 0;                 // Start transfer with first buffer byte
       lldesc->sosf = 1;
-      lldesc->eof = 1;
-      lldesc->owner = 1;
-      lldesc->buf = line_buffer;
-      lldesc->qe.stqe_next = 0;
+      lldesc->eof = 1;                    // Only one block at a time (end of list)
+      lldesc->owner = 1;                  // The allowed operator is the DMA controller
+      lldesc->buf = line_buffer;          // Buffer address
+      lldesc->qe.stqe_next = 0;           // Next descriptor (none)
     }
   }
 
+  #undef __I2S_COMMS__
+  
 #endif
