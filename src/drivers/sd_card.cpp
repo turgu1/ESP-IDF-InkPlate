@@ -122,6 +122,10 @@ SDCard::setup()
 }
 
 void SDCard::deepSleep() {
+  // while (card->isBusy()) {
+  //   ESP::delay(100);
+  // }
+  
   // Set SPI pins to input to reduce power consumption in deep sleep
   gpio_set_direction(PIN_NUM_MISO,  GPIO_MODE_INPUT);
   gpio_set_direction(PIN_NUM_MOSI,  GPIO_MODE_INPUT);

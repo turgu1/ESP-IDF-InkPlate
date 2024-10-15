@@ -1,4 +1,15 @@
-# ESP-IDF-InkPlate Library Version 0.9.7
+# ESP-IDF-InkPlate Library Version 0.9.8
+
+(October xxth, 2024)
+
+- Now built using ESP-IDF 5.3.1
+- No longer using PlatformIO. Using cmake through idf.py to build applications.
+- Added support for Soldered 6PLUS and 6FLICK
+- Added support for PCAL GPIO chip
+- Added support for Cypress touchscreen
+- Source code re-org
+
+TBD: How to build programs with the library, examples description
 
 (February 7th, 2023)
 
