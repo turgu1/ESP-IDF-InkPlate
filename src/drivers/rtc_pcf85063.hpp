@@ -2,7 +2,7 @@
 
 #include <cinttypes>
 #include "non_copyable.hpp"
-
+#include "wire.hpp"
 #include <ctime>
 
 class RTC : NonCopyable {
@@ -29,6 +29,8 @@ class RTC : NonCopyable {
 
   private:
     static constexpr char const * TAG = "RTC";
+    const uint8_t rtc_address;
+    WireDevice * wire_device;
     enum class Reg : uint8_t {
       CTRL1         = 0x00,
       CTRL2         = 0x01,
@@ -50,7 +52,6 @@ class RTC : NonCopyable {
       TIMER_MODE    = 0x11
     };
 
-    const uint8_t rtc_address;
     bool present;
 
     const uint8_t STOP_BIT     = 0x20;
@@ -61,9 +62,6 @@ class RTC : NonCopyable {
 
     uint8_t dec_to_bcd(uint8_t value);
     uint8_t bcd_to_dec(uint8_t value);
-
-    uint8_t   read_reg(Reg reg);
-    void     write_reg(Reg reg, uint8_t value);
 
     void write_date_time();
     void  read_date_time();
@@ -80,7 +78,10 @@ class RTC : NonCopyable {
 
 
   public:
-    RTC(uint8_t address) : rtc_address(address), present(false) { }
+    RTC(uint8_t address) : 
+      rtc_address(address), 
+      present(false) { 
+      }
 
     bool setup();
     void reset();

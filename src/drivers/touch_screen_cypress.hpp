@@ -23,7 +23,10 @@ class TouchScreen : NonCopyable
     static constexpr uint16_t MAX_X = 757;
     static constexpr uint16_t MAX_Y = 1023;
 
-    TouchScreen(IOExpander & _io_expander) : io_expander(_io_expander), ready(false) {}
+    TouchScreen(IOExpander & _io_expander) : 
+        io_expander(_io_expander), 
+        ready(false) {
+        }
 
     typedef void (* ISRHandlerPtr)(void * value);
 
@@ -106,7 +109,9 @@ class TouchScreen : NonCopyable
     } sys_info_data;
 
     static constexpr char const * TAG = "TouchScreen";
+
     IOExpander & io_expander;
+    WireDevice & wire_device;
 
     uint16_t x_resolution, y_resolution;
 
@@ -120,8 +125,6 @@ class TouchScreen : NonCopyable
     void hardware_reset();
     bool software_reset();
 
-    bool read(uint8_t cmd, uint8_t (& data)[], uint8_t size);
-    bool write(uint8_t cmd, uint8_t (& data)[], uint8_t size);
     bool send_command(uint8_t cmd);
 
     bool get_boot_loader_data(BootLoaderData & bl_data);

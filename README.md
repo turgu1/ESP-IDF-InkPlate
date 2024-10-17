@@ -5,8 +5,9 @@
 - Now built using ESP-IDF 5.3.1
 - No longer using PlatformIO. Using cmake through idf.py to build applications.
 - Added support for Soldered 6PLUS and 6FLICK
-- Added support for PCAL GPIO chip
-- Added support for Cypress touchscreen
+- Added support for PCAL GPIO chip (Soldered devices)
+- Added support for Cypress touchscreen (6FLICK)
+- Added support for SD Card power control (Soldered devices)
 - Source code re-org
 
 TBD: How to build programs with the library, examples description

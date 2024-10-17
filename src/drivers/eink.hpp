@@ -66,13 +66,15 @@ class EInk
         i2s_comms(I2SComms((screen_width / 4) + 16)),
         panel_state(PanelState::OFF), 
         initialized(false),
-        partial_allowed(false) {}
+        partial_allowed(false) {
+        }
     #else
       EInk(IOExpander & io_expander) : 
         io_expander_int(io_expander),
         panel_state(PanelState::OFF), 
         initialized(false),
-        partial_allowed(false) {}
+        partial_allowed(false) {
+        }
     #endif
 
     static const uint8_t PWRMGR_ADDRESS = 0x48;
@@ -80,6 +82,8 @@ class EInk
 
     IOExpander & io_expander_int;
 
+    WireDevice * wire_device;
+    
     #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
       I2SComms i2s_comms;
     #endif

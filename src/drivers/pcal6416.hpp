@@ -25,6 +25,7 @@ As such, only one of the two macros must be defined to be equal to 1
 
 #include "non_copyable.hpp"
 #include "esp.hpp"
+#include "wire.hpp"
 
 #include <array>
 
@@ -81,6 +82,7 @@ class IOExpander : NonCopyable
     const uint8_t pcal_address;
     enum_array<Reg, uint8_t, 23> registers;
 
+    WireDevice * wire_device;
     bool present;
  
     // Adjust Register, adding offset p
@@ -96,7 +98,9 @@ class IOExpander : NonCopyable
 
   public:
 
-    IOExpander(uint8_t address) : pcal_address(address), present(false) { 
+    IOExpander(uint8_t address) : 
+        pcal_address(address), 
+        present(false) { 
       std::fill(registers.begin(), registers.end(), 0); 
     }
 
