@@ -140,14 +140,14 @@ EInk10::setup()
   ESP_LOGD(TAG, "Memory allocation for bitmap buffers.");
   ESP_LOGD(TAG, "d_memory_new: %08x p_buffer: %08x.", (unsigned int)d_memory_new, (unsigned int)p_buffer);
 
+  Wire::leave();
+
   if ((d_memory_new == nullptr) || 
       (p_buffer     == nullptr) ||
       (GLUT         == nullptr) ||
       (GLUT2        == nullptr)) {
     return false;
   }
-
-  Wire::leave();
 
   d_memory_new->clear();
   memset(p_buffer, 0, BITMAP_SIZE_1BIT * 2);
@@ -175,8 +175,10 @@ EInk10::update(FrameBuffer1Bit & frame_buffer)
   uint8_t         dram;
 
   Wire::enter();
-
-  turn_on();
+  if (!turn_on()) {
+    Wire::leave();
+    return;
+  }
 
   clean(PixelState::WHITE, 10);
   clean(PixelState::BLACK, 10);
@@ -232,7 +234,10 @@ EInk10::update(FrameBuffer3Bit & frame_buffer)
   ESP_LOGD(TAG, "3bit Update...");
 
   Wire::enter();
-  turn_on();
+  if (!turn_on()) {
+    Wire::leave();
+    return;
+  }
 
   clean(PixelState::WHITE, 10);
   clean(PixelState::BLACK, 10);
@@ -310,7 +315,10 @@ EInk10::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
     }
   }
 
-  turn_on();
+  if (!turn_on()) {
+    Wire::leave();
+    return;
+  }
 
   for (int k = 0; k < 5; k++) {
     vscan_start();
@@ -347,7 +355,7 @@ void
 EInk10::clean(PixelState pixel_state, uint8_t repeat_count)
 {
 
-  turn_on();
+  if (!turn_on()) return;
 
   uint32_t send = PIN_LUT[(uint8_t) pixel_state];
 

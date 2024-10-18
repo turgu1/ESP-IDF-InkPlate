@@ -100,10 +100,8 @@ EInk6PLUSV2::setup()
   }
 
   // For same reason, unused pins of first I/O expander have to be also set as outputs, low.
-  io_expander_int.set_direction(IOExpander::Pin::IOPIN_13, IOExpander::PinMode::OUTPUT);
   io_expander_int.set_direction(IOExpander::Pin::IOPIN_14, IOExpander::PinMode::OUTPUT);  
   io_expander_int.set_direction(IOExpander::Pin::IOPIN_15, IOExpander::PinMode::OUTPUT);  
-  io_expander_int.digital_write(IOExpander::Pin::IOPIN_13, IOExpander::SignalLevel::LOW);
   io_expander_int.digital_write(IOExpander::Pin::IOPIN_14, IOExpander::SignalLevel::LOW);
   io_expander_int.digital_write(IOExpander::Pin::IOPIN_15, IOExpander::SignalLevel::LOW);
 
@@ -136,14 +134,14 @@ EInk6PLUSV2::setup()
   ESP_LOGD(TAG, "Memory allocation for bitmap buffers.");
   ESP_LOGD(TAG, "d_memory_new: %08x p_buffer: %08x.", (unsigned int)d_memory_new, (unsigned int)p_buffer);
 
+  Wire::leave();
+
   if ((d_memory_new == nullptr) || 
       (p_buffer     == nullptr) ||
       (GLUT         == nullptr) ||
       (GLUT2        == nullptr)) {
     return false;
   }
-
-  Wire::leave();
 
   d_memory_new->clear();
   memset(p_buffer, 0, BITMAP_SIZE_1BIT * 2);
@@ -172,7 +170,10 @@ EInk6PLUSV2::update(FrameBuffer1Bit & frame_buffer)
 
   Wire::enter();
 
-  turn_on();
+  if (!turn_on()) {
+    Wire::leave();
+    return;
+  }
 
   clean(PixelState::WHITE,      1);
   clean(PixelState::BLACK,     15);
@@ -256,7 +257,10 @@ EInk6PLUSV2::update(FrameBuffer3Bit & frame_buffer)
   ESP_LOGD(TAG, "3bit Update...");
 
   Wire::enter();
-  turn_on();
+  if (!turn_on()) { 
+    Wire::leave(); 
+    return;
+  }
 
   clean(PixelState::WHITE,      1);
   clean(PixelState::BLACK,     15);
@@ -316,8 +320,6 @@ EInk6PLUSV2::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
     return;
   }
 
-  Wire::enter();
-
   ESP_LOGD(TAG, "Partial update...");
 
   uint8_t * idata = frame_buffer.get_data();
@@ -336,7 +338,11 @@ EInk6PLUSV2::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
     }
   }
 
-  turn_on();
+  Wire::enter();
+  if (!turn_on()) {
+    Wire::leave();
+    return;
+  }
 
   for (int k = 0; k < 5; k++) {
     vscan_start();
@@ -370,7 +376,7 @@ EInk6PLUSV2::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 void
 EInk6PLUSV2::clean(PixelState pixel_state, uint8_t repeat_count)
 {
-  turn_on();
+  if (!turn_on()) return;
 
   uint32_t send = PIN_LUT[(uint8_t) pixel_state];
 

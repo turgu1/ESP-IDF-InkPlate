@@ -121,14 +121,14 @@ EInk6FLICK::setup()
   ESP_LOGD(TAG, "Memory allocation for bitmap buffers.");
   ESP_LOGD(TAG, "d_memory_new: %08x p_buffer: %08x.", (unsigned int)d_memory_new, (unsigned int)p_buffer);
 
+  Wire::leave();
+
   if ((d_memory_new == nullptr) || 
       (p_buffer     == nullptr) ||
       (GLUT         == nullptr) ||
       (GLUT2        == nullptr)) {
     return false;
   }
-
-  Wire::leave();
 
   d_memory_new->clear();
   memset(p_buffer, 0, BITMAP_SIZE_1BIT * 2);
@@ -154,7 +154,10 @@ EInk6FLICK::update(FrameBuffer1Bit & frame_buffer)
 
   Wire::enter();
 
-  if (!turn_on()) return;
+  if (!turn_on()) {
+    Wire::leave();
+    return;
+  }
 
   clean(PixelState::WHITE,      5);
   clean(PixelState::BLACK,     15);
@@ -253,7 +256,10 @@ EInk6FLICK::update(FrameBuffer3Bit & frame_buffer)
   ESP_LOGD(TAG, "3bit Update...");
 
   Wire::enter();
-  if (!turn_on()) return;
+  if (!turn_on()) {
+    Wire::leave();
+    return;
+  }
 
   clean(PixelState::WHITE,      5);
   clean(PixelState::BLACK,     15);
@@ -305,8 +311,6 @@ EInk6FLICK::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
     return;
   }
 
-  Wire::enter();
-
   ESP_LOGD(TAG, "Partial update...");
 
   uint8_t * idata = frame_buffer.get_data();
@@ -325,7 +329,11 @@ EInk6FLICK::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
     }
   }
 
-  if (!turn_on()) return;
+  Wire::enter();
+  if (!turn_on()) {
+    Wire::leave();
+    return;
+  }
 
   volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
   i2s_comms.init_lldesc();
@@ -366,7 +374,7 @@ EInk6FLICK::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 void
 EInk6FLICK::clean(PixelState pixel_state, uint8_t repeat_count)
 {
-  turn_on();
+  if (!turn_on()) return;
 
   volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
   for (int i = 0; i < (WIDTH / 4); i++) {
