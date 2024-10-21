@@ -5,9 +5,6 @@
 
 #define __WIRE__ 1
 #include "wire.hpp"
-#include "esp_log.h"
-
-#include "driver/i2c.h"
 
 #include <cstring>
 
@@ -24,23 +21,40 @@ Wire::setup()
 
     mutex = xSemaphoreCreateMutexStatic(&mutex_buffer);
 
-    i2c_config_t config;
+    #if I2C_LEGACY_BASED
+      i2c_config_t config;
 
-    memset(&config, 0, sizeof(i2c_config_t));
+      memset(&config, 0, sizeof(i2c_config_t));
 
-    config.mode             = I2C_MODE_MASTER;
-    config.scl_io_num       = GPIO_NUM_22;
-    config.scl_pullup_en    = GPIO_PULLUP_DISABLE;
-    config.sda_io_num       = GPIO_NUM_21;
-    config.sda_pullup_en    = GPIO_PULLUP_DISABLE;
-    config.master.clk_speed = 1E5;
+      config.mode             = I2C_MODE_MASTER;
+      config.scl_io_num       = GPIO_NUM_22;
+      config.scl_pullup_en    = GPIO_PULLUP_DISABLE;
+      config.sda_io_num       = GPIO_NUM_21;
+      config.sda_pullup_en    = GPIO_PULLUP_DISABLE;
+      config.master.clk_speed = 1E5;
 
-    ESP_ERROR_CHECK(  i2c_param_config(I2C_NUM_0, &config));
-    ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0));
+      ESP_ERROR_CHECK(  i2c_param_config(I2C_NUM_0, &config));
+      ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0));
+    #else
+      i2c_master_bus_config_t i2c_mst_config;
+
+      i2c_mst_config.clk_source                   = I2C_CLK_SRC_DEFAULT;
+      i2c_mst_config.i2c_port                     = 0;
+      i2c_mst_config.scl_io_num                   = GPIO_NUM_22;
+      i2c_mst_config.sda_io_num                   = GPIO_NUM_21;
+      i2c_mst_config.glitch_ignore_cnt            = 7;
+      i2c_mst_config.flags.enable_internal_pullup = false;
+      i2c_mst_config.intr_priority                = 0;
+      i2c_mst_config.trans_queue_depth            = 0;
+
+      ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_mst_config, &master_bus_handle));
+    #endif
 
     initialized = true; 
   }
 }
+
+#if I2C_LEGACY_BASED && !TRANSITION_TO_NEW_API_COMPLETED
 
 void   
 Wire::begin_transmission(uint8_t addr)
@@ -69,7 +83,7 @@ Wire::end_transmission()
     // printf("\n");
     // fflush(stdout);
 
-    cmd = i2c_cmd_link_create();
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     ESP_ERROR_CHECK(i2c_master_start(cmd));
     ESP_ERROR_CHECK(i2c_master_write_byte(cmd, (address << 1) | I2C_MASTER_WRITE, 1));
     if (index > 0) ESP_ERROR_CHECK(i2c_master_write(cmd, buffer, index, 1));
@@ -88,7 +102,7 @@ Wire::end_transmission()
 }
 
 void    
-Wire::write(uint8_t val)
+Wire::write_byte(uint8_t val)
 {
   if (initialized) {    
     buffer[index++] = val;
@@ -97,7 +111,7 @@ Wire::write(uint8_t val)
 }
 
 uint8_t 
-Wire::read()
+Wire::read_byte()
 {
   if (!initialized || (index >= size_to_read)) return 0;
   return buffer[index++];
@@ -134,4 +148,4 @@ Wire::request_from(uint8_t addr, uint8_t size)
     return ESP_ERR_INVALID_STATE;
   }
 }
-
+#endif

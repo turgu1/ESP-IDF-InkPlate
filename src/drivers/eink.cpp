@@ -95,16 +95,20 @@ EInk::turn_on()
   ESP::delay(5);
 
   // Modify power up sequence  (VEE and VNEG are swapped)
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x09);
-  wire.write(0b11100001);
-  wire.end_transmission();
+  wire_device->cmd_write(0x09, 0b11100001);
+
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x09);
+  // wire.write(0b11100001);
+  // wire.end_transmission();
 
   // Enable all rails
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x01);
-  wire.write(0b00111111);
-  wire.end_transmission();
+  wire_device->cmd_write(0x01, 0b00111111);
+
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x01);
+  // wire.write(0b00111111);
+  // wire.end_transmission();
 
   // // Modify power down sequence (VEE and VNEG are swapped)
   // wire.begin_transmission(PWRMGR_ADDRESS);
@@ -151,12 +155,14 @@ EInk::turn_on()
 uint8_t 
 EInk::read_power_good()
 {
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x0F);
-  wire.end_transmission();
+  return wire_device->cmd_read(0x0F);
 
-  wire.request_from(PWRMGR_ADDRESS, 1);
-  return wire.read();
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x0F);
+  // wire.end_transmission();
+
+  // wire.request_from(PWRMGR_ADDRESS, 1);
+  // return wire.read();
 }
 
 // LOW LEVEL FUNCTIONS
@@ -279,22 +285,29 @@ EInk::read_temperature()
     ESP::delay(5);
   }
 
+  
   Wire::enter();
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x0D);
-  wire.write(0b10000000);
-  wire.end_transmission();
+
+  wire_device->cmd_write(0x0D, 0b10000000);
+
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x0D);
+  // wire.write(0b10000000);
+  // wire.end_transmission();
+
   Wire::leave();
 
   ESP::delay(5);
 
   Wire::enter();
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x00);
-  wire.end_transmission();
+  temp = wire_device->cmd_read(0x00);
 
-  wire.request_from(PWRMGR_ADDRESS, 1);
-  temp = wire.read();
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x00);
+  // wire.end_transmission();
+
+  // wire.request_from(PWRMGR_ADDRESS, 1);
+  // temp = wire.read();
     
   if (get_panel_state() == PanelState::OFF) {
     pwrup_clear();

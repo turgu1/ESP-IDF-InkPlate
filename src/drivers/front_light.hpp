@@ -8,10 +8,14 @@
   #include "mcp23017.hpp"
 #endif
 
+#include "wire.hpp"
+
 class FrontLight
 {
   public:
-    FrontLight(IOExpander & _io_expander) : io_expander(_io_expander) {}
+    FrontLight(IOExpander & _io_expander) : 
+      io_expander(_io_expander) {
+      }
     bool setup();
     void set_level(uint8_t level);
     void enable();
@@ -19,8 +23,10 @@ class FrontLight
 
   private:
     static constexpr char const * TAG = "FrontLight";
-    
     IOExpander & io_expander;
+    WireDevice * wire_device;
+
+    bool enabled;
 
     const IOExpander::Pin FRONTLIGHT_EN = IOExpander::Pin::IOPIN_11;
 

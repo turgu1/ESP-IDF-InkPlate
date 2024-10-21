@@ -25,20 +25,27 @@ TouchScreen::setup(bool power_on, ISRHandlerPtr isr_handler)
 
   Wire::enter();
 
+  wire_device = new WireDevice(TOUCHSCREEN_ADDRESS);
+  if ((wire_device == nullptr) || !wire_device->is_initialized()) {
+    ESP_LOGE(TAG, "Setup error: %s", wire_device == nullptr ? "NULL Device!" : "Not initialized!");
+    return false;
+  }
+
   io_expander.set_direction(TOUCHSCREEN_ENABLE, IOExpander::PinMode::OUTPUT );
   io_expander.set_direction(TOUCHSCREEN_RESET,  IOExpander::PinMode::OUTPUT );
-  io_expander.digital_write(TOUCHSCREEN_ENABLE, IOExpander::SignalLevel::LOW); // off
 
   Wire::leave();
 
-   if (power_on) {
+  set_power_state(false);
+
+  if (power_on) {
     set_power_state(power_on);
 
     Wire::enter();
 
     hardware_reset();
 
-    uint8_t distance_default[] = { 0xF8 };
+    uint8_t distance_default = 0xF8;
 
     if (ping(5) &&
         send_command(SOFT_RESET_MODE) && 
@@ -47,7 +54,7 @@ TouchScreen::setup(bool power_on, ISRHandlerPtr isr_handler)
         get_sys_info(sys_info_data) &&
         set_sys_info_regs(sys_info_data) &&
         send_command(OPERATE_MODE) &&
-        write(DETECTION_DISTANCE, distance_default, 1)) {
+        wire_device->cmd_write(DETECTION_DISTANCE, distance_default)) {
 
       Wire::leave();
 
@@ -113,7 +120,6 @@ TouchScreen::software_reset()
   return true;
 }
 
-//ok
 uint8_t
 TouchScreen::get_position(TouchPositions & x_positions, TouchPositions & y_positions)
 {
@@ -121,7 +127,7 @@ TouchScreen::get_position(TouchPositions & x_positions, TouchPositions & y_posit
 
   Wire::enter();
   if (touchscreen_interrupt_happened) handshake();
-  bool res = read(BASE_ADDR, raw, sizeof(SysInfoData));
+  bool res = wire_device->cmd_read(BASE_ADDR, raw, sizeof(raw));
   Wire::leave();
 
   uint8_t fingers = res ? raw[2] : 0;
@@ -139,7 +145,6 @@ TouchScreen::get_position(TouchPositions & x_positions, TouchPositions & y_posit
   return fingers;
 }
 
-//ok
 void 
 TouchScreen::set_power_state(bool on_state)
 {
@@ -160,7 +165,6 @@ TouchScreen::set_power_state(bool on_state)
   Wire::leave();
 }
 
-//ok
 bool
 TouchScreen::get_power_state()
 {
@@ -169,49 +173,10 @@ TouchScreen::get_power_state()
   return power_is_on;
 }
 
-bool
-TouchScreen::read(uint8_t cmd, uint8_t (& data)[], uint8_t size) {
-
-  wire.begin_transmission(TOUCHSCREEN_ADDRESS);
-  wire.write(cmd);
-  if (wire.end_transmission() != ESP_OK) return false;
-
-  // read not more than 32 bytes at a time
-  int index = 0;
-  while (size > 0) {
-    int len = size > 32 ? 32 : size;
-
-    if (wire.request_from(TOUCHSCREEN_ADDRESS, len) != ESP_OK) return false;
-
-    for (int i = 0; i < len; i++, index++) {
-      data[index] = wire.read();
-    }
-
-    size -= len;
-  }
-
-  return true;
-}
-
 bool 
-TouchScreen::write(uint8_t cmd, uint8_t(& data)[], uint8_t size)
+TouchScreen::send_command(uint8_t command)
 {
-  wire.begin_transmission(TOUCHSCREEN_ADDRESS);
-  wire.write(cmd);
-  for (int i = 0; i < size; i++) {
-    wire.write(data[i]);
-  }
-  return wire.end_transmission() == ESP_OK;
-}
-
-//ok
-bool 
-TouchScreen::send_command(uint8_t cmd)
-{
-  wire.begin_transmission(TOUCHSCREEN_ADDRESS);
-  wire.write(BASE_ADDR);
-  wire.write(cmd);
-  bool res = wire.end_transmission() == ESP_OK; 
+  bool res = wire_device->cmd_write(BASE_ADDR, command); 
 
   ESP::delay(20);
 
@@ -219,12 +184,14 @@ TouchScreen::send_command(uint8_t cmd)
 }
 
 void
-TouchScreen::shutdown()
+TouchScreen::shutdown(bool remove_handler)
 {
   set_power_state(false);
 
-  gpio_isr_handler_remove(INTERRUPT_PIN);
-  app_isr_handler = nullptr;
+  if (remove_handler) {
+    gpio_isr_handler_remove(INTERRUPT_PIN);
+    app_isr_handler = nullptr;
+  }
   touchscreen_interrupt_happened = false;
 
   ready = false;
@@ -239,14 +206,10 @@ TouchScreen::is_screen_touched()
 bool 
 TouchScreen::get_boot_loader_data(BootLoaderData & bl_data)
 {
-    uint8_t raw[sizeof(BootLoaderData)];
-
-    if (!read(BASE_ADDR, raw, sizeof(raw))) {
-        return false;
-
+    if (!wire_device->cmd_read(BASE_ADDR, (uint8_t *) &bl_data, sizeof(BootLoaderData))) {
+      ESP_LOGE(TAG, "Unable to read boot loader data");
+      return false;
     }
-
-    memcpy(&bl_data, raw, sizeof(raw));
 
     return true;
 }
@@ -262,7 +225,9 @@ TouchScreen::exit_boot_loader_mode()
         0, 1, 2, 3, 4, 5, 6, 7    // Default keys.
     };
 
-    write(BASE_ADDR, command_data, sizeof(command_data));
+    wire_device->cmd_write(BASE_ADDR, command_data, sizeof(command_data));
+
+    wire.flush();
 
     // Wait a little bit - Must be long delay, otherwise setSysInfoMode will fail!
     // Delay of 150ms will fail - tested!
@@ -276,6 +241,7 @@ TouchScreen::exit_boot_loader_mode()
     // Check for validity.
     if (GET_BOOTLOADERMODE(boot_loader_data.bl_status) == 1) {
       // Still in boot loader mode... not good
+      ESP_LOGE(TAG, "Unable to leave boot loader mode");
       return false;
     }
 
@@ -296,8 +262,9 @@ TouchScreen::get_sys_info(SysInfoData &sys_info_data)
     uint8_t sys_info_array[sizeof(SysInfoData)];
 
     // Read the registers.
-    if (!read(BASE_ADDR, sys_info_array, sizeof(SysInfoData))) {
-        return false;
+    if (!wire_device->cmd_read(BASE_ADDR, sys_info_array, sizeof(sys_info_array))) {
+      ESP_LOGE(TAG, "Unable to read device registers");
+      return false;
     }
 
     // Copy into struct typedef.
@@ -308,7 +275,8 @@ TouchScreen::get_sys_info(SysInfoData &sys_info_data)
 
     // Check TTS version. If is zero, something went wrong.
     if (!(sys_info_data.tts_verh || sys_info_data.tts_verl)) {
-        return false;
+      ESP_LOGE(TAG, "Unable to get version");
+      return false;
     }
 
     // Everything went ok? Return true for success.
@@ -329,8 +297,10 @@ TouchScreen::set_sys_info_regs(SysInfoData &sys_info_data)
     };
 
     // Send the registers to the I2C. Check if failed. If failed, return false.
-    if (!write(REG_ACT_INTERVAL, regs, 3))
-        return false;
+    if (!wire_device->cmd_write(REG_ACT_INTERVAL, regs, 3)) {
+      ESP_LOGE(TAG, "Unable to send reqisters to devive.");
+      return false;
+    }
 
     // Wait a little bit.
     ESP::delay(20);
@@ -343,10 +313,10 @@ void
 TouchScreen::handshake()
 {
     // Read the hst_mode register (address 0x00).
-    uint8_t host_mode_reg[] = { 0 };
-    read(BASE_ADDR, host_mode_reg, 1);
-    host_mode_reg[0] ^= 0x80;
-    write(BASE_ADDR, host_mode_reg, 1);
+    uint8_t host_mode_reg;
+    host_mode_reg = wire_device->cmd_read(BASE_ADDR);
+    host_mode_reg ^= 0x80;
+    wire_device->cmd_write(BASE_ADDR, host_mode_reg);
 }
 
 bool 
@@ -356,8 +326,7 @@ TouchScreen::ping(int retries)
     // Delay between retires is 20ms (just a wildguess, don't have any documentation).
     while (retries-- > 0) {
         // Ping the TSC (touchscreen controller) on I2C.
-        wire.begin_transmission(TOUCHSCREEN_ADDRESS);
-        if (wire.end_transmission() == ESP_OK) {
+        if (wire.sense(TOUCHSCREEN_ADDRESS)) {
           return true;
         }
 
@@ -366,6 +335,7 @@ TouchScreen::ping(int retries)
     }
 
     // Got here? Not good, TSC not found, return error.
+    ESP_LOGE(TAG, "Unable to ping device");
     return false;
 }
 

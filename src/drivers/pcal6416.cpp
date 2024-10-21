@@ -11,7 +11,6 @@ July 15, 2024
 #include "pcal6416.hpp"
 #include "esp_log.h"
 
-#include "wire.hpp"
 #include "driver/gpio.h"
 
 // LOW LEVEL:
@@ -35,9 +34,6 @@ IOExpander::test()
   printf("\n");
   fflush(stdout);
 
-  wire.begin_transmission(pcal_address);
-  wire.end_transmission();
-
   read_all_registers();
 
   printf("Registers after read:\n");
@@ -53,14 +49,16 @@ IOExpander::setup()
 {
   ESP_LOGD(TAG, "Initializing...");
   
-  wire.begin_transmission(pcal_address);
-  present = wire.end_transmission() == ESP_OK;
+  wire_device = new WireDevice(pcal_address);
+  present = (wire_device != nullptr) && wire_device->is_initialized();
   
-  ESP_LOGI(TAG, "MCP at address 0x%X has%s been detected", pcal_address, present ? "" : " NOT");
+  ESP_LOGI(TAG, "PCAL at address 0x%X has%s been detected", pcal_address, present ? "" : " NOT");
 
-  read_all_registers();
+  if (present) {
+    read_all_registers();
+  }
 
-  return true;
+  return present;
 }
 
 void 
@@ -68,13 +66,15 @@ IOExpander::read_all_registers()
 {
   if (!check_presence()) return;
 
-  wire.begin_transmission(pcal_address);
-  wire.write(0x00);
-  wire.end_transmission();
-  wire.request_from(pcal_address, (uint8_t) 23);
-  for (auto & reg : registers) {
-    reg = wire.read();
-  }
+  wire_device->cmd_read(0x00, registers.data(), registers.size());
+
+  // wire.begin_transmission(pcal_address);
+  // wire.write(0x00);
+  // wire.end_transmission();
+  // wire.request_from(pcal_address, (uint8_t) 23);
+  // for (auto & reg : registers) {
+  //   reg = wire.read();
+  // }
 }
 
 void 
@@ -82,14 +82,16 @@ IOExpander::read_registers(Reg first_reg, uint8_t count)
 {
   if (!check_presence()) return;
 
-  wire.begin_transmission(pcal_address);
-  wire.write(reg_addresses[(int8_t)first_reg]);
-  wire.end_transmission();
+  wire_device->cmd_read(reg_addresses[(int8_t)first_reg], &registers[first_reg], count);
 
-  wire.request_from(pcal_address, count);
-  for (int i = 0; i < count; ++i) {
-    registers[R(first_reg, i)] = wire.read();
-  }
+  // wire.begin_transmission(pcal_address);
+  // wire.write(reg_addresses[(int8_t)first_reg]);
+  // wire.end_transmission();
+
+  // wire.request_from(pcal_address, count);
+  // for (int i = 0; i < count; ++i) {
+  //   registers[R(first_reg, i)] = wire.read();
+  // }
 }
 
 uint8_t 
@@ -97,11 +99,13 @@ IOExpander::read_register(Reg reg)
 {
   if (!check_presence()) return 0;
 
-  wire.begin_transmission(pcal_address);
-  wire.write(reg_addresses[(int8_t)reg]);
-  wire.end_transmission();
-  wire.request_from(pcal_address, (uint8_t) 1);
-  registers[reg] = wire.read();
+  registers[reg] = wire_device->cmd_read(reg_addresses[(int8_t)reg]);
+
+  // wire.begin_transmission(pcal_address);
+  // wire.write(reg_addresses[(int8_t)reg]);
+  // wire.end_transmission();
+  // wire.request_from(pcal_address, (uint8_t) 1);
+  // registers[reg] = wire.read();
 
   return registers[reg];
 }
@@ -111,12 +115,14 @@ IOExpander::update_all_registers()
 {
   if (!check_presence()) return;
 
-  wire.begin_transmission(pcal_address);
-  wire.write(0x00);
-  for (auto reg : registers) {
-    wire.write(reg);
-  }
-  wire.end_transmission();
+  wire_device->cmd_write(0x00, registers.data(), registers.size());
+
+  // wire.begin_transmission(pcal_address);
+  // wire.write(0x00);
+  // for (auto reg : registers) {
+  //   wire.write(reg);
+  // }
+  // wire.end_transmission();
 }
 
 void 
@@ -124,10 +130,12 @@ IOExpander::update_register(Reg reg, uint8_t value)
 {
   if (!check_presence()) return;
 
-  wire.begin_transmission(pcal_address);
-  wire.write(reg_addresses[(int8_t)reg]);
-  wire.write(value);
-  wire.end_transmission();
+  wire_device->cmd_write(reg_addresses[(int8_t)reg], value);
+
+  // wire.begin_transmission(pcal_address);
+  // wire.write(reg_addresses[(int8_t)reg]);
+  // wire.write(value);
+  // wire.end_transmission();
 }
 
 void 
@@ -135,12 +143,14 @@ IOExpander::update_registers(Reg first_reg, uint8_t count)
 {
   if (!check_presence()) return;
 
-  wire.begin_transmission(pcal_address);
-  wire.write(reg_addresses[(int8_t)first_reg]);
-  for (int i = 0; i < count; ++i) {
-    wire.write(registers[R(first_reg, i)]);
-  }
-  wire.end_transmission();
+  wire_device->cmd_write(reg_addresses[(int8_t)first_reg], &registers[first_reg], count);
+
+  // wire.begin_transmission(pcal_address);
+  // wire.write(reg_addresses[(int8_t)first_reg]);
+  // for (int i = 0; i < count; ++i) {
+  //   wire.write(registers[R(first_reg, i)]);
+  // }
+  // wire.end_transmission();
 }
 
 // HIGH LEVEL:

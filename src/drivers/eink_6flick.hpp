@@ -31,6 +31,7 @@ Distributed as-is; no warranty is given.
 #include "driver/gpio.h"
 #include "eink.hpp"
 #include "pcal6416.hpp"
+#include "wire.hpp"
 
 /**
  * @brief Low level e-Ink display

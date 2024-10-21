@@ -10,12 +10,17 @@
   #include "mcp23017.hpp"
 #endif
 
+#include "wire.hpp"
+
 #include <array>
 
 class TouchScreen : NonCopyable 
 {
   public:
-    TouchScreen(IOExpander & _io_expander) : io_expander(_io_expander), ready(false) {}
+    TouchScreen(IOExpander & _io_expander) : 
+      io_expander(_io_expander), 
+      ready(false) {
+      }
 
     typedef void (* ISRHandlerPtr)(void * value);
 
@@ -41,7 +46,9 @@ class TouchScreen : NonCopyable
 
   private:
     static constexpr char const * TAG = "TouchScreen";
+
     IOExpander & io_expander;
+    WireDevice * wire_device;
 
     uint16_t x_resolution, y_resolution;
 
@@ -50,17 +57,10 @@ class TouchScreen : NonCopyable
 
     static const uint8_t    TOUCHSCREEN_ADDRESS       = 0x15;
 
-    typedef std::array<uint8_t, 4> Data;
-    typedef std::array<uint8_t, 8> Data8;
-
     bool ready;
 
     void hardware_reset();
     bool software_reset();
-
-    bool  read(      Data  & data);
-    bool  read(      Data8 & data);
-    void write(const Data  & data);
 
     void retrieve_resolution();
 };
