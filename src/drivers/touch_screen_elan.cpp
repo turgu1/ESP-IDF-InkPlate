@@ -27,7 +27,10 @@ TouchScreen::setup(bool power_on, ISRHandlerPtr isr_handler)
   Wire::enter();
 
   wire_device = new WireDevice(TOUCHSCREEN_ADDRESS);
-  if ((wire_device == nullptr) || !wire_device->is_initialized()) return false;
+  if ((wire_device == nullptr) || !wire_device->is_initialized()) {
+    ESP_LOGE(TAG, "Setup error: %s", wire_device == nullptr ? "NULL Device!" : "Not initialized!");
+    return false;
+  }
 
   io_expander.set_direction(TOUCHSCREEN_ENABLE, IOExpander::PinMode::OUTPUT );
   io_expander.set_direction(TOUCHSCREEN_RESET,  IOExpander::PinMode::OUTPUT );
@@ -60,6 +63,8 @@ TouchScreen::setup(bool power_on, ISRHandlerPtr isr_handler)
     if (isr_handler != nullptr) set_app_isr_handler(isr_handler);
 
     ready = true;
+  } else {
+    ESP_LOGE(TAG, "Unable to do a software reset!");
   }
 
   return ready;
@@ -92,17 +97,22 @@ TouchScreen::software_reset()
   const uint8_t reset_cmd[] = { 0x77, 0x77, 0x77, 0x77 };
   wire_device->write(reset_cmd, sizeof(reset_cmd));
 
-  uint16_t timeout = 1000;
+  int16_t timeout = 1000;
   while (!touchscreen_interrupt_happened && (timeout > 0)) {
     ESP::delay(1);
     timeout--;
   }
 
-  uint8_t answer[4];
-  if (wire_device->read(answer, sizeof(answer))) {
-    const uint8_t hello_packet[] = { 0x55, 0x55, 0x55, 0x55 };
+  if (timeout <= 0) {
+    ESP_LOGE(TAG, "Timeout waiting for interrupt!");
+  } else {
+    uint8_t answer[4];
+    if (wire_device->read(answer, sizeof(answer))) {
+      const uint8_t hello_packet[] = { 0x55, 0x55, 0x55, 0x55 };
 
-    result = memcmp(answer, hello_packet, sizeof(answer)) == 0;
+      result = memcmp(answer, hello_packet, sizeof(answer)) == 0;
+      if (result) ESP_LOGI(TAG, "Software reset OK");
+    }
   }
 
   Wire::leave();

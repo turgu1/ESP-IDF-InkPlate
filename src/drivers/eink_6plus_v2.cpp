@@ -74,16 +74,33 @@ EInk6PLUSV2::setup()
 
   wakeup_set(); 
  
+   wire_device = new WireDevice(PWRMGR_ADDRESS);
+  if ((wire_device == nullptr) || !wire_device->is_initialized()) {
+    ESP_LOGE(TAG, "Setup error: %s", wire_device == nullptr ? "NULL Device!" : "Not initialized!");
+    return false;
+  }
+  
   //ESP_LOGD(TAG, "Power Mgr Init..."); fflush(stdout);
 
+  uint8_t pgm[] = {
+    0x09,       // cmd
+    0b00011011, // Power up seq.
+    0b00000000, // Power up delay (3mS per rail)
+    0b00011011, // Power down seq.
+    0b00000000  // Power down delay (6mS per rail)
+  };
+
   ESP::delay_microseconds(1800);
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x09);
-  wire.write(0b00011011); // Power up seq.
-  wire.write(0b00000000); // Power up delay (3mS per rail)
-  wire.write(0b00011011); // Power down seq.
-  wire.write(0b00000000); // Power down delay (6mS per rail)
-  wire.end_transmission();
+  wire_device->write(pgm, sizeof(pgm));
+
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x09);
+  // wire.write(0b00011011); // Power up seq.
+  // wire.write(0b00000000); // Power up delay (3mS per rail)
+  // wire.write(0b00011011); // Power down seq.
+  // wire.write(0b00000000); // Power down delay (6mS per rail)
+  // wire.end_transmission();
+
   ESP::delay(1);
 
   //ESP_LOGD(TAG, "Power init completed");

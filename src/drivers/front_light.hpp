@@ -26,6 +26,8 @@ class FrontLight
     IOExpander & io_expander;
     WireDevice * wire_device;
 
+    bool enabled;
+
     const IOExpander::Pin FRONTLIGHT_EN = IOExpander::Pin::IOPIN_11;
 
     static const uint8_t FRONTLIGHT_ADDRESS = 0x2E;

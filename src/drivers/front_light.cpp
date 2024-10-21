@@ -18,6 +18,8 @@ FrontLight::setup()
   io_expander.set_direction(FRONTLIGHT_EN, IOExpander::PinMode::OUTPUT);
   io_expander.digital_write(FRONTLIGHT_EN, IOExpander::SignalLevel::LOW); // disabled
   
+  enabled = false;
+
   Wire::leave();
 
   return true;
@@ -26,13 +28,13 @@ FrontLight::setup()
 void 
 FrontLight::set_level(uint8_t level)
 {
-  uint8_t pgm[] = {
-    0,
-    (uint8_t) (63 - (level & 0b00111111))
-  };
+  if (level > 63) return;
+
+  ESP_LOGD(TAG, "Set Level to %" PRIi8, level);
+  enable();
 
   Wire::enter();
-  wire_device->write(pgm, sizeof(pgm));
+  wire_device->cmd_write(0, (uint8_t) (63 - (level & 0b00111111)));
 
   // wire.begin_transmission(FRONTLIGHT_ADDRESS);
   // wire.write(0);
@@ -45,17 +47,28 @@ FrontLight::set_level(uint8_t level)
 void 
 FrontLight::enable()
 {
-  Wire::enter();
-  io_expander.digital_write(FRONTLIGHT_EN, IOExpander::SignalLevel::HIGH);
-  Wire::leave();
+  if (!enabled) {
+    ESP_LOGD(TAG, "Enable...");
+    Wire::enter();
+    io_expander.digital_write(FRONTLIGHT_EN, IOExpander::SignalLevel::HIGH);
+    Wire::leave();
+
+    ESP::delay(50);
+    enabled = true;
+  }
 }
 
 
 void 
 FrontLight::disable()
 {
-  Wire::enter();
-  io_expander.digital_write(FRONTLIGHT_EN, IOExpander::SignalLevel::LOW);
-  Wire::leave();
+  if (enabled) {
+    ESP_LOGD(TAG, "Disable...");
+    set_level(0);
+    Wire::enter();
+    io_expander.digital_write(FRONTLIGHT_EN, IOExpander::SignalLevel::LOW);
+    Wire::leave();
+    enabled = false;
+  }
 }
 #endif

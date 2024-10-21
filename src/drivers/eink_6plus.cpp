@@ -75,7 +75,10 @@ EInk6PLUS::setup()
   wakeup_set(); 
 
   wire_device = new WireDevice(PWRMGR_ADDRESS);
-  if ((wire_device == nullptr) || !wire_device->is_initialized()) return false;
+  if ((wire_device == nullptr) || !wire_device->is_initialized()) {
+    ESP_LOGE(TAG, "Setup error: %s", wire_device == nullptr ? "NULL Device!" : "Not initialized!");
+    return false;
+  }
 
   //ESP_LOGD(TAG, "Power Mgr Init..."); fflush(stdout);
 
