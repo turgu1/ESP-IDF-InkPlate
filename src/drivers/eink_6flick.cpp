@@ -394,7 +394,7 @@ EInk6FLICK::clean(PixelState pixel_state, uint8_t repeat_count)
 
   volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
   for (int i = 0; i < (WIDTH / 4); i++) {
-    line_buffer[i] = (uint8_t) pixel_state;
+    line_buffer[i] = static_cast<uint8_t>(pixel_state);
   }
 
   i2s_comms.init_lldesc();

@@ -82,7 +82,7 @@ class IOExpander : NonCopyable
     bool present;
  
     // Adjust Register, adding offset p
-    inline Reg R(Reg r, uint8_t p) { return (Reg)((uint8_t)r + p); }
+    inline Reg R(Reg r, uint8_t p) { return (Reg)(static_cast<uint8_t>(r) + p); }
 
     void   read_all_registers();
     void       read_registers(Reg first_reg, uint8_t count);

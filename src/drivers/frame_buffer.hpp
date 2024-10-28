@@ -40,5 +40,5 @@ class FrameBuffer1Bit : public FrameBuffer
 class FrameBuffer3Bit : public FrameBuffer 
 {
   public:
-    FrameBuffer3Bit(int16_t w, int16_t h, int32_t s) : FrameBuffer(w, h, s, (uint8_t) 0x77) {}
+    FrameBuffer3Bit(int16_t w, int16_t h, int32_t s) : FrameBuffer(w, h, s, static_cast<uint8_t>(0x77)) {}
 };

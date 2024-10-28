@@ -34,7 +34,7 @@ FrontLight::set_level(uint8_t level)
   enable();
 
   Wire::enter();
-  wire_device->cmd_write(0, (uint8_t) (63 - (level & 0b00111111)));
+  wire_device->cmd_write(0, static_cast<uint8_t>(63 - (level & 0b00111111)));
 
   // wire.begin_transmission(FRONTLIGHT_ADDRESS);
   // wire.write(0);

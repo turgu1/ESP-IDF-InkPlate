@@ -71,7 +71,7 @@ IOExpander::read_all_registers()
   // wire.begin_transmission(pcal_address);
   // wire.write(0x00);
   // wire.end_transmission();
-  // wire.request_from(pcal_address, (uint8_t) 23);
+  // wire.request_from(pcal_address, static_cast<uint8_t>(23));
   // for (auto & reg : registers) {
   //   reg = wire.read();
   // }
@@ -82,10 +82,10 @@ IOExpander::read_registers(Reg first_reg, uint8_t count)
 {
   if (!check_presence()) return;
 
-  wire_device->cmd_read(reg_addresses[(int8_t)first_reg], &registers[first_reg], count);
+  wire_device->cmd_read(reg_addresses[static_cast<int8_t>(first_reg)], &registers[first_reg], count);
 
   // wire.begin_transmission(pcal_address);
-  // wire.write(reg_addresses[(int8_t)first_reg]);
+  // wire.write(reg_addresses[static_cast<int8_t>(first_reg)]);
   // wire.end_transmission();
 
   // wire.request_from(pcal_address, count);
@@ -99,12 +99,12 @@ IOExpander::read_register(Reg reg)
 {
   if (!check_presence()) return 0;
 
-  registers[reg] = wire_device->cmd_read(reg_addresses[(int8_t)reg]);
+  registers[reg] = wire_device->cmd_read(reg_addresses[static_cast<int8_t>(reg)]);
 
   // wire.begin_transmission(pcal_address);
-  // wire.write(reg_addresses[(int8_t)reg]);
+  // wire.write(reg_addresses[static_cast<int8_t>(reg)]);
   // wire.end_transmission();
-  // wire.request_from(pcal_address, (uint8_t) 1);
+  // wire.request_from(pcal_address, static_cast<uint8_t>(1));
   // registers[reg] = wire.read();
 
   return registers[reg];
@@ -130,10 +130,10 @@ IOExpander::update_register(Reg reg, uint8_t value)
 {
   if (!check_presence()) return;
 
-  wire_device->cmd_write(reg_addresses[(int8_t)reg], value);
+  wire_device->cmd_write(reg_addresses[static_cast<int8_t>(reg)], value);
 
   // wire.begin_transmission(pcal_address);
-  // wire.write(reg_addresses[(int8_t)reg]);
+  // wire.write(reg_addresses[static_cast<int8_t>(reg)]);
   // wire.write(value);
   // wire.end_transmission();
 }
@@ -143,10 +143,10 @@ IOExpander::update_registers(Reg first_reg, uint8_t count)
 {
   if (!check_presence()) return;
 
-  wire_device->cmd_write(reg_addresses[(int8_t)first_reg], &registers[first_reg], count);
+  wire_device->cmd_write(reg_addresses[static_cast<int8_t>(first_reg)], &registers[first_reg], count);
 
   // wire.begin_transmission(pcal_address);
-  // wire.write(reg_addresses[(int8_t)first_reg]);
+  // wire.write(reg_addresses[static_cast<int8_t>(first_reg)]);
   // for (int i = 0; i < count; ++i) {
   //   wire.write(registers[R(first_reg, i)]);
   // }
@@ -158,8 +158,8 @@ IOExpander::update_registers(Reg first_reg, uint8_t count)
 void
 IOExpander::set_direction(Pin pin, PinMode mode)
 {
-  uint8_t port = ((uint8_t)pin >> 3) & 1;
-  uint8_t p    =  (uint8_t)pin & 7;
+  uint8_t port = (static_cast<uint8_t>(pin) >> 3) & 1;
+  uint8_t p    =  static_cast<uint8_t>(pin) & 7;
 
   if (!check_presence()) return;
 
@@ -194,8 +194,8 @@ IOExpander::set_direction(Pin pin, PinMode mode)
 void 
 IOExpander::digital_write(Pin pin, SignalLevel state)
 {
-  uint8_t port = ((uint8_t)pin >> 3) & 1;
-  uint8_t p    =  (uint8_t)pin & 7;
+  uint8_t port = (static_cast<uint8_t>(pin) >> 3) & 1;
+  uint8_t p    =  static_cast<uint8_t>(pin) & 7;
 
   if (registers[R(Reg::CONFA, port)] & (1 << p)) return;
   state == SignalLevel::HIGH ? (registers[R(Reg::OUTA, port)] |=  (1 << p)) : 
@@ -206,9 +206,9 @@ IOExpander::digital_write(Pin pin, SignalLevel state)
 IOExpander::SignalLevel 
 IOExpander::digital_read(Pin pin)
 {
-  uint8_t port = ((uint8_t)pin >> 3) & 1;
-  uint8_t p    =  (uint8_t)pin & 7;
-  uint8_t r = read_register((Reg)((int8_t)Reg::INA + port));
+  uint8_t port = (static_cast<uint8_t>(pin) >> 3) & 1;
+  uint8_t p    =  static_cast<uint8_t>(pin) & 7;
+  uint8_t r = read_register((Reg)(static_cast<int8_t>(Reg::INA) + port));
 
   return (r & (1 << p)) ? SignalLevel::HIGH : SignalLevel::LOW;
 }
@@ -224,8 +224,8 @@ IOExpander::set_int_output(IntPort intPort, bool mirroring, bool openDrain, Sign
 void 
 IOExpander::set_int_pin(Pin pin, IntMode mode)
 {
-  uint8_t port = ((uint8_t)pin >> 3) & 1;
-  uint8_t p    =  (uint8_t)pin & 7;
+  uint8_t port = (static_cast<uint8_t>(pin) >> 3) & 1;
+  uint8_t p    =  static_cast<uint8_t>(pin) & 7;
 
   registers[R(Reg::IMASKA, port)] &= ~(1 << p);
   update_register(R(Reg::IMASKA, port), registers[R(Reg::IMASKA, port)]);
@@ -234,8 +234,8 @@ IOExpander::set_int_pin(Pin pin, IntMode mode)
 void 
 IOExpander::remove_int_pin(Pin pin)
 {
-  uint8_t port = ((uint8_t)pin >> 3) & 1;
-  uint8_t p    =  (uint8_t)pin & 7;
+  uint8_t port = (static_cast<uint8_t>(pin) >> 3) & 1;
+  uint8_t p    =  static_cast<uint8_t>(pin) & 7;
 
   registers[R(Reg::IMASKA, port)] |= (1 << p);
   update_register(R(Reg::IMASKA, port), registers[R(Reg::IMASKA, port)]);

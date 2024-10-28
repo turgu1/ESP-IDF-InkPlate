@@ -27,26 +27,26 @@ bool RTC::setup()
 void RTC::reset() 
 {
   if (!present) return;
-  wire_device->cmd_write((uint8_t) Reg::CTRL1, RESET_CODE);
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::CTRL1), RESET_CODE);
 }
 
 void RTC::start() 
 {
   if (!present) return;
-  wire_device->cmd_write((uint8_t) Reg::CTRL1, wire_device->cmd_read((uint8_t) Reg::CTRL1) & ~STOP_BIT);
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::CTRL1), wire_device->cmd_read(static_cast<uint8_t>(Reg::CTRL1)) & ~STOP_BIT);
 }
 
 void RTC::stop() 
 {
   if (!present) return;
-  wire_device->cmd_write((uint8_t) Reg::CTRL1, wire_device->cmd_read((uint8_t) Reg::CTRL1) | STOP_BIT);
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::CTRL1), wire_device->cmd_read(static_cast<uint8_t>(Reg::CTRL1)) | STOP_BIT);
 }
 
 void RTC::read_date_time() 
 {
   uint8_t data[7];
 
-  wire_device->cmd_read((uint8_t) Reg::SEC, data, sizeof(data));
+  wire_device->cmd_read(static_cast<uint8_t>(Reg::SEC), data, sizeof(data));
 
   second   = bcd_to_dec(data[0] & SECONDS_MASK);
   minute   = bcd_to_dec(data[1]);
@@ -57,7 +57,7 @@ void RTC::read_date_time()
   year     = bcd_to_dec(data[6]);
 
   // wire.begin_transmission(rtc_address);
-  // wire.write((uint8_t) Reg::SEC);
+  // wire.write(static_cast<uint8_t>(Reg::SEC));
   // wire.end_transmission();
 
   // wire.request_from(rtc_address, 7);
@@ -73,13 +73,13 @@ void RTC::read_date_time()
 
 void RTC::write_date_time() 
 {
-  wire_device->cmd_write((uint8_t) Reg::SEC,     dec_to_bcd(second  ));
-  wire_device->cmd_write((uint8_t) Reg::MIN,     dec_to_bcd(minute  ));
-  wire_device->cmd_write((uint8_t) Reg::HOUR,    dec_to_bcd(hour    ));
-  wire_device->cmd_write((uint8_t) Reg::DAY,     dec_to_bcd(day     ));
-  wire_device->cmd_write((uint8_t) Reg::WEEKDAY, dec_to_bcd((uint8_t) week_day));
-  wire_device->cmd_write((uint8_t) Reg::MONTH,   dec_to_bcd(month   ));
-  wire_device->cmd_write((uint8_t) Reg::YEAR,    dec_to_bcd(year    ));
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::SEC),     dec_to_bcd(second  ));
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::MIN),     dec_to_bcd(minute  ));
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::HOUR),    dec_to_bcd(hour    ));
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::DAY),     dec_to_bcd(day     ));
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::WEEKDAY), dec_to_bcd(static_cast<uint8_t>(week_day)));
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::MONTH),   dec_to_bcd(month   ));
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::YEAR),    dec_to_bcd(year    ));
 }
 
 void RTC::set_date_time(uint16_t  y, uint8_t  m, uint8_t d, 
@@ -131,9 +131,14 @@ RTC::set_date_time(const time_t * t)
   uint16_t year = time.tm_year + 1900;
   if ((year < 2000) || (year > 2099)) return;
 
-  set_date_time(year,                   (uint8_t)(time.tm_mon + 1), (uint8_t) time.tm_mday, 
-                (uint8_t) time.tm_hour, (uint8_t) time.tm_min, (uint8_t) time.tm_sec,
-                (RTC::WeekDay) time.tm_wday);
+  set_date_time(
+    year,
+    static_cast<uint8_t>(time.tm_mon + 1), 
+    static_cast<uint8_t>(time.tm_mday), 
+    static_cast<uint8_t>(time.tm_hour), 
+    static_cast<uint8_t>(time.tm_min), 
+    static_cast<uint8_t>(time.tm_sec),
+    static_cast<RTC::WeekDay>(time.tm_wday));
 }
 
 void
@@ -149,7 +154,7 @@ RTC::get_date_time(time_t * t)
                 (uint8_t &) time.tm_hour, (uint8_t &) time.tm_min, (uint8_t &) time.tm_sec,
                 wd);
   time.tm_year = year - 1900;
-  time.tm_wday = (uint8_t) wd;
+  time.tm_wday = static_cast<uint8_t>(wd);
   time.tm_mon -= 1;
   if ((time.tm_mon < 0) || (time.tm_mon > 11)) time.tm_mon = 0;
 
@@ -194,41 +199,41 @@ void RTC::set_calibration(CalibrationMode mode, float Fmeas)
     offset = Eppm / 4.069;
   }
 
-  uint8_t data = ((((uint8_t) mode) << 7) & 0x80) | ((int)(offset + 0.5) & 0x7f);
-  wire_device->cmd_write((uint8_t) Reg::OFFSET, data);
+  uint8_t data = ((static_cast<uint8_t>(mode) << 7) & 0x80) | ((int)(offset + 0.5) & 0x7f);
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::OFFSET), data);
 }
 
 uint8_t RTC::read_calibration_reg(void) 
 {
-  return wire_device->cmd_read((uint8_t) Reg::OFFSET);
+  return wire_device->cmd_read(static_cast<uint8_t>(Reg::OFFSET));
 }
 
 
 void RTC::set_ram(uint8_t value)
 {
   if (!present) return;
-  wire_device->cmd_write((uint8_t) Reg::RAM, value);
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::RAM), value);
 }
 
 uint8_t RTC::get_ram(void) 
 {
   if (!present) return 0;
-  return wire_device->cmd_read((uint8_t) Reg::RAM);
+  return wire_device->cmd_read(static_cast<uint8_t>(Reg::RAM));
 }
 
 RTC::CAPACITOR RTC::set_capacitor(CAPACITOR value) 
 {
   if (!present) return (CAPACITOR) 0;
-  uint8_t control_1 = wire_device->cmd_read((uint8_t) Reg::CTRL1);
-  control_1 = (control_1 & 0xFE) | (0x01 & (uint8_t) value);
-  wire_device->cmd_write((uint8_t) Reg::CTRL1, control_1);
+  uint8_t control_1 = wire_device->cmd_read(static_cast<uint8_t>(Reg::CTRL1));
+  control_1 = (control_1 & 0xFE) | (0x01 & static_cast<uint8_t>(value));
+  wire_device->cmd_write(static_cast<uint8_t>(Reg::CTRL1), control_1);
 
-  return (CAPACITOR) (wire_device->cmd_read((uint8_t) Reg::CTRL1) & 0x01);
+  return (CAPACITOR) (wire_device->cmd_read(static_cast<uint8_t>(Reg::CTRL1)) & 0x01);
 }
 
 RTC::CAPACITOR RTC::get_capacitor() 
 {
   if (!present) return (CAPACITOR) 0;
-  return (CAPACITOR) (wire_device->cmd_read((uint8_t) Reg::CTRL1) & 0x01);
+  return (CAPACITOR) (wire_device->cmd_read(static_cast<uint8_t>(Reg::CTRL1)) & 0x01);
 }
 

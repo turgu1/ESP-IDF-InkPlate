@@ -25,6 +25,8 @@ SDCard::setup()
  #if INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
     Wire::enter();
     io_expander.set_direction(SD_POWER, IOExpander::PinMode::OUTPUT);
+    io_expander.digital_write(SD_POWER, IOExpander::SignalLevel::HIGH);
+    ESP::delay(50);
     io_expander.digital_write(SD_POWER, IOExpander::SignalLevel::LOW);
     ESP::delay(50);
     Wire::leave();
@@ -121,8 +123,14 @@ SDCard::setup()
   return true;
 }
 
-void SDCard::deepSleep() {
-  // while (card->isBusy()) {
+// bool 
+// SDCard::isBusy() {
+//   return false;
+// }
+
+void 
+SDCard::deepSleep() {
+  // while (isBusy()) {
   //   ESP::delay(100);
   // }
   

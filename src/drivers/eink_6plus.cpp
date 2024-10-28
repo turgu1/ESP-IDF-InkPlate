@@ -398,7 +398,7 @@ EInk6PLUS::clean(PixelState pixel_state, uint8_t repeat_count)
 {
   if (!turn_on()) return;
 
-  uint32_t send = PIN_LUT[(uint8_t) pixel_state];
+  uint32_t send = PIN_LUT[static_cast<uint8_t>(pixel_state)];
 
   for (int8_t k = 0; k < repeat_count; k++) {
 

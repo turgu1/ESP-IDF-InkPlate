@@ -45,7 +45,7 @@ uint8_t
 PressKeys::read_key(Key key)
 {
   Wire::enter();
-  IOExpander::SignalLevel value = io_expander.digital_read((IOExpander::Pin)(((uint8_t)key) + 10)); // Not clean
+  IOExpander::SignalLevel value = io_expander.digital_read((IOExpander::Pin)((static_cast<uint8_t>(key)) + 10)); // Not clean
   Wire::leave();
 
   return value == IOExpander::SignalLevel::HIGH ? 0 : 1;

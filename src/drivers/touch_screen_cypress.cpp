@@ -126,7 +126,7 @@ TouchScreen::get_position(TouchPositions & x_positions, TouchPositions & y_posit
   uint8_t raw[sizeof(SysInfoData)];
 
   Wire::enter();
-  if (touchscreen_interrupt_happened) handshake();
+  
   bool res = wire_device->cmd_read(BASE_ADDR, raw, sizeof(raw));
   Wire::leave();
 
@@ -137,10 +137,16 @@ TouchScreen::get_position(TouchPositions & x_positions, TouchPositions & y_posit
   x_positions[1] = (raw[9] << 8) | raw[10];
   y_positions[1] = (raw[11] << 8) | raw[12];
 
-  touchscreen_interrupt_happened = false;
 
   ESP_LOGD(TAG, "Pos: [%" PRIu16 ",%" PRIu16 "], [%" PRIu16 ",%" PRIu16 "], Fingers: %" PRIu8, 
     x_positions[0], y_positions[0], x_positions[1], y_positions[1], fingers);
+
+  if (touchscreen_interrupt_happened) {
+    touchscreen_interrupt_happened = false;
+    Wire::enter();
+    handshake();
+    Wire::leave();
+  }
 
   return fingers;
 }
@@ -309,14 +315,14 @@ TouchScreen::set_sys_info_regs(SysInfoData &sys_info_data)
     return true;
 }
 
-void 
+void
 TouchScreen::handshake()
 {
-    // Read the hst_mode register (address 0x00).
-    uint8_t host_mode_reg;
-    host_mode_reg = wire_device->cmd_read(BASE_ADDR);
-    host_mode_reg ^= 0x80;
-    wire_device->cmd_write(BASE_ADDR, host_mode_reg);
+  // Read the hst_mode register (address 0x00).
+  uint8_t host_mode_reg;
+  host_mode_reg = wire_device->cmd_read(BASE_ADDR);
+  host_mode_reg ^= 0x80;
+  wire_device->cmd_write(BASE_ADDR, host_mode_reg);
 }
 
 bool 
