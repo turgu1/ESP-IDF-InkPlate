@@ -23,3 +23,4 @@ idf_component_register(
     REQUIRES ${components}
 )
 
+project(esp_idf_inkplate)
