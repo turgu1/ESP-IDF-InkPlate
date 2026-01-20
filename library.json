@@ -1,8 +1,8 @@
 {
   "name": "ESP-IDF-Inkplate",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "description": "Implements common functions for Inkplate e-paper displays",
-  "keywords": "e-ink, e-paper, display, esp32",
+  "keywords": "inkplate, e-ink, e-paper, display, esp32",
   "repository":
   {
     "type": "git",
@@ -17,7 +17,7 @@
     },
     {
       "name": "David Zovko",
-      "email": "e-radionica.com<david.zovko@e-radionica.com>"
+      "email": "soldered.com<david.zovko@soldered.com>"
     }
   ],
   "license": "GPL-3.0-or-later",
@@ -25,11 +25,11 @@
   "platforms": "espressif32",
   "build": {
     "flags": [
-      "-I include/drivers",
-      "-I include/graphical",
-      "-I include/services",
-      "-I include/tools",
-      "-I include/fonts"
+      "-I src/drivers",
+      "-I src/graphical",
+      "-I src/services",
+      "-I src/tools",
+      "-I src/fonts"
     ]
   }
 }

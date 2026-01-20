@@ -25,10 +25,10 @@ Inkplate display(DisplayMode::INKPLATE_1BIT); // Create an object on Inkplate li
 static const char * TAG = "Main";
 
 // Char array where you can store your text that will be scrolled.
-#if defined(INKPLATE_6)
+#if INKPLATE_6
   const char text[] = "This is partial update on Inkplate 6 e-paper display! :)";
   int max = 9;
-#elif defined(INKPLATE_6PLUS)
+#elif INKPLATE_6PLUS
   const char text[] = "This is partial update on Inkplate 6PLUS e-paper display! :)";
   int max = 999;
 #else

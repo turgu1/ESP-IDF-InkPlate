@@ -62,10 +62,12 @@ void mainTask(void * params)
   display.setCursor(50, h / 2);
   display.setTextSize(4);
 
-  #if defined(INKPLATE_6)
+  #if INKPLATE_6
     display.print("Network test for Inkplate 6!");
-  #elif defined(INKPLATE_6PLUS)
+  #elif INKPLATE_6PLUS
     display.print("Network test for Inkplate 6PLUS!");
+  #elif INKPLATE_6PLUS_V2
+    display.print("Network test for Inkplate 6PLUS V2!");  
   #else
     display.print("Network test for Inkplate 10!");
   #endif

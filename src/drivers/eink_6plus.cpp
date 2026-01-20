@@ -3,7 +3,7 @@ eink_6plus.cpp
 Inkplate 6PLUS ESP-IDF
 
 Modified by Guy Turcotte 
-May 3, 2021
+July 20, 2024
 
 from the Arduino Library:
 
@@ -20,14 +20,13 @@ If you have any questions about licensing, please contact techsupport@e-radionic
 Distributed as-is; no warranty is given.
 */
 
-#if defined(INKPLATE_6PLUS)
+#if INKPLATE_6PLUS
 
 #define __EINK6PLUS__ 1
 #include "eink_6plus.hpp"
 #include "esp_log.h"
 
 #include "wire.hpp"
-#include "mcp23017.hpp"
 #include "esp.hpp"
 
 #include <iostream>
@@ -55,7 +54,7 @@ EInk6PLUS::setup()
 
   wire.setup();
   
-  if (!mcp_int.setup()) {
+  if (!io_expander_int.setup()) {
     ESP_LOGE(TAG, "Initialization not completed (Main MCP Issue).");
     return false;
   }
@@ -63,28 +62,45 @@ EInk6PLUS::setup()
     ESP_LOGD(TAG, "MCP initialized.");
   }
 
-  mcp_ext.setup();
+  io_expander_ext.setup();
 
   Wire::enter();
   
-  mcp_int.set_direction(VCOM,         MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(PWRUP,        MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(WAKEUP,       MCP23017::PinMode::OUTPUT); 
-  mcp_int.set_direction(GPIO0_ENABLE, MCP23017::PinMode::OUTPUT);
-  mcp_int.digital_write(GPIO0_ENABLE, MCP23017::SignalLevel::HIGH);
+  io_expander_int.set_direction(VCOM,         IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(PWRUP,        IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(WAKEUP,       IOExpander::PinMode::OUTPUT); 
+  io_expander_int.set_direction(GPIO0_ENABLE, IOExpander::PinMode::OUTPUT);
+  io_expander_int.digital_write(GPIO0_ENABLE, IOExpander::SignalLevel::HIGH);
 
   wakeup_set(); 
- 
+
+  wire_device = new WireDevice(PWRMGR_ADDRESS);
+  if ((wire_device == nullptr) || !wire_device->is_initialized()) {
+    ESP_LOGE(TAG, "Setup error: %s", wire_device == nullptr ? "NULL Device!" : "Not initialized!");
+    return false;
+  }
+
   //ESP_LOGD(TAG, "Power Mgr Init..."); fflush(stdout);
 
+  uint8_t pgm[] = {
+    0x09,       // cmd
+    0b00011011, // Power up seq.
+    0b00000000, // Power up delay (3mS per rail)
+    0b00011011, // Power down seq.
+    0b00000000  // Power down delay (6mS per rail)
+  };
+
   ESP::delay_microseconds(1800);
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x09);
-  wire.write(0b00011011); // Power up seq.
-  wire.write(0b00000000); // Power up delay (3mS per rail)
-  wire.write(0b00011011); // Power down seq.
-  wire.write(0b00000000); // Power down delay (6mS per rail)
-  wire.end_transmission();
+  wire_device->write(pgm, sizeof(pgm));
+
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x09);
+  // wire.write(0b00011011); // Power up seq.
+  // wire.write(0b00000000); // Power up delay (3mS per rail)
+  // wire.write(0b00011011); // Power down seq.
+  // wire.write(0b00000000); // Power down delay (6mS per rail)
+  // wire.end_transmission();
+
   ESP::delay(1);
 
   //ESP_LOGD(TAG, "Power init completed");
@@ -93,20 +109,20 @@ EInk6PLUS::setup()
 
   // Set all pins of seconds I/O expander to outputs, low.
   // For some reason, it draw more current in deep sleep when pins are set as inputs...
-  if (mcp_ext.is_present()) {
+  if (io_expander_ext.is_present()) {
     for (int i = 0; i < 15; i++) {
-      mcp_ext.set_direction((MCP23017::Pin) i, MCP23017::PinMode::OUTPUT);
-      mcp_ext.digital_write((MCP23017::Pin) i, MCP23017::SignalLevel::LOW);
+      io_expander_ext.set_direction((IOExpander::Pin) i, IOExpander::PinMode::OUTPUT);
+      io_expander_ext.digital_write((IOExpander::Pin) i, IOExpander::SignalLevel::LOW);
     }
   }
 
   // For same reason, unused pins of first I/O expander have to be also set as outputs, low.
-  mcp_int.set_direction(MCP23017::Pin::IOPIN_13, MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(MCP23017::Pin::IOPIN_14, MCP23017::PinMode::OUTPUT);  
-  mcp_int.set_direction(MCP23017::Pin::IOPIN_15, MCP23017::PinMode::OUTPUT);  
-  mcp_int.digital_write(MCP23017::Pin::IOPIN_13, MCP23017::SignalLevel::LOW);
-  mcp_int.digital_write(MCP23017::Pin::IOPIN_14, MCP23017::SignalLevel::LOW);
-  mcp_int.digital_write(MCP23017::Pin::IOPIN_15, MCP23017::SignalLevel::LOW);
+  io_expander_int.set_direction(IOExpander::Pin::IOPIN_13, IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(IOExpander::Pin::IOPIN_14, IOExpander::PinMode::OUTPUT);  
+  io_expander_int.set_direction(IOExpander::Pin::IOPIN_15, IOExpander::PinMode::OUTPUT);  
+  io_expander_int.digital_write(IOExpander::Pin::IOPIN_13, IOExpander::SignalLevel::LOW);
+  io_expander_int.digital_write(IOExpander::Pin::IOPIN_14, IOExpander::SignalLevel::LOW);
+  io_expander_int.digital_write(IOExpander::Pin::IOPIN_15, IOExpander::SignalLevel::LOW);
 
   // CONTROL PINS
   gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_OUTPUT);
@@ -114,9 +130,9 @@ EInk6PLUS::setup()
   gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT);
 
-  mcp_int.set_direction(OE,      MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(GMOD,    MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(SPV,     MCP23017::PinMode::OUTPUT);
+  io_expander_int.set_direction(OE,      IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(GMOD,    IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(SPV,     IOExpander::PinMode::OUTPUT);
 
   // DATA PINS
   gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_OUTPUT); // D0
@@ -137,14 +153,14 @@ EInk6PLUS::setup()
   ESP_LOGD(TAG, "Memory allocation for bitmap buffers.");
   ESP_LOGD(TAG, "d_memory_new: %08x p_buffer: %08x.", (unsigned int)d_memory_new, (unsigned int)p_buffer);
 
+  Wire::leave();
+  
   if ((d_memory_new == nullptr) || 
       (p_buffer     == nullptr) ||
       (GLUT         == nullptr) ||
       (GLUT2        == nullptr)) {
     return false;
   }
-
-  Wire::leave();
 
   d_memory_new->clear();
   memset(p_buffer, 0, BITMAP_SIZE_1BIT * 2);
@@ -173,7 +189,10 @@ EInk6PLUS::update(FrameBuffer1Bit & frame_buffer)
 
   Wire::enter();
 
-  turn_on();
+  if (!turn_on()) {
+    Wire::leave();
+    return;
+  }
 
   clean(PixelState::WHITE,      1);
   clean(PixelState::BLACK,     15);
@@ -257,7 +276,10 @@ EInk6PLUS::update(FrameBuffer3Bit & frame_buffer)
   ESP_LOGD(TAG, "3bit Update...");
 
   Wire::enter();
-  turn_on();
+  if (!turn_on()) {
+    Wire::leave();
+    return;
+  }
 
   clean(PixelState::WHITE,      1);
   clean(PixelState::BLACK,     15);
@@ -337,7 +359,10 @@ EInk6PLUS::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
     }
   }
 
-  turn_on();
+  if (!turn_on()) {
+    Wire::leave();
+    return;
+  }
 
   for (int k = 0; k < 5; k++) {
     vscan_start();
@@ -371,9 +396,9 @@ EInk6PLUS::partial_update(FrameBuffer1Bit & frame_buffer, bool force)
 void
 EInk6PLUS::clean(PixelState pixel_state, uint8_t repeat_count)
 {
-  turn_on();
+  if (!turn_on()) return;
 
-  uint32_t send = PIN_LUT[(uint8_t) pixel_state];
+  uint32_t send = PIN_LUT[static_cast<uint8_t>(pixel_state)];
 
   for (int8_t k = 0; k < repeat_count; k++) {
 

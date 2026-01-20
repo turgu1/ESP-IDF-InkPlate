@@ -72,9 +72,9 @@ void mainTask(void * params)
   display.setCursor(150, h / 2);
   display.setTextSize(4);
 
-  #if defined(INKPLATE_6)
+  #if INKPLATE_6
     display.print("Welcome to Inkplate 6!");
-  #elif defined(INKPLATE_6PLUS)
+  #elif INKPLATE_6PLUS
     display.print("Welcome to Inkplate 6PLUS!");
   #else
     display.print("Welcome to Inkplate 10!");
@@ -349,9 +349,9 @@ void mainTask(void * params)
                             1); // textSize parameter starts at 0 and goes up to 10 (larger won't fit Inkplate 6 screen)
         display.setCursor(200, (i * i * 8)); // setCursor works as same as on LCD displays - sets "the cursor" at the
                                              // place you want to write someting next
-        #if defined(INKPLATE_6)
+        #if INKPLATE_6
           display.print("INKPLATE 6!");        // The actual text you want to show on e-paper as String
-        #elif defined(INKPLATE_6PLUS)
+        #elif INKPLATE_6PLUS
           display.print("INKPLATE 6PLUS!");        // The actual text you want to show on e-paper as String
         #else
           display.print("INKPLATE 10!");        // The actual text you want to show on e-paper as String
@@ -371,9 +371,9 @@ void mainTask(void * params)
     { // only two options: BLACK & WHITE
         display.setTextSize(i + 1);
         display.setCursor(200, 300 + (i * i * 8));
-        #if defined(INKPLATE_6)
+        #if INKPLATE_6
           display.print("INKPLATE 6!");
-        #elif defined(INKPLATE_6PLUS)
+        #elif INKPLATE_6PLUS
           display.print("INKPLATE 6PLUS!");        // The actual text you want to show on e-paper as String
         #else
           display.print("INKPLATE 10!");
@@ -451,9 +451,9 @@ void mainTask(void * params)
       display.clearDisplay();
       display.setRotation(
           r); // Set rotation will sent rotation for the entire display, so you can use it sideways or upside-down
-      #if defined(INKPLATE_6)
+      #if INKPLATE_6
         display.print("INKPLATE 6");
-      #elif defined(INKPLATE_6PLUS)
+      #elif INKPLATE_6PLUS
         display.print("INKPLATE 6PLUS");        // The actual text you want to show on e-paper as String
       #else
         display.print("INKPLATE 10");

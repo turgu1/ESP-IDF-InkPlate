@@ -52,9 +52,9 @@ void mainTask(void * param)
     display.setTextSize(2);                  // Set font scaling to two (font will be 2 times bigger)
     display.setCursor(0, 60);                // Set print cursor on X = 0, Y = 60
     
-    #if defined(INKPLATE_6)
+    #if INKPLATE_6
       display.print("InkPlate 6");
-    #elif defined(INKPLATE_6PLUS)
+    #elif INKPLATE_6PLUS
       display.print("InkPlate 6PLUS");
     #else
       display.print("InkPlate 10");

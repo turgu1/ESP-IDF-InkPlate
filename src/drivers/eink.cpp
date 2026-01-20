@@ -51,108 +51,118 @@ EInk::turn_off()
 {
   if (get_panel_state() == PanelState::OFF) return;
  
-    oe_clear();
+  oe_clear();
   gmod_clear();
 
-  GPIO.out &= ~(DATA | LE | CL);
+  #if !(INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK)
+    GPIO.out &= ~(DATA | LE | CL);
+  #else
+    le_clear();
+  #endif
   
-   ckv_clear();
-   sph_clear();
-   spv_clear();
+  ckv_clear();
+  sph_clear();
+  spv_clear();
+
   vcom_clear();
+  pwrup_clear();
 
-  // Put TPS65186 into standby mode (leaving 3V3 SW active)
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x01);
-  wire.write(0x6f);
-  wire.end_transmission();
+  unsigned long timer = ESP::millis();
+  do {
+    ESP::delay(1);
+  } while ((read_power_good() != 0) && (ESP::millis() - timer) < 250);
 
-  // Wait for all PWR rails to shut down
-  ESP::delay(100);
-
-  // Disable 3V3 to the panel
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x01);
-  wire.write(0x4f);
-  wire.end_transmission();
-
-  // Clearing WAKEUP pin can cause vertical lines on panel
-  // WAKEUP_CLEAR;
+  // Do not disable WAKEUP if older Inkplate6Plus is used.
+  #if !INKPLATE_6PLUS
+    wakeup_clear();
+  #endif
 
   pins_z_state();
   set_panel_state(PanelState::OFF);
+
+  ESP_LOGD(TAG, "EInk is off");
 }
 
 // Turn on supply for epaper display (TPS65186) 
 // [+15 VDC, -15VDC, +22VDC, -20VDC, +3.3VDC, VCOM]
-void 
+bool 
 EInk::turn_on()
 {
-  if (get_panel_state() == PanelState::ON) return;
+  if (get_panel_state() == PanelState::ON) return true;
 
   wakeup_set();
-  vcom_set();
 
-  ESP::delay_microseconds(1800);
+  ESP::delay(5);
 
-  //pwrup_set();
+  // Modify power up sequence  (VEE and VNEG are swapped)
+  wire_device->cmd_write(0x09, 0b11100001);
+
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x09);
+  // wire.write(0b11100001);
+  // wire.end_transmission();
 
   // Enable all rails
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x01);
-  wire.write(0b00101111);
-  wire.end_transmission();
+  wire_device->cmd_write(0x01, 0b00111111);
 
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x09);
-  wire.write(0b11100001);
-  wire.end_transmission();
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x01);
+  // wire.write(0b00111111);
+  // wire.end_transmission();
 
-  ESP::delay_microseconds(1000);
+  // // Modify power down sequence (VEE and VNEG are swapped)
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x0B);
+  // wire.write(0b00011011);
+  // wire.end_transmission();
 
-  // Switch TPS65186 into active mode
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x01);
-  wire.write(0b10101111);
-  wire.end_transmission();
+  pwrup_set();
 
   pins_as_outputs();
 
-    le_clear();
-    oe_clear();
+  le_clear();
+  oe_clear();
+  
+  #if !(INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK)
     cl_clear();
-   sph_set();
+  #endif
+
+  sph_set();
   gmod_set();
-   spv_set();
-   ckv_clear();
-    oe_clear();
+  spv_set();
+  ckv_clear();
+  oe_clear();
+  vcom_set();
 
   unsigned long timer = ESP::millis();
-
   do {
     ESP::delay(1);
   } while ((read_power_good() != PWR_GOOD_OK) && (ESP::millis() - timer) < 250);
 
   if ((ESP::millis() - timer) >= 250) {
-    wakeup_clear();
-      vcom_clear();
-     pwrup_clear();
-    return;
+    vcom_clear();
+    pwrup_clear();
+    return false;
   }
 
   oe_set();
   set_panel_state(PanelState::ON);
+
+  ESP_LOGD(TAG, "EInk is on");
+  return true;
 }
 
 uint8_t 
 EInk::read_power_good()
 {
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x0F);
-  wire.end_transmission();
+  return wire_device->cmd_read(0x0F);
 
-  wire.request_from(PWRMGR_ADDRESS, 1);
-  return wire.read();
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x0F);
+  // wire.end_transmission();
+
+  // wire.request_from(PWRMGR_ADDRESS, 1);
+  // return wire.read();
 }
 
 // LOW LEVEL FUNCTIONS
@@ -160,17 +170,17 @@ EInk::read_power_good()
 void 
 EInk::vscan_start()
 {
-        ckv_set(); ESP::delay_microseconds( 7);
-      spv_clear(); ESP::delay_microseconds(10);
-      ckv_clear(); ESP::delay_microseconds( 0);
-        ckv_set(); ESP::delay_microseconds( 8);
-        spv_set(); ESP::delay_microseconds(10);
-      ckv_clear(); ESP::delay_microseconds( 0);
-        ckv_set(); ESP::delay_microseconds(18);
-      ckv_clear(); ESP::delay_microseconds( 0);
-        ckv_set(); ESP::delay_microseconds(18);
-      ckv_clear(); ESP::delay_microseconds( 0);
-        ckv_set();
+  ckv_set();   ESP::delay_microseconds( 7);
+  spv_clear(); ESP::delay_microseconds(10);
+  ckv_clear(); ESP::delay_microseconds( 0);
+  ckv_set();   ESP::delay_microseconds( 8);
+  spv_set();   ESP::delay_microseconds(10);
+  ckv_clear(); ESP::delay_microseconds( 0);
+  ckv_set();   ESP::delay_microseconds(18);
+  ckv_clear(); ESP::delay_microseconds( 0);
+  ckv_set();   ESP::delay_microseconds(18);
+  ckv_clear(); ESP::delay_microseconds( 0);
+  ckv_set();
 }
 
 void 
@@ -196,15 +206,15 @@ EInk::vscan_end()
 void 
 EInk::pins_z_state()
 {
-  gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_2,  GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_32, GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_INPUT);
 
-  mcp_int.set_direction(OE,   MCP23017::PinMode::INPUT);
-  mcp_int.set_direction(GMOD, MCP23017::PinMode::INPUT);
-  mcp_int.set_direction(SPV,  MCP23017::PinMode::INPUT);
+  io_expander_int.set_direction(OE,   IOExpander::PinMode::INPUT);
+  io_expander_int.set_direction(GMOD, IOExpander::PinMode::INPUT);
+  io_expander_int.set_direction(SPV,  IOExpander::PinMode::INPUT);
 
+  gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_5,  GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_18, GPIO_MODE_INPUT);
@@ -213,28 +223,50 @@ EInk::pins_z_state()
   gpio_set_direction(GPIO_NUM_25, GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_27, GPIO_MODE_INPUT);
+
+  #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
+    i2s_comms.stop_clock();
+  #endif
 }
 
 void 
 EInk::pins_as_outputs()
 {
-  gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_2,  GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT);
 
-  mcp_int.set_direction(OE,   MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(GMOD, MCP23017::PinMode::OUTPUT);
-  mcp_int.set_direction(SPV,  MCP23017::PinMode::OUTPUT);
+  io_expander_int.set_direction(OE,   IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(GMOD, IOExpander::PinMode::OUTPUT);
+  io_expander_int.set_direction(SPV,  IOExpander::PinMode::OUTPUT);
 
-  gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_OUTPUT);
-  gpio_set_direction(GPIO_NUM_5,  GPIO_MODE_OUTPUT);
-  gpio_set_direction(GPIO_NUM_18, GPIO_MODE_OUTPUT);
-  gpio_set_direction(GPIO_NUM_19, GPIO_MODE_OUTPUT);
-  gpio_set_direction(GPIO_NUM_23, GPIO_MODE_OUTPUT);
-  gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
-  gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
-  gpio_set_direction(GPIO_NUM_27, GPIO_MODE_OUTPUT);
+  #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
+
+      i2s_comms.set_pin( 0, I2S1O_BCK_OUT_IDX,   0);
+      i2s_comms.set_pin( 4, I2S1O_DATA_OUT0_IDX, 0);
+      i2s_comms.set_pin( 5, I2S1O_DATA_OUT1_IDX, 0);
+      i2s_comms.set_pin(18, I2S1O_DATA_OUT2_IDX, 0);
+      i2s_comms.set_pin(19, I2S1O_DATA_OUT3_IDX, 0);
+      i2s_comms.set_pin(23, I2S1O_DATA_OUT4_IDX, 0);
+      i2s_comms.set_pin(25, I2S1O_DATA_OUT5_IDX, 0);
+      i2s_comms.set_pin(26, I2S1O_DATA_OUT6_IDX, 0);
+      i2s_comms.set_pin(27, I2S1O_DATA_OUT7_IDX, 0);
+
+      i2s_comms.start_clock();
+
+  #else
+
+    gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_5,  GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_18, GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_19, GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_23, GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_27, GPIO_MODE_OUTPUT);
+    
+  #endif
 }
 
 
@@ -253,22 +285,29 @@ EInk::read_temperature()
     ESP::delay(5);
   }
 
+  
   Wire::enter();
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x0D);
-  wire.write(0b10000000);
-  wire.end_transmission();
+
+  wire_device->cmd_write(0x0D, 0b10000000);
+
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x0D);
+  // wire.write(0b10000000);
+  // wire.end_transmission();
+
   Wire::leave();
 
   ESP::delay(5);
 
   Wire::enter();
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x00);
-  wire.end_transmission();
+  temp = wire_device->cmd_read(0x00);
 
-  wire.request_from(PWRMGR_ADDRESS, 1);
-  temp = wire.read();
+  // wire.begin_transmission(PWRMGR_ADDRESS);
+  // wire.write(0x00);
+  // wire.end_transmission();
+
+  // wire.request_from(PWRMGR_ADDRESS, 1);
+  // temp = wire.read();
     
   if (get_panel_state() == PanelState::OFF) {
     pwrup_clear();
