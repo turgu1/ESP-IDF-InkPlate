@@ -1,6 +1,16 @@
 # ESP-IDF-InkPlate Library Version 0.9.8
 
-(October xxth, 2024)
+(January 20th, 2026)
+
+- Now built using ESP-IDF 5.5.2
+- Some adjustments to the sd_card driver
+
+Please note that this is considered a pre-release version. If you find any error in using
+this library, consider opening an issue in the github project (https://github.com/turgu1/ESP-IDF-InkPlate/issues).
+
+This repository cannot be built independantly of an application. For example, look in the EPub-InkPlate application CMakelists.txt located here: https://https://github.com/turgu1/EPub-InkPlate
+
+(October 10th, 2024)
 
 - Now built using ESP-IDF 5.3.1
 - No longer using PlatformIO. Using cmake through idf.py to build applications.
