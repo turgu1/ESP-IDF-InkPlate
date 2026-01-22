@@ -262,7 +262,7 @@ TouchScreen::get_sys_info(SysInfoData &sys_info_data)
     send_command(SYS_INFO_MODE);
 
     // Wait a bit.
-    ESP::delay(20);
+    ESP::delay(100);
 
     // Buffer for the system info data.
     uint8_t sys_info_array[sizeof(SysInfoData)];

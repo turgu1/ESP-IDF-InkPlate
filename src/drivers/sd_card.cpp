@@ -74,7 +74,7 @@ bool SDCard::setup() {
       .data5_io_num          = -1,
       .data6_io_num          = -1,
       .data7_io_num          = -1,
-      .data_io_default_level = true,
+      .data_io_default_level = false,
       .max_transfer_sz       = 4000,
       .flags                 = SPICOMMON_BUSFLAG_MASTER,
       .isr_cpu_id            = ESP_INTR_CPU_AFFINITY_AUTO,
