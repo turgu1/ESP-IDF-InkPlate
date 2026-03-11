@@ -34,7 +34,7 @@ class SDCard
     #if INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
       static constexpr IOExpander::Pin SD_POWER = IOExpander::Pin::IOPIN_13;
     #endif
-    #if INKPLATE_6V2
+    #if INKPLATE_5V2 || INKPLATE_6V2
       static constexpr IOExpander::Pin SD_POWER = IOExpander::Pin::IOPIN_10;
     #endif
 
