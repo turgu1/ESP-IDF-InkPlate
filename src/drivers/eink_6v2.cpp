@@ -23,16 +23,17 @@ Distributed as-is; no warranty is given.
 #if INKPLATE_6V2
 
 #define __EINK6V2__ 1
-#include <iostream>
-
 #include "eink_6v2.hpp"
+
 #include "esp.hpp"
 #include "esp_log.h"
-#include "wire.hpp"
+
+// #include <iostream>
 
 const uint8_t EInk6V2::WAVEFORM_3BIT[8][9] = {
-    {0, 0, 0, 0, 1, 1, 1, 1, 0}, {0, 0, 0, 1, 1, 1, 1, 0, 0}, {1, 1, 1, 1, 0, 2, 1, 0, 0},
-    {1, 1, 1, 2, 2, 1, 1, 0, 0}, {1, 1, 1, 1, 2, 2, 1, 0, 0}, {0, 1, 1, 1, 2, 2, 1, 0, 0},
+    {0, 0, 0, 0, 1, 1, 1, 1, 0}, {0, 0, 0, 1, 1, 1, 1, 0, 0}, 
+    {1, 1, 1, 1, 0, 2, 1, 0, 0}, {1, 1, 1, 2, 2, 1, 1, 0, 0}, 
+    {1, 1, 1, 1, 2, 2, 1, 0, 0}, {0, 1, 1, 1, 2, 2, 1, 0, 0},
     {0, 0, 0, 0, 1, 1, 2, 0, 0}, {0, 0, 0, 0, 0, 0, 2, 0, 0}};
 
 const uint8_t EInk6V2::LUT2[16] = {0xAA, 0xA9, 0xA6, 0xA5, 0x9A, 0x99, 0x96, 0x95,
@@ -46,6 +47,9 @@ const uint8_t EInk6V2::LUTB[16] = {0xFF, 0xFD, 0xF7, 0xF5, 0xDF, 0xDD, 0xD7, 0xD
 
 bool EInk6V2::setup() {
   if (initialized) return true;
+
+  esp_log_level_set(TAG, ESP_LOG_DEBUG);
+  esp_log_level_set("EInk", ESP_LOG_DEBUG);
 
   ESP_LOGD(TAG, "Initializing...");
 
@@ -130,13 +134,13 @@ bool EInk6V2::setup() {
   #endif
 
   d_memory_new = new_frame_buffer_1bit();
-  p_buffer     = (uint8_t *)ESP::ps_malloc(BITMAP_SIZE_1BIT * 2);
+  p_buffer     = (uint8_t *) malloc(BITMAP_SIZE_1BIT * 2);
 
-  GLUT  = (uint32_t *)malloc(256 * 9 * sizeof(uint32_t));
-  GLUT2 = (uint32_t *)malloc(256 * 9 * sizeof(uint32_t));
+  GLUT  = (uint32_t *) malloc(256 * 9 * sizeof(uint32_t));
+  GLUT2 = (uint32_t *) malloc(256 * 9 * sizeof(uint32_t));
 
-  ESP_LOGI(TAG, "Memory allocation for frame/bitmap buffers.");
-  ESP_LOGI(TAG, "d_memory_new: %08x p_buffer: %08x.", (unsigned int)d_memory_new,
+  ESP_LOGD(TAG, "Memory allocation for frame/bitmap buffers.");
+  ESP_LOGD(TAG, "d_memory_new: %08x p_buffer: %08x.", (unsigned int)d_memory_new,
            (unsigned int)p_buffer);
 
   Wire::leave();
@@ -164,15 +168,19 @@ bool EInk6V2::setup() {
 
 #if DMA_ENABLE
   void EInk6V2::update(FrameBuffer1Bit &frame_buffer) {
-    ESP_LOGI(TAG, "1bit Update...");
+    ESP_LOGD(TAG, "1bit Update...");
 
     const uint8_t *ptr;
 
     Wire::enter();
+
+    ESP_LOGD(TAG, "Display ON...");
     if (!turn_on()) {
       Wire::leave();
       return;
     }
+
+    ESP_LOGD(TAG, "Cleaning display...");
 
     clean(PixelState::WHITE,      1);
     clean(PixelState::BLACK,     18);
@@ -188,7 +196,7 @@ bool EInk6V2::setup() {
 
     volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
 
-    ESP_LOGI(TAG, "part 1...");
+    ESP_LOGD(TAG, "part 1...");
 
     for (int k = 0; k < 5; k++) {
 
@@ -201,19 +209,19 @@ bool EInk6V2::setup() {
           uint8_t dram1      = *ptr--;
           uint8_t dram2      = *ptr--;
           line_buffer[n    ] = LUTB[(dram2 >> 4) & 0x0F]; // i + 2;
-          line_buffer[n + 1] = LUTB[ dram2 & 0x0F];       // i + 3;
+          line_buffer[n + 1] = LUTB[ dram2       & 0x0F]; // i + 3;
           line_buffer[n + 2] = LUTB[(dram1 >> 4) & 0x0F]; // i;
-          line_buffer[n + 3] = LUTB[ dram1 & 0x0F];       // i + 1;
+          line_buffer[n + 3] = LUTB[ dram1       & 0x0F]; // i + 1;
         }
 
         i2s_comms.send_data();
         vscan_end();
       }
 
-      ESP::delay_microseconds(230);
+      // ESP::delay_microseconds(230);
     }
 
-    ESP_LOGI(TAG, "part 2...");
+    ESP_LOGD(TAG, "part 2...");
 
     for (int k = 0; k < 1; k++) {
 
@@ -227,19 +235,19 @@ bool EInk6V2::setup() {
           uint8_t dram1      = *ptr--;
           uint8_t dram2      = *ptr--;
           line_buffer[n    ] = LUT2[(dram2 >> 4) & 0x0F]; // i + 2;
-          line_buffer[n + 1] = LUT2[ dram2 & 0x0F];       // i + 3;
+          line_buffer[n + 1] = LUT2[ dram2       & 0x0F]; // i + 3;
           line_buffer[n + 2] = LUT2[(dram1 >> 4) & 0x0F]; // i;
-          line_buffer[n + 3] = LUT2[ dram1 & 0x0F];       // i + 1;
+          line_buffer[n + 3] = LUT2[ dram1       & 0x0F]; // i + 1;
         }
 
         i2s_comms.send_data();
         vscan_end();
       }
 
-      ESP::delay_microseconds(230);
+      // ESP::delay_microseconds(230);
     }
 
-    ESP_LOGI(TAG, "part 3...");
+    ESP_LOGD(TAG, "part 3...");
 
     for (int k = 0; k < 1; k++) {
 
@@ -258,7 +266,7 @@ bool EInk6V2::setup() {
         vscan_end();
       }
 
-      ESP::delay_microseconds(230);
+      // ESP::delay_microseconds(230);
     }
 
     ESP_LOGI(TAG, "The End...");
@@ -414,7 +422,7 @@ bool EInk6V2::setup() {
         vscan_end();
       }
 
-      ESP::delay_microseconds(230);
+      //ESP::delay_microseconds(230);
     }
   }
 
@@ -472,7 +480,7 @@ bool EInk6V2::setup() {
         GPIO.out_w1tc = CL | DATA;
         vscan_end();
       }
-      ESP::delay_microseconds(230);
+      // ESP::delay_microseconds(230);
     }
 
     ptr = &data[BITMAP_SIZE_1BIT - 1];
@@ -500,7 +508,7 @@ bool EInk6V2::setup() {
       GPIO.out_w1tc = CL | DATA;
       vscan_end();
     }
-    ESP::delay_microseconds(230);
+    // ESP::delay_microseconds(230);
 
     vscan_start();
 
@@ -522,7 +530,7 @@ bool EInk6V2::setup() {
       vscan_end();
     }
 
-    ESP::delay_microseconds(230);
+    // ESP::delay_microseconds(230);
 
     vscan_start();
     turn_off();
@@ -584,7 +592,7 @@ bool EInk6V2::setup() {
         vscan_end();
       }
 
-      ESP::delay_microseconds(230);
+      // ESP::delay_microseconds(230);
     }
 
     clean(PixelState::SKIP, 1);
@@ -644,7 +652,7 @@ bool EInk6V2::setup() {
         GPIO.out_w1tc = CL | DATA;
         vscan_end();
       }
-      ESP::delay_microseconds(230);
+      // ESP::delay_microseconds(230);
     }
 
     clean(PixelState::DISCHARGE, 2);
@@ -686,7 +694,7 @@ bool EInk6V2::setup() {
         vscan_end();
       }
 
-      ESP::delay_microseconds(230);
+      //ESP::delay_microseconds(230);
     }
   }
 

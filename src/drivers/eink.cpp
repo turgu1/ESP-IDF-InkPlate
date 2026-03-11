@@ -51,6 +51,7 @@ EInk::turn_off()
 {
   if (get_panel_state() == PanelState::OFF) return;
  
+  vcom_clear();
   oe_clear();
   gmod_clear();
 
@@ -63,8 +64,6 @@ EInk::turn_off()
   ckv_clear();
   sph_clear();
   spv_clear();
-
-  vcom_clear();
   pwrup_clear();
 
   unsigned long timer = ESP::millis();
@@ -75,6 +74,9 @@ EInk::turn_off()
   // Do not disable WAKEUP if older Inkplate6Plus is used.
   #if !INKPLATE_6PLUS
     wakeup_clear();
+    #if !(INKPLATE_6PLUS_V2 || INKPLATE_6V2 || INKPLATE_6FLICK)
+      wire_device->cmd_write(0x01, 0b00000000);
+    #endif
   #endif
 
   pins_z_state();
@@ -94,34 +96,18 @@ EInk::turn_on()
 
   ESP::delay(5);
 
-  // Modify power up sequence  (VEE and VNEG are swapped)
-  wire_device->cmd_write(0x09, 0b11100001);
-
-  // wire.begin_transmission(PWRMGR_ADDRESS);
-  // wire.write(0x09);
-  // wire.write(0b11100001);
-  // wire.end_transmission();
-
   // Enable all rails
-  wire_device->cmd_write(0x01, 0b00111111);
+  wire_device->cmd_write(0x01, 0b00100000);
 
-  // wire.begin_transmission(PWRMGR_ADDRESS);
-  // wire.write(0x01);
-  // wire.write(0b00111111);
-  // wire.end_transmission();
+  // Modify power up sequence 
+  wire_device->cmd_write(0x09, 0b11100100);
 
-  // // Modify power down sequence (VEE and VNEG are swapped)
-  // wire.begin_transmission(PWRMGR_ADDRESS);
-  // wire.write(0x0B);
-  // wire.write(0b00011011);
-  // wire.end_transmission();
-
-  pwrup_set();
+  // Modify power down sequence (VEE and VNEG are swapped)
+  wire_device->cmd_write(0x0B, 0b00011011);
 
   pins_as_outputs();
 
   le_clear();
-  oe_clear();
   
   #if !(INKPLATE_6 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK)
     cl_clear();
@@ -132,7 +118,9 @@ EInk::turn_on()
   spv_set();
   ckv_clear();
   oe_clear();
-  vcom_set();
+  pwrup_set();
+
+  set_panel_state(PanelState::ON);
 
   unsigned long timer = ESP::millis();
   do {
@@ -140,13 +128,12 @@ EInk::turn_on()
   } while ((read_power_good() != PWR_GOOD_OK) && (ESP::millis() - timer) < 250);
 
   if ((ESP::millis() - timer) >= 250) {
-    vcom_clear();
-    pwrup_clear();
+    turn_off();
     return false;
   }
 
+  vcom_set();
   oe_set();
-  set_panel_state(PanelState::ON);
 
   ESP_LOGD(TAG, "EInk is on");
   return true;
@@ -156,13 +143,6 @@ uint8_t
 EInk::read_power_good()
 {
   return wire_device->cmd_read(0x0F);
-
-  // wire.begin_transmission(PWRMGR_ADDRESS);
-  // wire.write(0x0F);
-  // wire.end_transmission();
-
-  // wire.request_from(PWRMGR_ADDRESS, 1);
-  // return wire.read();
 }
 
 // LOW LEVEL FUNCTIONS
@@ -240,7 +220,7 @@ EInk::pins_as_outputs()
   io_expander_int.set_direction(GMOD, IOExpander::PinMode::OUTPUT);
   io_expander_int.set_direction(SPV,  IOExpander::PinMode::OUTPUT);
 
-  #if INKPLATE_6 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
+  #if (INKPLATE_6 && DMA_ENABLE) || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
 
       i2s_comms.set_pin( 0, I2S1O_BCK_OUT_IDX,   0);
       i2s_comms.set_pin( 4, I2S1O_DATA_OUT0_IDX, 0);
@@ -290,24 +270,12 @@ EInk::read_temperature()
 
   wire_device->cmd_write(0x0D, 0b10000000);
 
-  // wire.begin_transmission(PWRMGR_ADDRESS);
-  // wire.write(0x0D);
-  // wire.write(0b10000000);
-  // wire.end_transmission();
-
   Wire::leave();
 
   ESP::delay(5);
 
   Wire::enter();
   temp = wire_device->cmd_read(0x00);
-
-  // wire.begin_transmission(PWRMGR_ADDRESS);
-  // wire.write(0x00);
-  // wire.end_transmission();
-
-  // wire.request_from(PWRMGR_ADDRESS, 1);
-  // temp = wire.read();
     
   if (get_panel_state() == PanelState::OFF) {
     pwrup_clear();

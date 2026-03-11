@@ -22,16 +22,17 @@ Distributed as-is; no warranty is given.
 
 #if INKPLATE_6V2
 
-  #pragma once
+#pragma once
 
-  #include <cinttypes>
-  #include <cstring>
+#include <cinttypes>
+#include <cstring>
 
-  #include "driver/gpio.h"
-  #include "eink.hpp"
-  #include "non_copyable.hpp"
+#include "driver/gpio.h"
+#include "eink.hpp"
+#include "non_copyable.hpp"
 
-  #include "pcal6416.hpp"
+#include "pcal6416.hpp"
+#include "wire.hpp"
 
 /**
  * @brief Low level e-Ink display
@@ -55,7 +56,7 @@ public:
     EInk6V2(IOExpander &io_expander) : EInk(io_expander) {}
   #endif
 
-  static const uint16_t BITMAP_SIZE_1BIT = (WIDTH * HEIGHT) >> 3;           // In bytes
+  static const uint32_t BITMAP_SIZE_1BIT = ((uint32_t)WIDTH * HEIGHT) >> 3; // In bytes
   static const uint32_t BITMAP_SIZE_3BIT = ((uint32_t)WIDTH * HEIGHT) >> 1; // In bytes
   static const uint16_t LINE_SIZE_1BIT   = WIDTH >> 3;                      // In bytes
   static const uint16_t LINE_SIZE_3BIT   = WIDTH >> 1;                      // In bytes

@@ -60,7 +60,7 @@ bool IOExpander::setup() {
   wire_device = new WireDevice(mcp_address);
   present     = (wire_device != nullptr) && wire_device->is_initialized();
 
-  ESP_LOGI(TAG, "MCP at address 0x%X has%s been detected", mcp_address, present ? "" : " NOT");
+  ESP_LOGD(TAG, "MCP at address 0x%X has%s been detected", mcp_address, present ? "" : " NOT");
 
   if (present) {
     read_all_registers();

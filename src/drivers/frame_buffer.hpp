@@ -16,7 +16,7 @@ class FrameBuffer
   public:
     FrameBuffer(int16_t w, int16_t h, int32_t s, uint8_t i) : 
       data_size(s), width(w), height(h), line_size(s / h), init_value(i) {
-        ESP_LOGI(TAG, "FrameBuffer created with width: %d, height: %d, data_size: %d, line_size: %d, init_value: %02x", 
+        ESP_LOGD(TAG, "FrameBuffer created with width: %d, height: %d, data_size: %d, line_size: %d, init_value: %02x", 
           (int)width, (int)height, (int)data_size, (int)line_size, (int)init_value);
       }
 

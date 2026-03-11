@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.16.0)
 
-set(DEVICE "INKPLATE_6V2")
+set(DEVICE "INKPLATE_6FLICK")
 
 set(IDF_TARGET esp32)
 
 set(SDKCONFIG "${CMAKE_BINARY_DIR}/sdkconfig")
 
-add_compile_definitions(
-    EPUB_LOG_LEVEL=ESP_LOG_INFO
-)
+# add_compile_definitions(
+#     EPUB_LOG_LEVEL=ESP_LOG_DEBUG
+# )
 
 if(DEVICE MATCHES "^INKPLATE_6$")
     message("INKPLATE 6 defined")

@@ -64,7 +64,7 @@ void mainTask(void *params)
 
   display.begin();
   display.clearDisplay();
-  display.display();
+  //display.display();
 
   w = display.width();
   h = display.height();
@@ -75,14 +75,7 @@ void mainTask(void *params)
   display.drawRect(180, 180, 440, 340, BLACK); // Arguments are: start X, start Y, size X, size Y, color
   display.drawRect(160, 160, 480, 380, BLACK); // Arguments are: start X, start Y, size X, size Y, color
   display.drawRect(140, 140, 520, 420, BLACK); // Arguments are: start X, start Y, size X, size Y, color
-
-  display.drawFastHLine(100, 600, w - 200, BLACK); // Arguments are: starting X, starting Y, length, color
-  display.drawFastHLine(100, 500, w - 200, BLACK); // Arguments are: starting X, starting Y, length, color
-  display.drawFastHLine(100, 600, w - 200, BLACK); // Arguments are: starting X, starting Y, length, color
-  display.drawFastHLine(100, 300, w - 200, BLACK); // Arguments are: starting X, starting Y, length, color
-  display.drawFastHLine(100, 200, w - 200, BLACK); // Arguments are: starting X, starting Y, length, color
-  display.drawFastHLine(100, 100, w - 200, BLACK); // Arguments are: starting X, starting Y, length, color
-
+  
   display.setCursor(150, h / 2);
   display.setTextSize(4);
 
