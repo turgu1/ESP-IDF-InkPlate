@@ -14,6 +14,7 @@ set(components
     freertos
     driver
     esp_wifi
+    esp_psram
     mbedtls
 )
 

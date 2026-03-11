@@ -92,8 +92,7 @@ void mainTask(void *params)
 
   display.display(); // Write hello message
 
-  for (;;)
-  {
+  for (;;) {
     ESP::delay(5000);
   }
 }

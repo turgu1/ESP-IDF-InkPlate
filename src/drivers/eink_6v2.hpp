@@ -49,7 +49,11 @@ public:
   static const uint16_t WIDTH  = 800; // In pixels
   static const uint16_t HEIGHT = 600; // In pixels
 
-  EInk6V2(IOExpander &io_expander) : EInk(io_expander, WIDTH) {}
+  #if DMA_ENABLE
+    EInk6V2(IOExpander &io_expander) : EInk(io_expander, WIDTH) {}
+  #else
+    EInk6V2(IOExpander &io_expander) : EInk(io_expander) {}
+  #endif
 
   static const uint16_t BITMAP_SIZE_1BIT = (WIDTH * HEIGHT) >> 3;           // In bytes
   static const uint32_t BITMAP_SIZE_3BIT = ((uint32_t)WIDTH * HEIGHT) >> 1; // In bytes
