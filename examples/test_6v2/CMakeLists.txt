@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16.0)
 
-set(DEVICE "INKPLATE_6FLICK")
+set(DEVICE "INKPLATE_6V2")
 
 set(IDF_TARGET esp32)
 

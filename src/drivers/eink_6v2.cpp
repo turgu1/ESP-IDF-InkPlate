@@ -126,7 +126,7 @@ bool EInk6V2::setup() {
 
   #if DMA_ENABLE
     if (i2s_comms.is_ready()) { // instanciated through the EInk constructor
-      i2s_comms.init(5);
+      i2s_comms.init(7);
     } else {
       ESP_LOGE(TAG, "I2SComms is not ready!!!");
       return false;
