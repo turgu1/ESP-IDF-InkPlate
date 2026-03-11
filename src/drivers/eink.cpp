@@ -54,7 +54,7 @@ EInk::turn_off()
   oe_clear();
   gmod_clear();
 
-  #if !(INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK)
+  #if !(INKPLATE_6 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK)
     GPIO.out &= ~(DATA | LE | CL);
   #else
     le_clear();
@@ -123,7 +123,7 @@ EInk::turn_on()
   le_clear();
   oe_clear();
   
-  #if !(INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK)
+  #if !(INKPLATE_6 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK)
     cl_clear();
   #endif
 
@@ -224,7 +224,7 @@ EInk::pins_z_state()
   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_27, GPIO_MODE_INPUT);
 
-  #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
+  #if INKPLATE_6 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
     i2s_comms.stop_clock();
   #endif
 }
@@ -240,7 +240,7 @@ EInk::pins_as_outputs()
   io_expander_int.set_direction(GMOD, IOExpander::PinMode::OUTPUT);
   io_expander_int.set_direction(SPV,  IOExpander::PinMode::OUTPUT);
 
-  #if INKPLATE_6 || INKPLATE_6V2 || INKPLATE_6FLICK
+  #if INKPLATE_6 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
 
       i2s_comms.set_pin( 0, I2S1O_BCK_OUT_IDX,   0);
       i2s_comms.set_pin( 4, I2S1O_DATA_OUT0_IDX, 0);
