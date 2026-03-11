@@ -55,20 +55,6 @@ void RTC::read_date_time()
   week_day = (WeekDay) bcd_to_dec(data[4]);
   month    = bcd_to_dec(data[5]);
   year     = bcd_to_dec(data[6]);
-
-  // wire.begin_transmission(rtc_address);
-  // wire.write(static_cast<uint8_t>(Reg::SEC));
-  // wire.end_transmission();
-
-  // wire.request_from(rtc_address, 7);
-
-  // second   = bcd_to_dec(wire.read() & SECONDS_MASK);
-  // minute   = bcd_to_dec(wire.read());
-  // hour     = bcd_to_dec(wire.read() & HOUR_MASK);
-  // day      = bcd_to_dec(wire.read());
-  // week_day = (WeekDay) bcd_to_dec(wire.read());
-  // month    = bcd_to_dec(wire.read());
-  // year     = bcd_to_dec(wire.read());
 }
 
 void RTC::write_date_time() 

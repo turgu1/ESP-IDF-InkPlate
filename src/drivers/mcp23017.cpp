@@ -76,14 +76,6 @@ void IOExpander::read_all_registers() {
   if (!check_presence()) return;
 
   wire_device->cmd_read(0x00, registers.data(), registers.size());
-
-  // wire.begin_transmission(mcp_address);
-  // wire.write(0x00);
-  // wire.end_transmission();
-  // wire.request_from(mcp_address, static_cast<uint8_t>(22));
-  // for (auto & reg : registers) {
-  //   reg = wire.read();
-  // }
 }
 
 void IOExpander::read_registers(Reg first_reg, uint8_t count) {
@@ -97,12 +89,6 @@ uint8_t IOExpander::read_register(Reg reg) {
 
   registers[reg] = wire_device->cmd_read(static_cast<int8_t>(reg));
 
-  // wire.begin_transmission(mcp_address);
-  // wire.write(static_cast<int8_t>(reg));
-  // wire.end_transmission();
-  // wire.request_from(mcp_address, static_cast<uint8_t>(1));
-  // registers[reg] = wire.read();
-
   return registers[reg];
 }
 
@@ -110,37 +96,18 @@ void IOExpander::update_all_registers() {
   if (!check_presence()) return;
 
   wire_device->cmd_write(0x00, registers.data(), registers.size());
-
-  // wire.begin_transmission(mcp_address);
-  // wire.write(0x00);
-  // for (auto reg : registers) {
-  //   wire.write(reg);
-  // }
-  // wire.end_transmission();
 }
 
 void IOExpander::update_register(Reg reg, uint8_t value) {
   if (!check_presence()) return;
 
   wire_device->cmd_write(static_cast<uint8_t>(reg), value);
-
-  // wire.begin_transmission(mcp_address);
-  // wire.write(static_cast<int8_t>(reg));
-  // wire.write(value);
-  // wire.end_transmission();
 }
 
 void IOExpander::update_registers(Reg first_reg, uint8_t count) {
   if (!check_presence()) return;
 
   wire_device->cmd_write(static_cast<uint8_t>(first_reg), &registers[first_reg], count);
-
-  // wire.begin_transmission(mcp_address);
-  // wire.write(static_cast<int8_t>(first_reg));
-  // for (int i = 0; i < count; ++i) {
-  //   wire.write(registers[R(first_reg, i)]);
-  // }
-  // wire.end_transmission();
 }
 
 // HIGH LEVEL:

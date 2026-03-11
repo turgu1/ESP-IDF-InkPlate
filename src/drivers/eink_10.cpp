@@ -80,15 +80,16 @@ EInk10::setup()
  
   //ESP_LOGD(TAG, "Power Mgr Init..."); fflush(stdout);
 
-  ESP::delay_microseconds(1800);
-  wire.begin_transmission(PWRMGR_ADDRESS);
-  wire.write(0x09);
-  wire.write(0b00011011); // Power up seq.
-  wire.write(0b00000000); // Power up delay (3mS per rail)
-  wire.write(0b00011011); // Power down seq.
-  wire.write(0b00000000); // Power down delay (6mS per rail)
-  wire.end_transmission();
+  uint8_t pgm[] = {
+    0x09,       // cmd
+    0b00011011, // Power up seq.
+    0b00000000, // Power up delay (3mS per rail)
+    0b00011011, // Power down seq.
+    0b00000000  // Power down delay (6mS per rail)
+  };
+
   ESP::delay(1);
+  wire_device->write(pgm, sizeof(pgm));
 
   //ESP_LOGD(TAG, "Power init completed");
 
