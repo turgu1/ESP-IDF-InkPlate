@@ -48,8 +48,8 @@ const uint8_t EInk6V2::LUTB[16] = {0xFF, 0xFD, 0xF7, 0xF5, 0xDF, 0xDD, 0xD7, 0xD
 bool EInk6V2::setup() {
   if (initialized) return true;
 
-  esp_log_level_set(TAG, ESP_LOG_DEBUG);
-  esp_log_level_set("EInk", ESP_LOG_DEBUG);
+  // esp_log_level_set(TAG, ESP_LOG_DEBUG);
+  // esp_log_level_set("EInk", ESP_LOG_DEBUG);
 
   ESP_LOGD(TAG, "Initializing...");
 
