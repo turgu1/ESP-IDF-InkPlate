@@ -15,6 +15,11 @@ if(DEVICE MATCHES "^INKPLATE_6$")
     add_compile_definitions(
         INKPLATE_6=1 
         MCP23017=1)
+elseif(DEVICE MATCHES "^INKPLATE_5V2$")
+    message("INKPLATE 5V2 defined")
+    add_compile_definitions(
+        INKPLATE_5V2=1 
+        PCAL6416=1)
 elseif(DEVICE MATCHES "^INKPLATE_6V2$")
     message("INKPLATE 6V2 defined")
     add_compile_definitions(
@@ -47,7 +52,7 @@ elseif(DEVICE MATCHES "^INKPLATE_10_V2$")
         INKPLATE_10_V2=1 
         PCAL6416=1)
 else()
-    message(FATAL_ERROR "DEVICE NOT defined!!\nExample call: idf.py build -DDEVICE=INKPLATE_6\nDEVICE Options are:\n  INKPLATE_6\n  INKPLATE_6V2\n  INKPLATE_6PLUS\n  INKPLATE_6PLUS_V2\n  INKPLATE_10\n  INKPLATE_10_V2")
+    message(FATAL_ERROR "DEVICE NOT defined!!\nExample call: idf.py build -DDEVICE=INKPLATE_6\nDEVICE Options are:\n  INKPLATE_6\n  INKPLATE_5V2\n  INKPLATE_6V2\n  INKPLATE_6PLUS\n  INKPLATE_6PLUS_V2\n  INKPLATE_10\n  INKPLATE_10_V2")
 endif()
 
 list(APPEND EXTRA_COMPONENT_DIRS 

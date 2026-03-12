@@ -1,4 +1,4 @@
-#if INKPLATE_5V2 || INKPLATE_6 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
+#if INKPLATE_6 || INKPLATE_5V2 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
 
 #define __I2S_COMMS__ 1
 
@@ -50,7 +50,7 @@
  *
  * @note        Function must be declared static to fit into Instruction RAM of the ESP32.
  */
-void IRAM_ATTR my_I2SInit(i2s_dev_t *_i2sDev, uint8_t _clockDivider) {
+void my_I2SInit(i2s_dev_t *_i2sDev, uint8_t _clockDivider) {
   // Enable I2S peripheral and reset it.
   periph_module_enable(PERIPH_I2S1_MODULE);
   periph_module_reset(PERIPH_I2S1_MODULE);
@@ -131,7 +131,7 @@ void IRAM_ATTR my_I2SInit(i2s_dev_t *_i2sDev, uint8_t _clockDivider) {
  * @note        Function must be declared static to fit into Instruction RAM of the ESP32. Also, DMA
  * descriptor must be already configured!
  */
-void IRAM_ATTR my_sendDataI2S(i2s_dev_t *_i2sDev, volatile lldesc_s *_dmaDecs) {
+void my_sendDataI2S(i2s_dev_t *_i2sDev, volatile lldesc_s *_dmaDecs) {
   // Stop any on-going transmission (just in case).
   _i2sDev->out_link.stop  = 1;
   _i2sDev->out_link.start = 0;
@@ -176,7 +176,7 @@ void IRAM_ATTR my_sendDataI2S(i2s_dev_t *_i2sDev, volatile lldesc_s *_dmaDecs) {
   _i2sDev->out_link.start = 0;
 }
 
-void IRAM_ATTR my_setI2S1pin(uint32_t _pin, uint32_t _function, uint32_t _inv) {
+void my_setI2S1pin(uint32_t _pin, uint32_t _function, uint32_t _inv) {
   // Check if valid pin is selected
   if (_pin > 39) return;
 

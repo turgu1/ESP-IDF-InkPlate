@@ -4,7 +4,7 @@
 #include "wire.hpp"
 #include "soc/gpio_struct.h"
 
-#if INKPLATE_5V2 || INKPLATE_6 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
+#if INKPLATE_6 || INKPLATE_5V2 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
   #include "i2s_comms.hpp"
   #include "soc/gpio_sig_map.h"
 #endif
@@ -60,7 +60,7 @@ class EInk
 
   protected:                     
     
-    #if INKPLATE_5V2 || INKPLATE_6 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
+    #if INKPLATE_6 || INKPLATE_5V2 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
       EInk(IOExpander & io_expander, const int screen_width) : 
         io_expander_int(io_expander),
         i2s_comms(I2SComms((screen_width / 4) + 16)),
@@ -84,7 +84,7 @@ class EInk
 
     WireDevice * wire_device;
     
-    #if INKPLATE_5V2 || INKPLATE_6 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
+    #if INKPLATE_6 || INKPLATE_5V2 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
       I2SComms i2s_comms;
     #endif
 

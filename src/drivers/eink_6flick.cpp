@@ -92,14 +92,6 @@ EInk6FLICK::setup()
   ESP::delay(1);
   wire_device->write(pgm, sizeof(pgm));
 
-  // wire.begin_transmission(PWRMGR_ADDRESS);
-  // wire.write(0x09);
-  // wire.write(0b00011011); // Power up seq.
-  // wire.write(0b00000000); // Power up delay (3mS per rail)
-  // wire.write(0b00011011); // Power down seq.
-  // wire.write(0b00000000); // Power down delay (6mS per rail)
-  // wire.end_transmission();
-
   ESP::delay(1);
 
   wakeup_clear();

@@ -1,6 +1,6 @@
 #pragma once
 
-#if INKPLATE_5V2 || INKPLATE_6 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
+#if INKPLATE_6 || INKPLATE_5V2 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
 
 // #include "driver/i2s_std.h"
 // #include "driver/i2s_types.h"
