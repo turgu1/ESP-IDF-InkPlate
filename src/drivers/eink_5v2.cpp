@@ -125,7 +125,7 @@ bool EInk5V2::setup() {
   io_expander_int.set_direction(SPV, IOExpander::PinMode::OUTPUT);
 
   if (i2s_comms.is_ready()) { // instanciated through the EInk constructor
-    i2s_comms.init(7);
+    i2s_comms.init(8);
   } else {
     ESP_LOGE(TAG, "I2SComms is not ready!!!");
     return false;
