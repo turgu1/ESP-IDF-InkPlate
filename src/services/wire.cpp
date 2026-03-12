@@ -28,7 +28,11 @@ Wire::setup()
     i2c_mst_config.scl_io_num                   = GPIO_NUM_22;
     i2c_mst_config.sda_io_num                   = GPIO_NUM_21;
     i2c_mst_config.glitch_ignore_cnt            = 7;
-    i2c_mst_config.flags.enable_internal_pullup = false;
+    #if INKPLATE_5V2
+      i2c_mst_config.flags.enable_internal_pullup = true;
+    #else
+      i2c_mst_config.flags.enable_internal_pullup = false;
+    #endif
     i2c_mst_config.intr_priority                = 0;
     i2c_mst_config.trans_queue_depth            = 0;
 
