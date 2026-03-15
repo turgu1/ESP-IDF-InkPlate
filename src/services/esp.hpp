@@ -17,6 +17,8 @@
 static const uint8_t HIGH = 1;
 static const uint8_t LOW  = 0;
 
+#define NOP() asm volatile("nop")
+
 /**
  * @brief ESP-IDF support methods
  * 
@@ -31,15 +33,19 @@ class ESP
     
   public:
     static inline long millis() { return (unsigned long) (esp_timer_get_time() / 1000); }
-
+ 
     static void IRAM_ATTR delay_microseconds(uint32_t micro_seconds) {
-      uint64_t m = esp_timer_get_time();
-      if (micro_seconds > 2) {
-        uint64_t e = m + micro_seconds;
-        if (m > e) {
-          while (esp_timer_get_time() > e) asm volatile ("nop"); // overflow...
+      uint64_t m = (uint64_t)esp_timer_get_time();
+      if (micro_seconds) {
+        uint64_t e = (m + micro_seconds);
+        if (m > e) {  //overflow
+          while ((uint64_t)esp_timer_get_time() > e) {
+            NOP();
+          }
         }
-        while (esp_timer_get_time() < e) asm volatile ("nop");
+        while ((uint64_t)esp_timer_get_time() < e) {
+          NOP();
+        }
       }
     }
 

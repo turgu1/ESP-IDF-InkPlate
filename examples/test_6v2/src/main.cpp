@@ -14,16 +14,19 @@
    15 July 2020 by e-radionica.com
 */
 
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_log.h"
 
 #include <iostream>
-#include <string>
 #include <math.h>
+#include <string>
 
 #include "inkplate.hpp"
-#include "logo.hpp"
+
+#include "nvs_flash.h"
+#include <esp_chip_info.h>
+#include <esp_flash.h>
 
 Inkplate display(DisplayMode::INKPLATE_1BIT);
 
@@ -32,50 +35,33 @@ static const char *TAG = "Main";
 uint16_t w;
 uint16_t h;
 
-// Small function that will write on the screen what function is currently in demonstration.
-void displayCurrentAction(std::string text)
-{
-  display.setTextSize(2);
-  display.setCursor(2, h - 20);
-  display.print(text);
-}
-
-int random(int a, int b)
-{
-  // a -> 0
-  // b -> RAND_MAX
-
-  long long r = std::rand();
-  return (a + (r * b) / RAND_MAX);
-}
-
-void mainTask(void *params)
-{
+void mainTask(void *params) {
   // Show a downcount of 10 seconds at the usb port
-  for (int i = 3; i > 0; i--)
-  {
+  for (int i = 3; i > 0; i--) {
     std::cout << "\r" << i << "..." << std::flush;
     ESP::delay(1000);
   }
-  std::cout << std::endl
-            << std::flush;
+  std::cout << std::endl << std::flush;
 
   ESP_LOGI(TAG, "Initialization.");
 
   display.begin();
   display.clearDisplay();
-  //display.display();
 
   w = display.width();
   h = display.height();
 
   ESP_LOGI(TAG, "Display size: width: %d, height: %d", w, h);
 
-  display.drawRect(200, 200, 400, 300, BLACK); // Arguments are: start X, start Y, size X, size Y, color
-  display.drawRect(180, 180, 440, 340, BLACK); // Arguments are: start X, start Y, size X, size Y, color
-  display.drawRect(160, 160, 480, 380, BLACK); // Arguments are: start X, start Y, size X, size Y, color
-  display.drawRect(140, 140, 520, 420, BLACK); // Arguments are: start X, start Y, size X, size Y, color
-  
+  display.drawRect(200, 200, 400, 300,
+                   BLACK); // Arguments are: start X, start Y, size X, size Y, color
+  display.drawRect(180, 180, 440, 340,
+                   BLACK); // Arguments are: start X, start Y, size X, size Y, color
+  display.drawRect(160, 160, 480, 380,
+                   BLACK); // Arguments are: start X, start Y, size X, size Y, color
+  display.drawRect(140, 140, 520, 420,
+                   BLACK); // Arguments are: start X, start Y, size X, size Y, color
+
   display.setCursor(150, h / 2);
   display.setTextSize(4);
 
@@ -90,17 +76,45 @@ void mainTask(void *params)
   }
 }
 
-#define STACK_SIZE 20000
+#define STACK_SIZE 60000
 
-extern "C"
-{
+extern "C" {
 
-  void app_main()
-  {
-    TaskHandle_t xHandle = NULL;
-
-    xTaskCreate(mainTask, "mainTask", STACK_SIZE, (void *)1, tskIDLE_PRIORITY, &xHandle);
-    configASSERT(xHandle);
+void app_main() {
+  auto err = nvs_flash_init();
+  if (err != ESP_OK) {
+    if ((err == ESP_ERR_NVS_NO_FREE_PAGES) || (err == ESP_ERR_NVS_NEW_VERSION_FOUND)) {
+      ESP_LOGI(TAG, "Erasing NVS Partition... (Because of %s)", esp_err_to_name(err));
+      if ((err = nvs_flash_erase()) == ESP_OK) {
+        err = nvs_flash_init();
+      }
+    }
   }
+
+  /* Print chip information */
+  esp_chip_info_t chip_info;
+  esp_chip_info(&chip_info);
+  printf("This is %s chip with %d CPU core(s), WiFi%s%s, ", CONFIG_IDF_TARGET, chip_info.cores,
+         (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
+         (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
+
+  printf("silicon revision %d, ", chip_info.revision);
+
+  uint32_t size_flash_chip;
+  esp_flash_get_size(NULL, &size_flash_chip);
+
+  printf("%" PRIu32 "MB %s flash\n", size_flash_chip / (1024 * 1024),
+         (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
+
+  printf("Minimum free heap size: %" PRIu32 " bytes\n", esp_get_minimum_free_heap_size());
+
+  heap_caps_print_heap_info(MALLOC_CAP_32BIT | MALLOC_CAP_8BIT | MALLOC_CAP_SPIRAM |
+                            MALLOC_CAP_INTERNAL);
+
+  TaskHandle_t xHandle = NULL;
+
+  xTaskCreate(mainTask, "mainTask", STACK_SIZE, (void *)1, configMAX_PRIORITIES - 1, &xHandle);
+  configASSERT(xHandle);
+}
 
 } // extern "C"
