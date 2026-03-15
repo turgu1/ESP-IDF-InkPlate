@@ -50,7 +50,7 @@
  *
  * @note        Function must be declared static to fit into Instruction RAM of the ESP32.
  */
-void my_I2SInit(i2s_dev_t *_i2sDev, uint8_t _clockDivider) {
+void IRAM_ATTR my_I2SInit(i2s_dev_t *_i2sDev, uint8_t _clockDivider) {
   // Enable I2S peripheral and reset it.
   periph_module_enable(PERIPH_I2S1_MODULE);
   periph_module_reset(PERIPH_I2S1_MODULE);
@@ -131,7 +131,7 @@ void my_I2SInit(i2s_dev_t *_i2sDev, uint8_t _clockDivider) {
  * @note        Function must be declared static to fit into Instruction RAM of the ESP32. Also, DMA
  * descriptor must be already configured!
  */
-void my_sendDataI2S(i2s_dev_t *_i2sDev, volatile lldesc_s *_dmaDecs) {
+void IRAM_ATTR my_sendDataI2S(i2s_dev_t *_i2sDev, volatile lldesc_s *_dmaDecs) {
   // Stop any on-going transmission (just in case).
   _i2sDev->out_link.stop  = 1;
   _i2sDev->out_link.start = 0;
@@ -168,6 +168,10 @@ void my_sendDataI2S(i2s_dev_t *_i2sDev, volatile lldesc_s *_dmaDecs) {
   while (!_i2sDev->int_raw.out_total_eof)
     ;
 
+  // Wait for I2S TX module to finish clocking out FIFO
+  while (_i2sDev->state.tx_idle == 0)
+    ;
+
   SPH_SET;
 
   // Clear the interrupt flags and stop the transmission.
@@ -176,7 +180,7 @@ void my_sendDataI2S(i2s_dev_t *_i2sDev, volatile lldesc_s *_dmaDecs) {
   _i2sDev->out_link.start = 0;
 }
 
-void my_setI2S1pin(uint32_t _pin, uint32_t _function, uint32_t _inv) {
+void IRAM_ATTR my_setI2S1pin(uint32_t _pin, uint32_t _function, uint32_t _inv) {
   // Check if valid pin is selected
   if (_pin > 39) return;
 
