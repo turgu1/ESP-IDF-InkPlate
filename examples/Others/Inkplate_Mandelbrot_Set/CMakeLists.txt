@@ -11,4 +11,4 @@ list(APPEND EXTRA_COMPONENT_DIRS
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
-project(Inkplate_Peripheral_Mode)
+project(Inkplate_Mandelbrot_Set)
