@@ -27,10 +27,7 @@ Distributed as-is; no warranty is given.
 #include "battery.hpp"
 #include "eink.hpp"
 
-#if INKPLATE_5V2
-  #include "eink_5v2.hpp"
-#endif
-
+#include "eink_5v2.hpp"
 #include "eink_6.hpp"
 #include "eink_6v2.hpp"
 #include "eink_6plus.hpp"
@@ -72,7 +69,9 @@ Distributed as-is; no warranty is given.
     FrontLight   front_light(io_expander_int);
   #endif
 
-  #if INKPLATE_6
+  #if INKPLATE_5V2
+    EInk5V2     e_ink(io_expander_int);
+  #elif INKPLATE_6
     EInk6     e_ink(io_expander_int);
   #elif INKPLATE_5V2
     EInk5V2   e_ink(io_expander_int); 
@@ -108,7 +107,9 @@ Distributed as-is; no warranty is given.
     extern FrontLight   front_light;
   #endif
 
-  #if INKPLATE_6
+  #if INKPLATE_5V2
+    extern EInk5V2   e_ink;
+  #elif INKPLATE_6
     extern EInk6     e_ink;
   #elif INKPLATE_5V2
     extern EInk5V2   e_ink; 

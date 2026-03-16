@@ -27,6 +27,26 @@
 
 #include "inkplate.hpp" //Include Inkplate library to the sketch
 
+#if INKPLATE_5V2
+  #define DEVICE_NAME "Inkplate 5V2"
+#elif INKPLATE_6
+  #define DEVICE_NAME "Inkplate 6"
+#elif INKPLATE_6V2
+  #define DEVICE_NAME "Inkplate 6V2"
+#elif INKPLATE_6PLUS
+  #define DEVICE_NAME "Inkplate 6PLUS"
+#elif INKPLATE_6PLUS_V2
+  #define DEVICE_NAME "Inkplate 6PLUS V2"
+#elif INKPLATE_6FLICK
+  #define DEVICE_NAME "Inkplate 6FLICK"
+#elif INKPLATE_10
+  #define DEVICE_NAME "Inkplate 10"
+#elif INKPLATE_10_V2
+  #define DEVICE_NAME "Inkplate 10 V2"
+#else
+  #error "Unknown device"
+#endif
+
 #include "DSEG14Classic_Regular20pt7b.h" //Include second font
 #include "Not_Just_Groovy20pt7b.h"       //Include first .h font file to the sketch
 
@@ -54,13 +74,7 @@ void mainTask(void *param) {
   display.setTextSize(2);                  // Set font scaling to two (font will be 2 times bigger)
   display.setCursor(0, 60);                // Set print cursor on X = 0, Y = 60
 
-  #if INKPLATE_6
-    display.print("InkPlate 6");
-  #elif INKPLATE_6PLUS
-    display.print("InkPlate 6PLUS");
-  #else
-    display.print("InkPlate 10");
-  #endif
+  display.print(DEVICE_NAME);
 
   display.setTextSize(1);              // Set font scaling to one (font is now original size)
   display.print("by e-radionica.com"); // Print text

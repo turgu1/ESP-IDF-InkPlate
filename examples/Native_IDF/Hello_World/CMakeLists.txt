@@ -14,6 +14,17 @@ if(DEVICE MATCHES "^INKPLATE_6$")
     add_compile_definitions(
         INKPLATE_6=1 
         MCP23017=1)
+elseif(DEVICE MATCHES "^INKPLATE_5V2$")
+    message("INKPLATE 5V2 defined")
+    add_compile_definitions(
+        INKPLATE_5V2=1 
+        PCAL6416=1)
+elseif(DEVICE MATCHES "^INKPLATE_6V2$")
+    message("INKPLATE 6V2 defined")
+    add_compile_definitions(
+        INKPLATE_6V2=1 
+        PCAL6416=1
+        DMA_ENABLE=1)
 elseif(DEVICE MATCHES  "^INKPLATE_6PLUS$")
     message("INKPLATE 6PLUS defined")
     add_compile_definitions(

@@ -20,7 +20,7 @@ bool SDCard::setup() {
     ESP_LOGI(TAG, "Setup SD card");
   }
 
-#if INKPLATE_6V2 || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
+#if INKPLATE_5V2 || INKPLATE_6V2 || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
   Wire::enter();
   io_expander.set_direction(SD_POWER, IOExpander::PinMode::OUTPUT);
   io_expander.digital_write(SD_POWER, IOExpander::SignalLevel::HIGH);
@@ -139,7 +139,7 @@ void SDCard::deepSleep() {
   gpio_set_direction(PIN_NUM_CLK, GPIO_MODE_INPUT);
   gpio_set_direction(PIN_NUM_CS, GPIO_MODE_INPUT);
 
-#if INKPLATE_6V2 || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
+#if INKPLATE_5V2 || INKPLATE_6V2 || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
   Wire::enter();
   io_expander.digital_write(SD_POWER, IOExpander::SignalLevel::HIGH);
   ESP::delay(50);

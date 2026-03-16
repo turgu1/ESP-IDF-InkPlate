@@ -27,10 +27,31 @@
 
 #include "image.h" //Include image file that holds gray image data. You can see it in next tab inside Arduino IDE.
 #include "inkplate.hpp" //Include Inkplate library to the sketch
-Inkplate
-    display(DisplayMode::INKPLATE_3BIT); // Create object on Inkplate library and set library to
-                                         // work in gray mode (3-bit) Other option is BW mode, which
-                                         // is demonstrated in next example "Inkplate_basic_BW"
+#include "image.h"    //Include image file that holds gray image data. You can see it in next tab inside Arduino IDE.
+
+#if INKPLATE_5V2
+  #define DEVICE_NAME "Inkplate 5V2"
+#elif INKPLATE_6
+  #define DEVICE_NAME "Inkplate 6"
+#elif INKPLATE_6V2
+  #define DEVICE_NAME "Inkplate 6V2"
+#elif INKPLATE_6PLUS
+  #define DEVICE_NAME "Inkplate 6PLUS"
+#elif INKPLATE_6PLUS_V2
+  #define DEVICE_NAME "Inkplate 6PLUS V2"
+#elif INKPLATE_6FLICK
+  #define DEVICE_NAME "Inkplate 6FLICK"
+#elif INKPLATE_10
+  #define DEVICE_NAME "Inkplate 10"
+#elif INKPLATE_10_V2
+  #define DEVICE_NAME "Inkplate 10 V2"
+#else
+  #error "Unknown device"
+#endif
+
+Inkplate display(DisplayMode::INKPLATE_3BIT); // Create object on Inkplate library and set library to work in gray mode (3-bit)
+                                 // Other option is BW mode, which is demonstrated in next example
+                                 // "Inkplate_basic_BW"
 
 #define DELAY_MS                                                                                   \
   5000 // Delay in milliseconds between screen refresh. Refreshing e-paper screens more often than
@@ -74,15 +95,11 @@ void mainTask(void *params) {
   display.setTextColor(0, 7);
   display.setCursor(150, h / 2);
   display.setTextSize(4);
-  #if INKPLATE_6
-    display.print("Welcome to Inkplate 6!");
-  #elif INKPLATE_6PLUS
+  #if INKPLATE_6PLUS
     display.frontlight(true);
     display.setFrontlight(10);
-    display.print("Welcome to Inkplate 6PLUS!");
-  #else
-    display.print("Welcome to Inkplate 10!");
   #endif
+  display.print("Welcome to " DEVICE_NAME "!");
   display.display(); // Write hello message
   ESP::delay(5000);  // Wait a little bit
 
@@ -316,38 +333,26 @@ void mainTask(void *params) {
 
     // Write some text on screen with different sizes and color
     display.clearDisplay();
-    for (int i = 0; i < 6; i++) {
-      display.setTextColor(i);
-      display.setTextSize(i + 1); // textSize parameter starts at 0 and goes up to 10 (larger won't
-                                  // fit Inkplate 6 screen)
-      display.setCursor(200, (i * i * 8)); // setCursor works as same as on LCD displays - sets "the
-                                           // cursor" at the place you want to write someting next
-      #if INKPLATE_6
-        display.print("INKPLATE 6!");
-      #elif INKPLATE_6PLUS
-        display.print("INKPLATE 6PLUS!"); // The actual text you want to show on e-paper as String
-      #else
-        display.print("INKPLATE 10!");
-      #endif
+    for (int i = 0; i < 6; i++)
+    {
+        display.setTextColor(i);
+        display.setTextSize(i + 1);           // textSize parameter starts at 0 and goes up to 10 (larger won't fit Inkplate 6 screen)
+        display.setCursor(200, (i * i * 8)); // setCursor works as same as on LCD displays - sets "the cursor" at the
+                                             // place you want to write someting next
+        display.print(DEVICE_NAME "!");
     }
     displayCurrentAction("Text in different sizes and shadings");
     display.display(); // To show stuff on screen, you always need to call display.display();
     ESP::delay(5000);
 
-    // Write same text on different location, but now invert colors (text is white, text background
-    // is black)
-    display.setTextColor(7, 0); // First argument is text color, while second argument is background
-                                // color. In greyscale,
-    for (int i = 0; i < 6; i++) { // you are able to choose from 8 different colors (0-7)
-      display.setTextSize(i + 1);
-      display.setCursor(200, 300 + (i * i * 8));
-      #if INKPLATE_6
-        display.print("INKPLATE 6!");
-      #elif INKPLATE_6PLUS
-        display.print("INKPLATE 6PLUS!"); // The actual text you want to show on e-paper as String
-      #else
-        display.print("INKPLATE 10!");
-      #endif
+    // Write same text on different location, but now invert colors (text is white, text background is black)
+    display.setTextColor(7, 0); // First argument is text color, while second argument is background color. In
+                                // greyscale,
+    for (int i = 0; i < 6; i++)
+    { // you are able to choose from 8 different colors (0-7)
+        display.setTextSize(i + 1);
+        display.setCursor(200, 300 + (i * i * 8));
+        display.print(DEVICE_NAME "!");
     }
     display.display();
     ESP::delay(5000);
@@ -407,20 +412,15 @@ void mainTask(void *params) {
     // Write text and rotate it by 90 deg. forever
     display.setTextSize(8);
     display.setTextColor(7, 0);
-    for (int r = 0; r < 4; r++) {
-      display.setCursor(100, 100);
-      display.clearDisplay();
-      display.setRotation(r); // Set rotation will sent rotation for the entire display, so you can
-                              // use it sideways or upside-down
-      #if INKPLATE_6
-        display.print("INKPLATE 6");
-      #elif INKPLATE_6PLUS
-        display.print("INKPLATE 6PLUS"); // The actual text you want to show on e-paper as String
-      #else
-        display.print("INKPLATE 10");
-      #endif
-      display.display();
-      ESP::delay(5000);
+    for (int r = 0; r < 4; r++)
+    {
+        display.setCursor(100, 100);
+        display.clearDisplay();
+        display.setRotation(
+            r); // Set rotation will sent rotation for the entire display, so you can use it sideways or upside-down
+        display.print(DEVICE_NAME);
+        display.display();
+        ESP::delay(5000);
     }
 
     display.setTextColor(0, 7);

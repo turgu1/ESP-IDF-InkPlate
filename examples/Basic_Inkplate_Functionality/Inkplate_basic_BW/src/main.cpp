@@ -25,6 +25,26 @@
 #include "inkplate.hpp"
 #include "logo.hpp"
 
+#if INKPLATE_5V2
+  #define DEVICE_NAME "Inkplate 5V2"
+#elif INKPLATE_6
+  #define DEVICE_NAME "Inkplate 6"
+#elif INKPLATE_6V2
+  #define DEVICE_NAME "Inkplate 6V2"
+#elif INKPLATE_6PLUS
+  #define DEVICE_NAME "Inkplate 6PLUS"
+#elif INKPLATE_6PLUS_V2
+  #define DEVICE_NAME "Inkplate 6PLUS V2"
+#elif INKPLATE_6FLICK
+  #define DEVICE_NAME "Inkplate 6FLICK"
+#elif INKPLATE_10
+  #define DEVICE_NAME "Inkplate 10"
+#elif INKPLATE_10_V2
+  #define DEVICE_NAME "Inkplate 10 V2"
+#else
+  #error "Unknown device"
+#endif
+
 Inkplate display(DisplayMode::INKPLATE_1BIT);
 
 static const char *TAG = "Main";
@@ -69,13 +89,7 @@ void mainTask(void *params) {
   display.setCursor(150, h / 2);
   display.setTextSize(4);
 
-  #if INKPLATE_6
-    display.print("Welcome to Inkplate 6!");
-  #elif INKPLATE_6PLUS
-    display.print("Welcome to Inkplate 6PLUS!");
-  #else
-    display.print("Welcome to Inkplate 10!");
-  #endif
+  display.print("Welcome to " DEVICE_NAME "!");
 
   display.display(); // Write hello message
   ESP::delay(5000);
@@ -340,18 +354,13 @@ void mainTask(void *params) {
 
     // Write some text on screen with different sizes
     display.clearDisplay();
-    for (int i = 0; i < 6; i++) {
-      display.setTextSize(i + 1); // textSize parameter starts at 0 and goes up to 10 (larger won't
-                                  // fit Inkplate 6 screen)
-      display.setCursor(200, (i * i * 8)); // setCursor works as same as on LCD displays - sets "the
-                                           // cursor" at the place you want to write someting next
-      #if INKPLATE_6
-        display.print("INKPLATE 6!"); // The actual text you want to show on e-paper as String
-      #elif INKPLATE_6PLUS
-        display.print("INKPLATE 6PLUS!"); // The actual text you want to show on e-paper as String
-      #else
-        display.print("INKPLATE 10!"); // The actual text you want to show on e-paper as String
-      #endif
+    for (int i = 0; i < 6; i++)
+    {
+        display.setTextSize(i +
+                            1); // textSize parameter starts at 0 and goes up to 10 (larger won't fit Inkplate 6 screen)
+        display.setCursor(200, (i * i * 8)); // setCursor works as same as on LCD displays - sets "the cursor" at the
+                                             // place you want to write someting next
+        display.print(DEVICE_NAME "!");
     }
     displayCurrentAction("Text in different sizes and shadings");
     display.display(); // To show stuff on screen, you always need to call display.display();
@@ -359,20 +368,15 @@ void mainTask(void *params) {
 
     // -----
 
-    // Write same text on different location, but now invert colors (text is white, text background
-    // is black), without cleaning the previous text
-    display.setTextColor(WHITE, BLACK); // First argument is text color, while second argument is
-                                        // background color. In BW, there are
-    for (int i = 0; i < 6; i++) {       // only two options: BLACK & WHITE
-      display.setTextSize(i + 1);
-      display.setCursor(200, 300 + (i * i * 8));
-      #if INKPLATE_6
-        display.print("INKPLATE 6!");
-      #elif INKPLATE_6PLUS
-        display.print("INKPLATE 6PLUS!"); // The actual text you want to show on e-paper as String
-      #else
-        display.print("INKPLATE 10!");
-      #endif
+    // Write same text on different location, but now invert colors (text is white, text background is black), without
+    // cleaning the previous text
+    display.setTextColor(
+        WHITE, BLACK); // First argument is text color, while second argument is background color. In BW, there are
+    for (int i = 0; i < 6; i++)
+    { // only two options: BLACK & WHITE
+        display.setTextSize(i + 1);
+        display.setCursor(200, 300 + (i * i * 8));
+        display.print(DEVICE_NAME "!");
     }
     display.display();
     display.setTextColor(BLACK, WHITE);
@@ -441,15 +445,9 @@ void mainTask(void *params) {
     for (int r = 0; r < 4; r++) {
       display.setCursor(100, 100);
       display.clearDisplay();
-      display.setRotation(r); // Set rotation will sent rotation for the entire display, so you can
-                              // use it sideways or upside-down
-      #if INKPLATE_6
-        display.print("INKPLATE 6");
-      #elif INKPLATE_6PLUS
-        display.print("INKPLATE 6PLUS"); // The actual text you want to show on e-paper as String
-      #else
-        display.print("INKPLATE 10");
-      #endif
+      display.setRotation(
+          r); // Set rotation will sent rotation for the entire display, so you can use it sideways or upside-down
+      display.print(DEVICE_NAME);
       display.display();
       ESP::delay(5000);
     }
