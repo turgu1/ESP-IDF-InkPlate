@@ -154,8 +154,8 @@ Distributed as-is; no warranty is given.
     d_memory_new->clear();
     memset(p_buffer, 0, BITMAP_SIZE_1BIT * 2);
 
-    for (int j = 0; j < 9; j++) {
-      for (uint32_t i = 0; i < 256; i++) {
+    for (auto j = 0; j < 9; j++) {
+      for (auto i = 0; i < 256; i++) {
         GLUT[(j << 8) + i] =
             (WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j]);
         GLUT2[(j << 8) + i] =
@@ -208,14 +208,14 @@ Distributed as-is; no warranty is given.
 
       ESP_LOGD(TAG, "part 1...");
 
-      for (int k = 0; k < 5; k++) {
+      for (auto k = 0; k < 5; k++) {
 
         ptr = &data[BITMAP_SIZE_1BIT - 1];
 
         vscan_start();
 
-        for (int i = 0; i < HEIGHT; i++) {
-          for (int n = 0; n < (WIDTH / 4); n += 4) {
+        for (auto i = 0; i < HEIGHT; i++) {
+          for (auto n = 0; n < (WIDTH / 4); n += 4) {
             uint8_t dram1      = *ptr--;
             uint8_t dram2      = *ptr--;
             line_buffer[n]     = LUTB[(dram2 >> 4) & 0x0F]; // i + 2;
@@ -233,15 +233,15 @@ Distributed as-is; no warranty is given.
 
       ESP_LOGD(TAG, "part 2...");
 
-      for (int k = 0; k < 1; k++) {
+      for (auto k = 0; k < 1; k++) {
 
         ptr = &data[BITMAP_SIZE_1BIT - 1];
 
         vscan_start();
 
-        for (int i = 0; i < HEIGHT; i++) {
+        for (auto i = 0; i < HEIGHT; i++) {
 
-          for (int n = 0; n < (WIDTH / 4); n += 4) {
+          for (auto n = 0; n < (WIDTH / 4); n += 4) {
             uint8_t dram1      = *ptr--;
             uint8_t dram2      = *ptr--;
             line_buffer[n]     = LUT2[(dram2 >> 4) & 0x0F]; // i + 2;
@@ -259,13 +259,13 @@ Distributed as-is; no warranty is given.
 
       ESP_LOGD(TAG, "part 3...");
 
-      for (int k = 0; k < 1; k++) {
+      for (auto k = 0; k < 1; k++) {
 
         vscan_start();
 
-        for (int i = 0; i < HEIGHT; i++) {
+        for (auto i = 0; i < HEIGHT; i++) {
 
-          for (int n = 0; n < (WIDTH / 4); n += 4) {
+          for (auto n = 0; n < (WIDTH / 4); n += 4) {
             line_buffer[n]     = 0; // i + 2;
             line_buffer[n + 1] = 0; // i + 3;
             line_buffer[n + 2] = 0; // i;
@@ -314,14 +314,14 @@ Distributed as-is; no warranty is given.
 
       volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
 
-      for (int k = 0, kk = 0; k < 9; k++, kk += 256) {
+      for (auto k = 0, kk = 0; k < 9; k++, kk += 256) {
         uint8_t *dp = &data[BITMAP_SIZE_3BIT] - 2;
 
         vscan_start();
 
-        for (int i = 0; i < HEIGHT; i++) {
+        for (auto i = 0; i < HEIGHT; i++) {
 
-          for (int j = 0; j < (WIDTH / 4); j += 4) {
+          for (auto j = 0; j < (WIDTH / 4); j += 4) {
             line_buffer[j + 2] = (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]);
             dp -= 2;
             line_buffer[j + 3] = (GLUT2[kk + dp[1]] | GLUT[kk + dp[0]]);
@@ -363,8 +363,8 @@ Distributed as-is; no warranty is given.
       uint32_t n   = BITMAP_SIZE_1BIT * 2 - 1;
       uint16_t pos = BITMAP_SIZE_1BIT - 1;
 
-      for (int i = 0; i < HEIGHT; i++) {
-        for (int j = 0; j < LINE_SIZE_1BIT; j++) {
+      for (auto i = 0; i < HEIGHT; i++) {
+        for (auto j = 0; j < LINE_SIZE_1BIT; j++) {
           uint8_t diffw = odata[pos] & ~idata[pos];
           uint8_t diffb = ~odata[pos] & idata[pos];
           pos--;
@@ -384,14 +384,14 @@ Distributed as-is; no warranty is given.
 
       if (line_buffer == nullptr) return;
 
-      for (int k = 0; k < 6; k++) {
+      for (auto k = 0; k < 6; k++) {
 
         vscan_start();
         n = (BITMAP_SIZE_1BIT * 2) - 1;
 
-        for (int i = 0; i < HEIGHT; i++) {
+        for (auto i = 0; i < HEIGHT; i++) {
 
-          for (int j = 0; j < (WIDTH / 4); j += 4) {
+          for (auto j = 0; j < (WIDTH / 4); j += 4) {
             line_buffer[j + 2] = p_buffer[n];
             line_buffer[j + 3] = p_buffer[n - 1];
             line_buffer[j]     = p_buffer[n - 2];
@@ -417,26 +417,22 @@ Distributed as-is; no warranty is given.
 
     void EInk6V2::clean(PixelState pixel_state, uint8_t repeat_count) {
 
-      // if (!turn_on()) return;
-
       volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
 
-      for (auto i = 0; i < i2s_comms.get_line_buffer_size(); i++) {
+      for (auto i = 0; i < (WIDTH / 4); i++) {
         line_buffer[i] = static_cast<uint8_t>(pixel_state);
       }
 
       i2s_comms.init_lldesc();
 
-      for (int k = 0; k < repeat_count; k++) {
+      for (auto k = 0; k < repeat_count; k++) {
 
         vscan_start();
 
-        for (int i = 0; i < HEIGHT; i++) {
+        for (auto i = 0; i < HEIGHT; i++) {
           i2s_comms.send_data();
           vscan_end();
         }
-
-        // ESP::delay_microseconds(230);
       }
     }
 

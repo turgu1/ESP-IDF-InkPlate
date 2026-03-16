@@ -11,5 +11,5 @@ list(APPEND EXTRA_COMPONENT_DIRS
     src 
 )
 
-project(test_6FLICK)
+project(test_6V2)
 

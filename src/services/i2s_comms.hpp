@@ -47,6 +47,7 @@ public:
     ready = (line_buffer != nullptr) && (lldesc != nullptr);
 
     if (ready) {
+      memset((void *) line_buffer, 0, buffer_size);
       ESP_LOGI(TAG, "Ready...");
     }
   }
