@@ -419,9 +419,11 @@ Distributed as-is; no warranty is given.
 
       volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
 
-      for (auto i = 0; i < (WIDTH / 4); i++) {
-        line_buffer[i] = static_cast<uint8_t>(pixel_state);
-      }
+      // for (auto i = 0; i < (WIDTH / 4); i++) {
+      //   line_buffer[i] = static_cast<uint8_t>(pixel_state);
+      // }
+
+      memset((void *)line_buffer, static_cast<uint8_t>(pixel_state), WIDTH / 4);
 
       i2s_comms.init_lldesc();
 
@@ -433,6 +435,8 @@ Distributed as-is; no warranty is given.
           i2s_comms.send_data();
           vscan_end();
         }
+
+        // ESP::delay_microseconds(230);
       }
     }
 

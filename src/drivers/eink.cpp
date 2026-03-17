@@ -206,16 +206,7 @@ void EInk::pins_as_outputs() {
 
   #if (INKPLATE_6 && DMA_ENABLE) || INKPLATE_5V2 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
 
-    i2s_comms.set_pin(0, I2S1O_BCK_OUT_IDX, 0);
-    i2s_comms.set_pin(4, I2S1O_DATA_OUT0_IDX, 0);
-    i2s_comms.set_pin(5, I2S1O_DATA_OUT1_IDX, 0);
-    i2s_comms.set_pin(18, I2S1O_DATA_OUT2_IDX, 0);
-    i2s_comms.set_pin(19, I2S1O_DATA_OUT3_IDX, 0);
-    i2s_comms.set_pin(23, I2S1O_DATA_OUT4_IDX, 0);
-    i2s_comms.set_pin(25, I2S1O_DATA_OUT5_IDX, 0);
-    i2s_comms.set_pin(26, I2S1O_DATA_OUT6_IDX, 0);
-    i2s_comms.set_pin(27, I2S1O_DATA_OUT7_IDX, 0);
-
+    i2s_comms.setup_pins();
     i2s_comms.start_clock();
 
   #else

@@ -18,6 +18,7 @@
   // #include "driver/i2s.h"
   #include "esp_private/periph_ctrl.h"
   #include "rom/lldesc.h"
+  #include "soc/gpio_sig_map.h"
   #include "soc/i2s_reg.h"
   #include "soc/i2s_struct.h"
   #include "soc/periph_defs.h"
@@ -33,10 +34,6 @@
   #else
     #define PUBLIC extern
   #endif
-
-  // PUBLIC void IRAM_ATTR my_I2SInit(i2s_dev_t *_i2sDev, uint8_t _clockDivider);
-  // PUBLIC void IRAM_ATTR my_sendDataI2S(i2s_dev_t *_i2sDev, volatile lldesc_s *_dmaDecs);
-  // PUBLIC void IRAM_ATTR my_setI2S1pin(uint32_t _pin, uint32_t _function, uint32_t _inv);
 
   class I2SComms {
 
@@ -64,9 +61,10 @@
       }
     }
 
-    void IRAM_ATTR init(uint8_t clock_divider = 5);
+    void IRAM_ATTR init(uint8_t clock_divider = 7);
     void IRAM_ATTR send_data();
     void IRAM_ATTR set_pin(uint32_t pin, uint32_t function, uint32_t inverted);
+    void IRAM_ATTR setup_pins();
 
     void init_lldesc();
 
@@ -85,24 +83,26 @@
       ESP::delay_microseconds(230);
     }
 
+    // clang-format off
     void show_clocks() {
-      ESP_LOGI(TAG, "I2S Clock values:");
-      ESP_LOGI(TAG, "conf1.tx_stop_en: %d", i2s_dev->conf1.tx_stop_en);
-      ESP_LOGI(TAG, "sample_rate_conf.val: %d", i2s_dev->sample_rate_conf.val);
-      ESP_LOGI(TAG, "sample_rate_conf.rx_bits_mod: %d", i2s_dev->sample_rate_conf.rx_bits_mod);
-      ESP_LOGI(TAG, "sample_rate_conf.tx_bits_mod: %d", i2s_dev->sample_rate_conf.tx_bits_mod);
-      ESP_LOGI(TAG, "sample_rate_conf.rx_bck_div_num: %d",
-               i2s_dev->sample_rate_conf.rx_bck_div_num);
-      ESP_LOGI(TAG, "sample_rate_conf.tx_bck_div_num: %d",
-               i2s_dev->sample_rate_conf.tx_bck_div_num);
+      ESP_LOGI(TAG,                "I2S Clock values:"                                             );
+      ESP_LOGI(TAG,                "conf1.tx_stop_en: %d", i2s_dev->conf1.tx_stop_en               );
+      ESP_LOGI(TAG,           "int_raw.out_total_eof: %d", i2s_dev->int_raw.out_total_eof          );
+      ESP_LOGI(TAG,                   "state.tx_idle: %d", i2s_dev->state.tx_idle                  );
+      ESP_LOGI(TAG,            "sample_rate_conf.val: %d", i2s_dev->sample_rate_conf.val           );
+      ESP_LOGI(TAG,    "sample_rate_conf.rx_bits_mod: %d", i2s_dev->sample_rate_conf.rx_bits_mod   );
+      ESP_LOGI(TAG,    "sample_rate_conf.tx_bits_mod: %d", i2s_dev->sample_rate_conf.tx_bits_mod   );
+      ESP_LOGI(TAG, "sample_rate_conf.rx_bck_div_num: %d", i2s_dev->sample_rate_conf.rx_bck_div_num);
+      ESP_LOGI(TAG, "sample_rate_conf.tx_bck_div_num: %d", i2s_dev->sample_rate_conf.tx_bck_div_num);
 
-      ESP_LOGI(TAG, "clkm_conf.val: %d", i2s_dev->clkm_conf.val);
-      ESP_LOGI(TAG, "clkm_conf.clka_en: %d", i2s_dev->clkm_conf.clka_en);
-      ESP_LOGI(TAG, "clkm_conf.clkm_div_b: %d", i2s_dev->clkm_conf.clkm_div_b);
-      ESP_LOGI(TAG, "clkm_conf.clkm_div_a: %d", i2s_dev->clkm_conf.clkm_div_a);
-      ESP_LOGI(TAG, "clkm_conf.clkm_div_num: %d", i2s_dev->clkm_conf.clkm_div_num);
+      ESP_LOGI(TAG,                   "clkm_conf.val: %d", i2s_dev->clkm_conf.val                  );
+      ESP_LOGI(TAG,               "clkm_conf.clka_en: %d", i2s_dev->clkm_conf.clka_en              );
+      ESP_LOGI(TAG,            "clkm_conf.clkm_div_b: %d", i2s_dev->clkm_conf.clkm_div_b           );
+      ESP_LOGI(TAG,            "clkm_conf.clkm_div_a: %d", i2s_dev->clkm_conf.clkm_div_a           );
+      ESP_LOGI(TAG,          "clkm_conf.clkm_div_num: %d", i2s_dev->clkm_conf.clkm_div_num         );
       ESP_LOGI(TAG, "----");
     }
+    // clang-format on
   };
 
   #undef PUBLIC
