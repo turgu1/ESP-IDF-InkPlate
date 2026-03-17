@@ -127,7 +127,7 @@ Distributed as-is; no warranty is given.
     #if DMA_ENABLE
       if (i2s_comms.is_ready()) { // instanciated through the EInk constructor
         i2s_comms.init(7);
-        i2s_comms.show_clocks();
+        // i2s_comms.show_clocks();
       } else {
         ESP_LOGE(TAG, "I2SComms is not ready!!!");
         return false;
@@ -200,7 +200,7 @@ Distributed as-is; no warranty is given.
       clean(PixelState::WHITE, 18);
       clean(PixelState::DISCHARGE, 1);
 
-      i2s_comms.show_clocks();
+      // i2s_comms.show_clocks();
 
       uint8_t *data = frame_buffer.get_data();
 
