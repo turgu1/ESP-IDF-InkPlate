@@ -76,7 +76,7 @@ protected:
 
   IOExpander &io_expander_int;
 
-  WireDevice *wire_device;
+  WireDevice *pwrmgr_device;
 
   #if (INKPLATE_6 && DMA_ENABLE) || INKPLATE_5V2 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
     I2SComms i2s_comms;
@@ -87,6 +87,8 @@ protected:
   bool partial_allowed;
 
   static const uint32_t PIN_LUT[256];
+
+  auto pwr_mgr_init() -> bool;
 
   void vscan_start();
   void hscan_start(uint32_t d);

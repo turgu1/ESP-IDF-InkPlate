@@ -30,9 +30,11 @@ Distributed as-is; no warranty is given.
 
   // #include <iostream>
 
+  // clang-format off
   const uint8_t EInk6V2::WAVEFORM_3BIT[8][9] = {
-      {0, 0, 0, 0, 1, 1, 1, 1, 0}, {0, 0, 0, 1, 1, 1, 1, 0, 0}, {1, 1, 1, 1, 0, 2, 1, 0, 0},
-      {1, 1, 1, 2, 2, 1, 1, 0, 0}, {1, 1, 1, 1, 2, 2, 1, 0, 0}, {0, 1, 1, 1, 2, 2, 1, 0, 0},
+      {0, 0, 0, 0, 1, 1, 1, 1, 0}, {0, 0, 0, 1, 1, 1, 1, 0, 0}, 
+      {1, 1, 1, 1, 0, 2, 1, 0, 0}, {1, 1, 1, 2, 2, 1, 1, 0, 0},
+      {1, 1, 1, 1, 2, 2, 1, 0, 0}, {0, 1, 1, 1, 2, 2, 1, 0, 0},
       {0, 0, 0, 0, 1, 1, 2, 0, 0}, {0, 0, 0, 0, 0, 0, 2, 0, 0}};
 
   const uint8_t EInk6V2::LUT2[16] = {0xAA, 0xA9, 0xA6, 0xA5, 0x9A, 0x99, 0x96, 0x95,
@@ -43,6 +45,7 @@ Distributed as-is; no warranty is given.
 
   const uint8_t EInk6V2::LUTB[16] = {0xFF, 0xFD, 0xF7, 0xF5, 0xDF, 0xDD, 0xD7, 0xD5,
                                      0x7F, 0x7D, 0x77, 0x75, 0x5F, 0x5D, 0x57, 0x55};
+  // clang-format on
 
   bool EInk6V2::setup() {
     if (initialized) return true;
@@ -65,41 +68,17 @@ Distributed as-is; no warranty is given.
 
     Wire::enter();
 
+    if (!pwr_mgr_init()) {
+      ESP_LOGE(TAG, "Power manager initialization failed.");
+      return false;
+    }
+
     io_expander_int.set_direction(VCOM, IOExpander::PinMode::OUTPUT);
     io_expander_int.set_direction(PWRUP, IOExpander::PinMode::OUTPUT);
     io_expander_int.set_direction(WAKEUP, IOExpander::PinMode::OUTPUT);
 
     io_expander_int.set_direction(GPIO0_ENABLE, IOExpander::PinMode::OUTPUT);
     io_expander_int.digital_write(GPIO0_ENABLE, IOExpander::SignalLevel::HIGH);
-
-    wakeup_set();
-
-    // ESP_LOGD(TAG, "Power Mgr Init..."); fflush(stdout);
-
-    wire_device = new WireDevice(PWRMGR_ADDRESS);
-    if ((wire_device == nullptr) || !wire_device->is_initialized()) {
-      ESP_LOGE(TAG, "Setup error: %s",
-               wire_device == nullptr ? "NULL Device!" : "Not initialized!");
-      return false;
-    }
-
-    uint8_t pgm[] = {
-        0x09,       // cmd
-        0b00011011, // Power up seq.
-        0b00000000, // Power up delay (3mS per rail)
-        0b00011011, // Power down seq.
-        0b00000000  // Power down delay (6mS per rail)
-    };
-
-    ESP::delay(1);
-
-    wire_device->write(pgm, sizeof(pgm));
-
-    ESP::delay_microseconds(1800);
-
-    // ESP_LOGD(TAG, "Power init completed");
-
-    wakeup_clear();
 
     // Unused pins of first I/O expander have to be set as outputs.
     io_expander_int.set_direction(IOExpander::Pin::IOPIN_11, IOExpander::PinMode::OUTPUT);
@@ -190,15 +169,17 @@ Distributed as-is; no warranty is given.
 
       ESP_LOGD(TAG, "Cleaning display...");
 
-      clean(PixelState::WHITE, 1);
-      clean(PixelState::BLACK, 18);
-      clean(PixelState::DISCHARGE, 1);
-      clean(PixelState::WHITE, 18);
-      clean(PixelState::DISCHARGE, 1);
-      clean(PixelState::BLACK, 18);
-      clean(PixelState::DISCHARGE, 1);
-      clean(PixelState::WHITE, 18);
-      clean(PixelState::DISCHARGE, 1);
+      // clang-format off
+      clean(PixelState::WHITE,      1);
+      clean(PixelState::BLACK,     18);
+      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::WHITE,     18);
+      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::BLACK,     18);
+      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::WHITE,     18);
+      clean(PixelState::DISCHARGE,  1);
+      // clang-format on
 
       // i2s_comms.show_clocks();
 
@@ -300,15 +281,17 @@ Distributed as-is; no warranty is given.
         return;
       }
 
-      clean(PixelState::WHITE, 1);
-      clean(PixelState::BLACK, 18);
-      clean(PixelState::DISCHARGE, 1);
-      clean(PixelState::WHITE, 18);
-      clean(PixelState::DISCHARGE, 1);
-      clean(PixelState::BLACK, 18);
-      clean(PixelState::DISCHARGE, 1);
-      clean(PixelState::WHITE, 18);
-      clean(PixelState::DISCHARGE, 1);
+      // clang-format off
+      clean(PixelState::WHITE,      1);
+      clean(PixelState::BLACK,     18);
+      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::WHITE,     18);
+      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::BLACK,     18);
+      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::WHITE,     18);
+      clean(PixelState::DISCHARGE,  1);
+      // clang-format on
 
       uint8_t *data = frame_buffer.get_data();
 
@@ -456,15 +439,17 @@ Distributed as-is; no warranty is given.
         return;
       }
 
-      clean(PixelState::WHITE, 1);
-      clean(PixelState::BLACK, 18);
-      clean(PixelState::DISCHARGE, 1);
-      clean(PixelState::WHITE, 18);
-      clean(PixelState::DISCHARGE, 1);
-      clean(PixelState::BLACK, 18);
-      clean(PixelState::DISCHARGE, 1);
-      clean(PixelState::WHITE, 18);
-      clean(PixelState::DISCHARGE, 1);
+      // clang-format off
+      clean(PixelState::WHITE,      1);
+      clean(PixelState::BLACK,     18);
+      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::WHITE,     18);
+      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::BLACK,     18);
+      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::WHITE,     18);
+      clean(PixelState::DISCHARGE,  1);
+      // clang-format on
 
       uint8_t *data = frame_buffer.get_data();
 
@@ -564,15 +549,17 @@ Distributed as-is; no warranty is given.
         return;
       }
 
-      clean(PixelState::WHITE, 1);
-      clean(PixelState::BLACK, 18);
-      clean(PixelState::DISCHARGE, 1);
-      clean(PixelState::WHITE, 18);
-      clean(PixelState::DISCHARGE, 1);
-      clean(PixelState::BLACK, 18);
-      clean(PixelState::DISCHARGE, 1);
-      clean(PixelState::WHITE, 18);
-      clean(PixelState::DISCHARGE, 1);
+      // clang-format off
+      clean(PixelState::WHITE,      1);
+      clean(PixelState::BLACK,     18);
+      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::WHITE,     18);
+      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::BLACK,     18);
+      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::WHITE,     18);
+      clean(PixelState::DISCHARGE,  1);
+      // clang-format on
 
       uint8_t *data = frame_buffer.get_data();
 

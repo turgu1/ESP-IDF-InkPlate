@@ -8,11 +8,11 @@
 
 #include <cinttypes>
 
+#include "driver/gpio.h"
+#include "esp_task_wdt.h"
+#include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_task_wdt.h"
-#include "driver/gpio.h"
-#include "esp_timer.h"
 
 static const uint8_t HIGH = 1;
 static const uint8_t LOW  = 0;
@@ -21,59 +21,59 @@ static const uint8_t LOW  = 0;
 
 /**
  * @brief ESP-IDF support methods
- * 
+ *
  * These are class methods that simplify access to some esp-idf specifics.
  * The class is taylored for the needs of the low-level driver classes of the InkPlate-6
  * software.
  */
-class ESP
-{
-  private:
-    static constexpr char const * TAG = "ESP";
-    
-  public:
-    static inline long millis() { return (unsigned long) (esp_timer_get_time() / 1000); }
- 
-    static void IRAM_ATTR delay_microseconds(uint32_t micro_seconds) {
-      uint64_t m = (uint64_t)esp_timer_get_time();
-      if (micro_seconds) {
-        uint64_t e = (m + micro_seconds);
-        if (m > e) {  //overflow
-          while ((uint64_t)esp_timer_get_time() > e) {
-            NOP();
-          }
-        }
-        while ((uint64_t)esp_timer_get_time() < e) {
+class ESP {
+private:
+  static constexpr char const *TAG = "ESP";
+
+public:
+  static inline long millis() { return (unsigned long)(esp_timer_get_time() / 1000); }
+
+  static void IRAM_ATTR delay_microseconds(uint32_t micro_seconds) {
+    uint64_t m = (uint64_t)esp_timer_get_time();
+    if (micro_seconds) {
+      uint64_t e = (m + micro_seconds);
+      if (m > e) { // overflow
+        while ((uint64_t)esp_timer_get_time() > e) {
           NOP();
         }
       }
-    }
-
-    static void delay(uint32_t milliseconds) {
-      vTaskDelay(milliseconds / portTICK_PERIOD_MS);
-    
-      uint32_t remainder_usec = (milliseconds % portTICK_PERIOD_MS) * 1000;
-      if (remainder_usec) delay_microseconds(remainder_usec);
-    }
-
-
-    static void * ps_malloc(uint32_t size) {
-      void * mem = nullptr; 
-      if (heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM) > size) {
-        mem = heap_caps_malloc(size, MALLOC_CAP_SPIRAM); 
+      while ((uint64_t)esp_timer_get_time() < e) {
+        NOP();
       }
-      if (mem == nullptr) {
-        ESP_LOGE(TAG, "Not enough memory on PSRAM!!! (Asking %" PRIu32 " bytes)", size);
-      }
-      return mem;
     }
+  }
 
-    static void show_heaps_info() {
-      char * task_name = pcTaskGetName(nullptr);
-      ESP_LOGD(TAG, "%s +----- HEAPS/STACK DATA -----+", task_name);
-      ESP_LOGD(TAG, "%s | Total heap:        %7d |",      task_name,    heap_caps_get_total_size(MALLOC_CAP_8BIT));
-      ESP_LOGD(TAG, "%s | Free heap:         %7d |",      task_name,     heap_caps_get_free_size(MALLOC_CAP_8BIT));
-      ESP_LOGD(TAG, "%s | Free stack:        %7d |",      task_name, uxTaskGetStackHighWaterMark(nullptr        ));
-      ESP_LOGD(TAG, "%s +----------------------------+",  task_name);
+  static void delay(uint32_t milliseconds) {
+    vTaskDelay(milliseconds / portTICK_PERIOD_MS);
+
+    uint32_t remainder_usec = (milliseconds % portTICK_PERIOD_MS) * 1000;
+    if (remainder_usec) delay_microseconds(remainder_usec);
+  }
+
+  static void *ps_malloc(uint32_t size) {
+    void *mem = nullptr;
+    if (heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM) > size) {
+      mem = heap_caps_malloc(size, MALLOC_CAP_SPIRAM);
     }
+    if (mem == nullptr) {
+      ESP_LOGE(TAG, "Not enough memory on PSRAM!!! (Asking %" PRIu32 " bytes)", size);
+    }
+    return mem;
+  }
+
+  // clang-format off
+  static void show_heaps_info() {
+    char * task_name = pcTaskGetName(nullptr);
+    ESP_LOGD(TAG, "%s +----- HEAPS/STACK DATA -----+", task_name);
+    ESP_LOGD(TAG, "%s | Total heap:        %7d |",     task_name,    heap_caps_get_total_size(MALLOC_CAP_8BIT));
+    ESP_LOGD(TAG, "%s | Free heap:         %7d |",     task_name,     heap_caps_get_free_size(MALLOC_CAP_8BIT));
+    ESP_LOGD(TAG, "%s | Free stack:        %7d |",     task_name, uxTaskGetStackHighWaterMark(nullptr        ));
+    ESP_LOGD(TAG, "%s +----------------------------+", task_name);
+  }
+  // clang-format on
 };

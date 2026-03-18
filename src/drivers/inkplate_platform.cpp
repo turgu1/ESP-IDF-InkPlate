@@ -2,9 +2,9 @@
 #include "inkplate_platform.hpp"
 #include "esp_log.h"
 
-#include "wire.hpp"
 #include "esp.hpp"
 #include "sd_card.hpp"
+#include "wire.hpp"
 
 #include "esp_sleep.h"
 
@@ -32,7 +32,7 @@ bool
     ESP_LOGE(TAG, "Battery setup not completed!");
     return false;
   }
-  
+
   #if EXTENDED_CASE && (INKPLATE_6 || INKPLATE_10)
     // Setup Press keys
     if (!press_keys.setup()) {
@@ -74,25 +74,22 @@ bool
 
 /**
  * @brief Start light sleep
- * 
+ *
  * Will be waken up at the end of the time requested or when a key is pressed.
- * 
+ *
  * @param minutes_to_sleep Wait time in minutes
  * @return true The timer when through the end
  * @return false A key was pressed
  */
-bool
-InkPlatePlatform::light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num, int level)
-{
+bool InkPlatePlatform::light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num, int level) {
   esp_err_t err;
 
   if ((err = esp_sleep_enable_timer_wakeup(minutes_to_sleep * 60e6)) != ESP_OK) {
     ESP_LOGE(TAG, "Unable to program Light Sleep wait time: %d", err);
-  }
-  else if ((gpio_num != ((gpio_num_t) 0)) && ((err = esp_sleep_enable_ext0_wakeup(gpio_num, level)) != ESP_OK)) {
+  } else if ((gpio_num != ((gpio_num_t)0)) &&
+             ((err = esp_sleep_enable_ext0_wakeup(gpio_num, level)) != ESP_OK)) {
     ESP_LOGE(TAG, "Unable to set ext0 WakeUp for Light Sleep: %d", err);
-  } 
-  else {
+  } else {
     if ((err = esp_light_sleep_start()) != ESP_OK) {
       ESP_LOGE(TAG, "Unable to start Light Sleep mode: %d", err);
     }
@@ -109,25 +106,22 @@ InkPlatePlatform::light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num, in
   return result;
 }
 
-void 
-InkPlatePlatform::deep_sleep(gpio_num_t gpio_num, int level)
-{
+void InkPlatePlatform::deep_sleep(gpio_num_t gpio_num, int level) {
   esp_err_t err;
-  
-  if (gpio_num != ((gpio_num_t) 0)) {
+
+  if (gpio_num != ((gpio_num_t)0)) {
     if ((err = esp_sleep_enable_ext0_wakeup(gpio_num, level)) != ESP_OK) {
       ESP_LOGE(TAG, "Unable to set ext0 WakeUp for Deep Sleep. Error: %d", err);
     }
-  }
-  else {
+  } else {
     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
   }
-  
+
   #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
     touch_screen.shutdown();
     front_light.disable();
   #endif
-  
+
   sd_card.deepSleep();
   rtc_gpio_isolate(GPIO_NUM_12);
 

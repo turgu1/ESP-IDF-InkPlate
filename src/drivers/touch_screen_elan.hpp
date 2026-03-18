@@ -2,42 +2,38 @@
 
 #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2
 
-#include "non_copyable.hpp"
+  #include "non_copyable.hpp"
 
-#if PCAL6416
-  #include "pcal6416.hpp"
-#else
-  #include "mcp23017.hpp"
-#endif
+  #if PCAL6416
+    #include "pcal6416.hpp"
+  #else
+    #include "mcp23017.hpp"
+  #endif
 
-#include "wire.hpp"
+  #include "wire.hpp"
 
-#include <array>
+  #include <array>
 
-class TouchScreen : NonCopyable 
-{
+  class TouchScreen : NonCopyable {
   public:
-    TouchScreen(IOExpander & _io_expander) : 
-      io_expander(_io_expander), 
-      ready(false) {
-      }
+    TouchScreen(IOExpander &_io_expander) : io_expander(_io_expander), ready(false) {}
 
-    typedef void (* ISRHandlerPtr)(void * value);
+    typedef void (*ISRHandlerPtr)(void *value);
 
     static const gpio_num_t INTERRUPT_PIN = GPIO_NUM_36;
 
     typedef std::array<uint16_t, 2> TouchPositions;
-    
-    bool             setup(bool power_on, ISRHandlerPtr isr_handler = nullptr);
 
-    void          shutdown();
+    bool setup(bool power_on, ISRHandlerPtr isr_handler = nullptr);
+
+    void shutdown();
     bool is_screen_touched();
-    uint8_t   get_position(TouchPositions & x_positions, TouchPositions & y_positions);
+    uint8_t get_position(TouchPositions &x_positions, TouchPositions &y_positions);
 
-    void   set_power_state(bool on_state);
-    bool   get_power_state();
+    void set_power_state(bool on_state);
+    bool get_power_state();
 
-    bool   is_ready() { return ready; }
+    bool is_ready() { return ready; }
 
     void set_app_isr_handler(ISRHandlerPtr isr_handler);
 
@@ -45,17 +41,17 @@ class TouchScreen : NonCopyable
     inline uint16_t get_y_resolution() { return y_resolution; }
 
   private:
-    static constexpr char const * TAG = "TouchScreen";
+    static constexpr char const *TAG = "TouchScreen";
 
-    IOExpander & io_expander;
-    WireDevice * wire_device;
+    IOExpander &io_expander;
+    WireDevice *touch_device;
 
     uint16_t x_resolution, y_resolution;
 
     const IOExpander::Pin TOUCHSCREEN_ENABLE = IOExpander::Pin::IOPIN_12;
     const IOExpander::Pin TOUCHSCREEN_RESET  = IOExpander::Pin::IOPIN_10;
 
-    static const uint8_t    TOUCHSCREEN_ADDRESS       = 0x15;
+    static const uint8_t TOUCHSCREEN_ADDRESS = 0x15;
 
     bool ready;
 
@@ -63,6 +59,6 @@ class TouchScreen : NonCopyable
     bool software_reset();
 
     void retrieve_resolution();
-};
+  };
 
 #endif

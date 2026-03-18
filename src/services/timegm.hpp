@@ -2,8 +2,8 @@
 
 #ifndef HAVE_TIMEGM
 
-#include <ctime>
+  #include <ctime>
 
-time_t timegm(struct tm * tm);
+  time_t timegm(struct tm *tm);
 
 #endif

@@ -44,6 +44,33 @@ const uint32_t EInk::PIN_LUT[256] = {
     0x0e800000, 0x0e800010, 0x0e800020, 0x0e800030, 0x0e840000, 0x0e840010, 0x0e840020, 0x0e840030,
     0x0e880000, 0x0e880010, 0x0e880020, 0x0e880030, 0x0e8c0000, 0x0e8c0010, 0x0e8c0020, 0x0e8c0030};
 
+auto EInk::pwr_mgr_init() -> bool {
+
+  pwrmgr_device = new WireDevice(PWRMGR_ADDRESS);
+  if ((pwrmgr_device == nullptr) || !pwrmgr_device->is_initialized()) {
+    ESP_LOGE(TAG, "Setup error: %s",
+             pwrmgr_device == nullptr ? "NULL Device!" : "Not initialized!");
+    return false;
+  }
+
+  wakeup_set();
+  ESP::delay(1);
+
+  uint8_t pgm[] = {
+      0x09,       // cmd
+      0b00011011, // Power up seq.
+      0b00000000, // Power up delay (3mS per rail)
+      0b00011011, // Power down seq.
+      0b00000000  // Power down delay (6mS per rail)
+  };
+
+  pwrmgr_device->write(pgm, sizeof(pgm));
+
+  ESP::delay_microseconds(1800);
+  wakeup_clear();
+  return true;
+}
+
 // Turn off epaper power supply and put all digital IO pins in high Z state
 void EInk::turn_off() {
   if (get_panel_state() == PanelState::OFF) return;
@@ -73,7 +100,7 @@ void EInk::turn_off() {
   #if !INKPLATE_6PLUS
     wakeup_clear();
     #if !(INKPLATE_6PLUS_V2 || INKPLATE_5V2 || INKPLATE_6V2 || INKPLATE_6FLICK)
-      wire_device->cmd_write(0x01, 0b00000000);
+      pwrmgr_device->cmd_write(0x01, 0b00000000);
     #endif
   #endif
 
@@ -93,13 +120,13 @@ bool EInk::turn_on() {
   ESP::delay(5);
 
   // Enable all rails
-  wire_device->cmd_write(0x01, 0b00100000);
+  pwrmgr_device->cmd_write(0x01, 0b00100000);
 
   // Modify power up sequence
-  wire_device->cmd_write(0x09, 0b11100100);
+  pwrmgr_device->cmd_write(0x09, 0b11100100);
 
   // Modify power down sequence (VEE and VNEG are swapped)
-  wire_device->cmd_write(0x0B, 0b00011011);
+  pwrmgr_device->cmd_write(0x0B, 0b00011011);
 
   pins_as_outputs();
 
@@ -135,7 +162,7 @@ bool EInk::turn_on() {
   return true;
 }
 
-uint8_t EInk::read_power_good() { return wire_device->cmd_read(0x0F); }
+uint8_t EInk::read_power_good() { return pwrmgr_device->cmd_read(0x0F); }
 
 // LOW LEVEL FUNCTIONS
 
@@ -239,14 +266,14 @@ int8_t EInk::read_temperature() {
 
   Wire::enter();
 
-  wire_device->cmd_write(0x0D, 0b10000000);
+  pwrmgr_device->cmd_write(0x0D, 0b10000000);
 
   Wire::leave();
 
   ESP::delay(5);
 
   Wire::enter();
-  temp = wire_device->cmd_read(0x00);
+  temp = pwrmgr_device->cmd_read(0x00);
 
   if (get_panel_state() == PanelState::OFF) {
     pwrup_clear();

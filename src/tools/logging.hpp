@@ -8,7 +8,7 @@
 
 #include "esp_log.h"
 
-// Shorter versions of the standard LOG functions. 
+// Shorter versions of the standard LOG functions.
 
 #define LOG_E(fmt, ...) ESP_LOGE(TAG, fmt, ##__VA_ARGS__)
 #define LOG_I(fmt, ...) ESP_LOGI(TAG, fmt, ##__VA_ARGS__)
