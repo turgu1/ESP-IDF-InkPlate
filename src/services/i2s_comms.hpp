@@ -83,26 +83,28 @@
       ESP::delay_microseconds(230);
     }
 
-    // clang-format off
-    void show_clocks() {
-      ESP_LOGI(TAG,                "I2S Clock values:"                                             );
-      ESP_LOGI(TAG,                "conf1.tx_stop_en: %d", i2s_dev->conf1.tx_stop_en               );
-      ESP_LOGI(TAG,           "int_raw.out_total_eof: %d", i2s_dev->int_raw.out_total_eof          );
-      ESP_LOGI(TAG,                   "state.tx_idle: %d", i2s_dev->state.tx_idle                  );
-      ESP_LOGI(TAG,            "sample_rate_conf.val: %d", i2s_dev->sample_rate_conf.val           );
-      ESP_LOGI(TAG,    "sample_rate_conf.rx_bits_mod: %d", i2s_dev->sample_rate_conf.rx_bits_mod   );
-      ESP_LOGI(TAG,    "sample_rate_conf.tx_bits_mod: %d", i2s_dev->sample_rate_conf.tx_bits_mod   );
-      ESP_LOGI(TAG, "sample_rate_conf.rx_bck_div_num: %d", i2s_dev->sample_rate_conf.rx_bck_div_num);
-      ESP_LOGI(TAG, "sample_rate_conf.tx_bck_div_num: %d", i2s_dev->sample_rate_conf.tx_bck_div_num);
+    #if 0
+      // clang-format off
+      void show_clocks() {
+        ESP_LOGI(TAG,                "I2S Clock values:"                                             );
+        ESP_LOGI(TAG,                "conf1.tx_stop_en: %d", i2s_dev->conf1.tx_stop_en               );
+        ESP_LOGI(TAG,           "int_raw.out_total_eof: %d", i2s_dev->int_raw.out_total_eof          );
+        ESP_LOGI(TAG,                   "state.tx_idle: %d", i2s_dev->state.tx_idle                  );
+        ESP_LOGI(TAG,            "sample_rate_conf.val: %d", i2s_dev->sample_rate_conf.val           );
+        ESP_LOGI(TAG,    "sample_rate_conf.rx_bits_mod: %d", i2s_dev->sample_rate_conf.rx_bits_mod   );
+        ESP_LOGI(TAG,    "sample_rate_conf.tx_bits_mod: %d", i2s_dev->sample_rate_conf.tx_bits_mod   );
+        ESP_LOGI(TAG, "sample_rate_conf.rx_bck_div_num: %d", i2s_dev->sample_rate_conf.rx_bck_div_num);
+        ESP_LOGI(TAG, "sample_rate_conf.tx_bck_div_num: %d", i2s_dev->sample_rate_conf.tx_bck_div_num);
 
-      ESP_LOGI(TAG,                   "clkm_conf.val: %d", i2s_dev->clkm_conf.val                  );
-      ESP_LOGI(TAG,               "clkm_conf.clka_en: %d", i2s_dev->clkm_conf.clka_en              );
-      ESP_LOGI(TAG,            "clkm_conf.clkm_div_b: %d", i2s_dev->clkm_conf.clkm_div_b           );
-      ESP_LOGI(TAG,            "clkm_conf.clkm_div_a: %d", i2s_dev->clkm_conf.clkm_div_a           );
-      ESP_LOGI(TAG,          "clkm_conf.clkm_div_num: %d", i2s_dev->clkm_conf.clkm_div_num         );
-      ESP_LOGI(TAG, "----");
-    }
-    // clang-format on
+        ESP_LOGI(TAG,                   "clkm_conf.val: %d", i2s_dev->clkm_conf.val                  );
+        ESP_LOGI(TAG,               "clkm_conf.clka_en: %d", i2s_dev->clkm_conf.clka_en              );
+        ESP_LOGI(TAG,            "clkm_conf.clkm_div_b: %d", i2s_dev->clkm_conf.clkm_div_b           );
+        ESP_LOGI(TAG,            "clkm_conf.clkm_div_a: %d", i2s_dev->clkm_conf.clkm_div_a           );
+        ESP_LOGI(TAG,          "clkm_conf.clkm_div_num: %d", i2s_dev->clkm_conf.clkm_div_num         );
+        ESP_LOGI(TAG, "----");
+      }
+      // clang-format on
+    #endif
   };
 
   #undef PUBLIC
