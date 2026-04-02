@@ -2,7 +2,7 @@
 
 (March 25th, 2026)
 
-- Now built using ESP-IDF 6.0.0 .
+- Now built using ESP-IDF 5.5.4 .
 - The `services/timegm.{cpp, hpp}` no longer required. The service is now supplied through the <time.h> 
   available with the new ESP-IDF version.
 - EInk power setup is now in the EInk class. Delay after setup addusted.
