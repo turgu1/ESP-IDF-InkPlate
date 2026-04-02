@@ -148,6 +148,7 @@ public:
 
   bool light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num = (gpio_num_t)0, int level = 1);
   void deep_sleep(gpio_num_t gpio_num = (gpio_num_t)0, int level = 1);
+  void restart();
 };
 
 #if __INKPLATE_PLATFORM__

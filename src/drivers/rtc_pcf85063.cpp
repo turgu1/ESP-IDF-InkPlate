@@ -1,7 +1,14 @@
 #include "rtc_pcf85063.hpp"
-#include "timegm.hpp"
 
 #include <cstring>
+
+#include "esp_idf_version.h"
+
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(6, 0, 0)
+  #include <time.h>
+#else
+  #include "timegm.hpp"
+#endif
 
 uint8_t RTC::dec_to_bcd(uint8_t val) { return ((val / 10) << 4) + (val % 10); }
 

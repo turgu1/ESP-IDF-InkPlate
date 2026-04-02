@@ -95,7 +95,7 @@ bool InkPlatePlatform::light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_nu
     }
   }
 
-  bool result = esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER;
+  bool result = (esp_sleep_get_wakeup_causes() & BIT(ESP_SLEEP_WAKEUP_TIMER)) != 0;
 
   if ((err = esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER)) != ESP_OK) {
     if (err != ESP_ERR_INVALID_STATE) {
@@ -126,4 +126,24 @@ void InkPlatePlatform::deep_sleep(gpio_num_t gpio_num, int level) {
   rtc_gpio_isolate(GPIO_NUM_12);
 
   esp_deep_sleep_start();
+  while (true) continue;
+}
+
+void InkPlatePlatform::restart() {
+  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+
+  #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
+    touch_screen.shutdown();
+    front_light.disable();
+  #endif
+
+  sd_card.deepSleep();
+  rtc_gpio_isolate(GPIO_NUM_12);
+  e_ink.turn_off();
+
+  esp_restart();
+
+  // esp_sleep_enable_timer_wakeup(1e5);
+  // esp_deep_sleep_start();
+  while (true) continue;
 }

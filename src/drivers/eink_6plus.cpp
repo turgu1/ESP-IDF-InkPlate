@@ -68,6 +68,8 @@ Distributed as-is; no warranty is given.
       return false;
     }
 
+    // ESP::delay(1000);
+
     io_expander_int.set_direction(VCOM, IOExpander::PinMode::OUTPUT);
     io_expander_int.set_direction(PWRUP, IOExpander::PinMode::OUTPUT);
     io_expander_int.set_direction(WAKEUP, IOExpander::PinMode::OUTPUT);

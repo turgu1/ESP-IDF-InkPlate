@@ -62,7 +62,7 @@ bool SDCard::setup() {
 
   sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
   slot_config.gpio_cs               = PIN_NUM_CS;
-  slot_config.host_id               = HSPI_HOST;
+  slot_config.host_id               = SPI2_HOST;
 
   spi_bus_config_t bus_cfg = {
       .mosi_io_num           = PIN_NUM_MOSI,
@@ -85,7 +85,7 @@ bool SDCard::setup() {
 
   // gpio_dump_io_configuration(stdout, (1ULL << PIN_NUM_MISO) | (1ULL << PIN_NUM_MOSI));
 
-  esp_err_t ret = spi_bus_initialize(HSPI_HOST, &bus_cfg, SDSPI_DEFAULT_DMA);
+  esp_err_t ret = spi_bus_initialize(SPI2_HOST, &bus_cfg, SDSPI_DEFAULT_DMA);
 
   gpio_set_pull_mode(PIN_NUM_MISO, GPIO_FLOATING);
 

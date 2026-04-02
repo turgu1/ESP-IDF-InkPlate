@@ -123,7 +123,7 @@ bool NetworkClient::joinAP(const char *ssid, const char *pass) {
   wifi_config.sta.password[sizeof(wifi_config.sta.password) - 1] = 0;
 
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-  ESP_ERROR_CHECK(esp_wifi_set_config((wifi_interface_t)ESP_IF_WIFI_STA, &wifi_config));
+  ESP_ERROR_CHECK(esp_wifi_set_config((wifi_interface_t)WIFI_IF_STA, &wifi_config));
   ESP_ERROR_CHECK(esp_wifi_start());
 
   ESP_LOGI(TAG, "wifi_init_sta finished.");
@@ -182,9 +182,20 @@ static esp_err_t http_event_handler(esp_http_client_event_t *evt) {
   case HTTP_EVENT_ON_CONNECTED:
     ESP_LOGI(TAG, "HTTP_EVENT_ON_CONNECTED");
     break;
+
+    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(6, 0, 0)
+    case HTTP_EVENT_ON_HEADERS_COMPLETE: // For ESP-IDF V6.0.0
+      ESP_LOGI(TAG, "HTTP_EVENT_ON_HEADERS_COMPLETE");
+      break;
+    case HTTP_EVENT_ON_STATUS_CODE: // For ESP-IDF V6.0.0
+      ESP_LOGI(TAG, "HTTP_EVENT_ON_STATUS_CODE: %d", evt->data_len);
+      break;
+    #endif
+
   case HTTP_EVENT_HEADER_SENT:
     ESP_LOGI(TAG, "HTTP_EVENT_HEADER_SENT");
     break;
+
   case HTTP_EVENT_ON_HEADER:
     ESP_LOGI(TAG, "HTTP_EVENT_ON_HEADER");
     // ESP_LOGI(TAG, "key = %s, value = %s", evt->header_key, evt->header_value);

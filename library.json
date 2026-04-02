@@ -1,15 +1,13 @@
 {
   "name": "ESP-IDF-Inkplate",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "description": "Implements common functions for Inkplate e-paper displays",
   "keywords": "inkplate, e-ink, e-paper, display, esp32",
-  "repository":
-  {
+  "repository": {
     "type": "git",
     "url": "https://github.com/turgu1/ESP-IDF-InkPlate"
   },
-  "authors":
-  [
+  "authors": [
     {
       "name": "Guy Turcotte",
       "email": "turgu666@gmail.com",

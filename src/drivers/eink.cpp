@@ -66,7 +66,8 @@ auto EInk::pwr_mgr_init() -> bool {
 
   pwrmgr_device->write(pgm, sizeof(pgm));
 
-  ESP::delay_microseconds(1800);
+  ESP::delay(50);
+
   wakeup_clear();
   return true;
 }

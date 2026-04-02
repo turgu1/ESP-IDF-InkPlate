@@ -1,6 +1,8 @@
 #pragma once
 
-#ifndef HAVE_TIMEGM
+#include "esp_idf_version.h"
+
+#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(6, 0, 0)
 
   #include <ctime>
 
