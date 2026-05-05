@@ -1,5 +1,9 @@
 # ESP-IDF-InkPlate Library Version 0.9.9
 
+(May 4th, 2026)
+
+- Update to the Battery class to permit a trim value and use a pre-defined calibration scheme if available.
+  
 (March 25th, 2026)
 
 - Now built using ESP-IDF 5.5.4 .

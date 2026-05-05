@@ -3,6 +3,20 @@
 
 #include "wire.hpp"
 
+namespace {
+constexpr double ADC_REFERENCE_VOLTAGE = 1.1;
+constexpr double ADC_ATTENUATION_SCALE = 3.548133892;
+constexpr double BATTERY_DIVIDER_SCALE = 2.0;
+constexpr double ADC_MAX_READING       = 4095.0;
+constexpr uint32_t DEFAULT_VREF_MV     = 1100;
+} // namespace
+
+Battery::~Battery() {
+  if (calibration_enabled) {
+    adc_cali_delete_scheme_line_fitting(adc_cali_handle);
+  }
+}
+
 bool Battery::setup() {
   io_expander.set_direction(BATTERY_SWITCH, IOExpander::PinMode::OUTPUT);
 
@@ -21,8 +35,20 @@ bool Battery::setup() {
 
   adc_oneshot_config_channel(adc_handle, ADC_CHANNEL_7, &adc_channel_config);
 
+  adc_cali_line_fitting_config_t calibration_config = {
+      .unit_id      = ADC_UNIT_1,
+      .atten        = ADC_ATTEN_DB_12,
+      .bitwidth     = ADC_BITWIDTH_12,
+      .default_vref = DEFAULT_VREF_MV,
+  };
+
+  calibration_enabled =
+      adc_cali_create_scheme_line_fitting(&calibration_config, &adc_cali_handle) == ESP_OK;
+
   return true;
 }
+
+void Battery::set_voltage_trim(double value) { voltage_trim = value == 0 ? 1.0 : value; }
 
 double Battery::read_level() {
   Wire::enter();
@@ -43,5 +69,14 @@ double Battery::read_level() {
   io_expander.digital_write(BATTERY_SWITCH, IOExpander::SignalLevel::LOW);
   Wire::leave();
 
-  return (double(adc_value) * 1.1 * 3.548133892 * 2) / 4095.0;
+  if (calibration_enabled) {
+    int voltage_mv;
+    if (adc_cali_raw_to_voltage(adc_cali_handle, adc_value, &voltage_mv) == ESP_OK) {
+      return (double(voltage_mv) * BATTERY_DIVIDER_SCALE * voltage_trim) / 1000.0;
+    }
+  }
+
+  return (double(adc_value) * ADC_REFERENCE_VOLTAGE * ADC_ATTENUATION_SCALE *
+          BATTERY_DIVIDER_SCALE * voltage_trim) /
+         ADC_MAX_READING;
 }
