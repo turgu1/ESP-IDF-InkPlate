@@ -20,49 +20,49 @@ bool SDCard::setup() {
     ESP_LOGI(TAG, "Setup SD card");
   }
 
-#if INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
-  Wire::enter();
-  io_expander.set_direction(SD_POWER, IOExpander::PinMode::OUTPUT);
-  io_expander.digital_write(SD_POWER, IOExpander::SignalLevel::HIGH);
-  ESP::delay(50);
-  io_expander.digital_write(SD_POWER, IOExpander::SignalLevel::LOW);
-  ESP::delay(50);
-  Wire::leave();
-#endif
+  #if INKPLATE_5V2 || INKPLATE_6V2 || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
+    Wire::enter();
+    io_expander.set_direction(SD_POWER, IOExpander::PinMode::OUTPUT);
+    io_expander.digital_write(SD_POWER, IOExpander::SignalLevel::HIGH);
+    ESP::delay(50);
+    io_expander.digital_write(SD_POWER, IOExpander::SignalLevel::LOW);
+    ESP::delay(50);
+    Wire::leave();
+  #endif
 
   // The original SDSPI_HOST_DEFAULT() from 5.3 is lacking some entries that make it
   // not userfriendly to C++
 
-#define MY_SDSPI_HOST_DEFAULT()                                                                    \
-  {                                                                                                \
-      .flags              = SDMMC_HOST_FLAG_SPI | SDMMC_HOST_FLAG_DEINIT_ARG,                      \
-      .slot               = SDSPI_DEFAULT_HOST,                                                    \
-      .max_freq_khz       = SDMMC_FREQ_DEFAULT,                                                    \
-      .io_voltage         = 3.3f,                                                                  \
-      .init               = &sdspi_host_init,                                                      \
-      .set_bus_width      = NULL,                                                                  \
-      .get_bus_width      = NULL,                                                                  \
-      .set_bus_ddr_mode   = NULL,                                                                  \
-      .set_card_clk       = &sdspi_host_set_card_clk,                                              \
-      .set_cclk_always_on = NULL,                                                                  \
-      .do_transaction     = &sdspi_host_do_transaction,                                            \
-      .deinit_p           = &sdspi_host_remove_device,                                             \
-      .io_int_enable      = &sdspi_host_io_int_enable,                                             \
-      .io_int_wait        = &sdspi_host_io_int_wait,                                               \
-      .command_timeout_ms = 0,                                                                     \
-      .get_real_freq      = &sdspi_host_get_real_freq,                                             \
-      .input_delay_phase  = SDMMC_DELAY_PHASE_0,                                                   \
-      .set_input_delay    = NULL,                                                                  \
-      .dma_aligned_buffer = NULL,                                                                  \
-      .pwr_ctrl_handle    = NULL,                                                                  \
-      .get_dma_info       = &sdspi_host_get_dma_info,                                              \
-  }
+  #define MY_SDSPI_HOST_DEFAULT()                                                                  \
+    {                                                                                              \
+        .flags              = SDMMC_HOST_FLAG_SPI | SDMMC_HOST_FLAG_DEINIT_ARG,                    \
+        .slot               = SDSPI_DEFAULT_HOST,                                                  \
+        .max_freq_khz       = SDMMC_FREQ_DEFAULT,                                                  \
+        .io_voltage         = 3.3f,                                                                \
+        .init               = &sdspi_host_init,                                                    \
+        .set_bus_width      = NULL,                                                                \
+        .get_bus_width      = NULL,                                                                \
+        .set_bus_ddr_mode   = NULL,                                                                \
+        .set_card_clk       = &sdspi_host_set_card_clk,                                            \
+        .set_cclk_always_on = NULL,                                                                \
+        .do_transaction     = &sdspi_host_do_transaction,                                          \
+        .deinit_p           = &sdspi_host_remove_device,                                           \
+        .io_int_enable      = &sdspi_host_io_int_enable,                                           \
+        .io_int_wait        = &sdspi_host_io_int_wait,                                             \
+        .command_timeout_ms = 0,                                                                   \
+        .get_real_freq      = &sdspi_host_get_real_freq,                                           \
+        .input_delay_phase  = SDMMC_DELAY_PHASE_0,                                                 \
+        .set_input_delay    = NULL,                                                                \
+        .dma_aligned_buffer = NULL,                                                                \
+        .pwr_ctrl_handle    = NULL,                                                                \
+        .get_dma_info       = &sdspi_host_get_dma_info,                                            \
+    }
 
   sdmmc_host_t host = SDSPI_HOST_DEFAULT();
 
   sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
   slot_config.gpio_cs               = PIN_NUM_CS;
-  slot_config.host_id               = HSPI_HOST;
+  slot_config.host_id               = SPI2_HOST;
 
   spi_bus_config_t bus_cfg = {
       .mosi_io_num           = PIN_NUM_MOSI,
@@ -85,7 +85,7 @@ bool SDCard::setup() {
 
   // gpio_dump_io_configuration(stdout, (1ULL << PIN_NUM_MISO) | (1ULL << PIN_NUM_MOSI));
 
-  esp_err_t ret = spi_bus_initialize(HSPI_HOST, &bus_cfg, SDSPI_DEFAULT_DMA);
+  esp_err_t ret = spi_bus_initialize(SPI2_HOST, &bus_cfg, SDSPI_DEFAULT_DMA);
 
   gpio_set_pull_mode(PIN_NUM_MISO, GPIO_FLOATING);
 
@@ -139,11 +139,11 @@ void SDCard::deepSleep() {
   gpio_set_direction(PIN_NUM_CLK, GPIO_MODE_INPUT);
   gpio_set_direction(PIN_NUM_CS, GPIO_MODE_INPUT);
 
-#if INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
-  Wire::enter();
-  io_expander.digital_write(SD_POWER, IOExpander::SignalLevel::HIGH);
-  ESP::delay(50);
-  io_expander.set_direction(SD_POWER, IOExpander::PinMode::INPUT);
-  Wire::leave();
-#endif
+  #if INKPLATE_5V2 || INKPLATE_6V2 || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
+    Wire::enter();
+    io_expander.digital_write(SD_POWER, IOExpander::SignalLevel::HIGH);
+    ESP::delay(50);
+    io_expander.set_direction(SD_POWER, IOExpander::PinMode::INPUT);
+    Wire::leave();
+  #endif
 }

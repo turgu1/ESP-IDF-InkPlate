@@ -1,9 +1,11 @@
 #pragma once
 
-#ifndef HAVE_TIMEGM
+#include "esp_idf_version.h"
 
-#include <ctime>
+#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(6, 0, 0)
 
-time_t timegm(struct tm * tm);
+  #include <ctime>
+
+  time_t timegm(struct tm *tm);
 
 #endif

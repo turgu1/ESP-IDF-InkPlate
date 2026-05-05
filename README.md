@@ -1,4 +1,17 @@
-# ESP-IDF-InkPlate Library Version 0.9.8
+# ESP-IDF-InkPlate Library Version 0.9.9
+
+(May 4th, 2026)
+
+- Update to the Battery class to permit a trim value and use a pre-defined calibration scheme if available.
+  
+(March 25th, 2026)
+
+- Now built using ESP-IDF 5.5.4 .
+- The `services/timegm.{cpp, hpp}` no longer required. The service is now supplied through the <time.h> 
+  available with the new ESP-IDF version.
+- EInk power setup is now in the EInk class. Delay after setup addusted.
+- I2SComms class reorganized.
+- Added support for Inplate 5V2 (thanks to Germain Masse)
 
 (January 20th, 2026)
 

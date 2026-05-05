@@ -1,23 +1,3 @@
-/*
-inkplate_platform.hpp
-
-Modified by Guy Turcotte
-July 20, 2024
-
-Inkplate 6 Arduino library
-David Zovko, Borna Biro, Denis Vajak, Zvonimir Haramustek @ e-radionica.com
-September 24, 2020
-https://github.com/e-radionicacom/Inkplate-6-Arduino-library
-
-For support, please reach over forums: forum.e-radionica.com/en
-For more info about the product, please check: www.inkplate.io
-
-This code is released under the GNU Lesser General Public License v3.0: https://www.gnu.org/licenses/lgpl-3.0.en.html
-Please review the LICENSE file included with this example.
-If you have any questions about licensing, please contact techsupport@e-radionica.com
-Distributed as-is; no warranty is given.
-*/
-
 #pragma once
 
 #include <cstdint>
@@ -26,12 +6,15 @@ Distributed as-is; no warranty is given.
 
 #include "battery.hpp"
 #include "eink.hpp"
+
+#include "eink_10.hpp"
+#include "eink_5v2.hpp"
 #include "eink_6.hpp"
+#include "eink_6flick.hpp"
 #include "eink_6plus.hpp"
 #include "eink_6plus_v2.hpp"
-#include "eink_6flick.hpp"
-#include "eink_10.hpp"
-#include "rtc_pcf85063.hpp" 
+#include "eink_6v2.hpp"
+#include "rtc_pcf85063.hpp"
 #include "sd_card.hpp"
 
 #if PCAL6416
@@ -54,108 +37,122 @@ Distributed as-is; no warranty is given.
 #endif
 
 #if __INKPLATE_PLATFORM__
-  IOExpander  io_expander_int(0x20);
-  Battery     battery(io_expander_int);
-  SDCard      sd_card(io_expander_int);
+  IOExpander io_expander_int(0x20);
+  Battery battery(io_expander_int);
+  SDCard sd_card(io_expander_int);
   #if EXTENDED_CASE && (INKPLATE_6 || INKPLATE_10)
     PressKeys press_keys(io_expander_int);
   #elif INKPLATE_6 || INKPLATE_10
     TouchKeys touch_keys(io_expander_int);
   #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
     TouchScreen touch_screen(io_expander_int);
-    FrontLight   front_light(io_expander_int);
+    FrontLight front_light(io_expander_int);
   #endif
 
-  #if INKPLATE_6
-    EInk6     e_ink(io_expander_int);
+  #if INKPLATE_5V2
+    EInk5V2 e_ink(io_expander_int);
+  #elif INKPLATE_6
+    EInk6 e_ink(io_expander_int);
+  #elif INKPLATE_5V2
+    EInk5V2 e_ink(io_expander_int);
+  #elif INKPLATE_6V2
+    EInk6V2 e_ink(io_expander_int);
   #elif INKPLATE_10
-    IOExpander  io_expander_ext(0x22);
-    EInk10    e_ink(io_expander_int, io_expander_ext);
+    IOExpander io_expander_ext(0x22);
+    EInk10 e_ink(io_expander_int, io_expander_ext);
   #elif INKPLATE_6PLUS
-    IOExpander  io_expander_ext(0x22);
+    IOExpander io_expander_ext(0x22);
     EInk6PLUS e_ink(io_expander_int, io_expander_ext);
   #elif INKPLATE_6PLUS_V2
-    IOExpander  io_expander_ext(0x21);
-    EInk6PLUSV2 e_ink(io_expander_int, io_expander_ext);  
+    IOExpander io_expander_ext(0x21);
+    EInk6PLUSV2 e_ink(io_expander_int, io_expander_ext);
   #elif INKPLATE_6FLICK
-    IOExpander  io_expander_ext(0x21);
-    EInk6FLICK e_ink(io_expander_int, io_expander_ext);    
+    IOExpander io_expander_ext(0x21);
+    EInk6FLICK e_ink(io_expander_int, io_expander_ext);
   #else
-    #error "One of INKPLATE_6, INKPLATE_10, INKPLATE_6PLUS, INKPLATE_6PLUS_V2, INKPLATE_6FLICK must be defined."
+    #error                                                                                         \
+        "One of INKPLATE_6, INKPLATE_5V2, INKPLATE_6V2, INKPLATE_10, INKPLATE_6PLUS, INKPLATE_6PLUS_V2, INKPLATE_6FLICK must be defined."
   #endif
-  
-  RTC       rtc(0x51);
+
+  RTC rtc(0x51);
 #else
-  extern IOExpander  io_expander_int;
-  extern Battery     battery;
-  extern SDCard      sd_card;
+  extern IOExpander io_expander_int;
+  extern Battery battery;
+  extern SDCard sd_card;
   #if EXTENDED_CASE
     extern PressKeys press_keys;
   #elif INKPLATE_6 || INKPLATE_10
     extern TouchKeys touch_keys;
   #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
     extern TouchScreen touch_screen;
-    extern FrontLight   front_light;
+    extern FrontLight front_light;
   #endif
 
-  #if INKPLATE_6
-    extern EInk6     e_ink;
+  #if INKPLATE_5V2
+    extern EInk5V2 e_ink;
+  #elif INKPLATE_6
+    extern EInk6 e_ink;
+  #elif INKPLATE_5V2
+    extern EInk5V2 e_ink;
+  #elif INKPLATE_6V2
+    extern EInk6V2 e_ink;
   #elif INKPLATE_10
-    extern IOExpander  io_expander_ext;
-    extern EInk10    e_ink;
+    extern IOExpander io_expander_ext;
+    extern EInk10 e_ink;
   #elif INKPLATE_6PLUS
-    extern IOExpander  io_expander_ext;
+    extern IOExpander io_expander_ext;
     extern EInk6PLUS e_ink;
   #elif INKPLATE_6PLUS_V2
-    extern IOExpander  io_expander_ext;
+    extern IOExpander io_expander_ext;
     extern EInk6PLUSV2 e_ink;
   #elif INKPLATE_6FLICK
-    extern IOExpander  io_expander_ext;
+    extern IOExpander io_expander_ext;
     extern EInk6FLICK e_ink;
   #else
-    #error "One of INKPLATE_6, INKPLATE_10, INKPLATE_6PLUS, INKPLATE_6PLUS_V2, INKPLATE_6FLICK must be defined."
+    #error                                                                                         \
+        "One of INKPLATE_6, INKPLATE_5V2, INKPLATE_6V2, INKPLATE_10, INKPLATE_6PLUS, INKPLATE_6PLUS_V2, INKPLATE_6FLICK must be defined."
   #endif
- 
-  extern RTC       rtc;
+
+  extern RTC rtc;
 #endif
 
-class InkPlatePlatform : NonCopyable
-{
-  private:
-    static constexpr char const * TAG = "InkPlatePlatform";
-    
-    static InkPlatePlatform singleton;
-    InkPlatePlatform() {};
+class InkPlatePlatform : NonCopyable {
+private:
+  static constexpr char const *TAG = "InkPlatePlatform";
 
-  public:
-    static inline InkPlatePlatform & get_singleton() noexcept { return singleton; }
+  static InkPlatePlatform singleton;
+  InkPlatePlatform() {};
 
-    /**
-     * @brief Setup the InkPlate Devices
-     * 
-     * This method initialize the SD-Card, the e-Ink display, battery status, and the touchkeys/touchscreen 
-     * capabilities.
-     * @param sd_card_init - true will initialize the sd_card, default is false
-     * @param touch_screen_handler - For INKPLATE_6PLUS only, pointer to the touch_screen handler. As this 
-     *                               handler is called from an interrupt function, it is very limited
-     *                               in actions that can be taken there. In the handler code, better use
-     *                               a flag or a FreeRTOS queue to get the processing done in an out of interrupt
-     *                               method or handler. 
-     * @return true - All devices ready
-     * @return false - Some device not initialized properly
-     */
-    #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
-      bool setup(bool sd_card_init = false, TouchScreen::ISRHandlerPtr touch_screen_handler = nullptr);
-    #else
-      bool setup(bool sd_card_init = false);
-    #endif
+public:
+  static inline InkPlatePlatform &get_singleton() noexcept { return singleton; }
 
-    bool light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num = (gpio_num_t) 0, int level = 1);
-    void deep_sleep(gpio_num_t gpio_num = (gpio_num_t) 0, int level = 1);
+  /**
+   * @brief Setup the InkPlate Devices
+   *
+   * This method initialize the SD-Card, the e-Ink display, battery status, and the
+   * touchkeys/touchscreen capabilities.
+   * @param sd_card_init - true will initialize the sd_card, default is false
+   * @param touch_screen_handler - For INKPLATE_6PLUS only, pointer to the touch_screen handler. As
+   * this handler is called from an interrupt function, it is very limited in actions that can be
+   * taken there. In the handler code, better use a flag or a FreeRTOS queue to get the processing
+   * done in an out of interrupt method or handler.
+   * @return true - All devices ready
+   * @return false - Some device not initialized properly
+   */
+  #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
+    bool setup(bool sd_card_init                               = false,
+               TouchScreen::ISRHandlerPtr touch_screen_handler = nullptr);
+  #else
+    bool setup(bool sd_card_init = false);
+  #endif
+
+  bool light_sleep(uint32_t minutes_to_sleep, gpio_num_t gpio_num = (gpio_num_t)0, int level = 1);
+  void deep_sleep(gpio_num_t gpio_num = (gpio_num_t)0, int level = 1);
+  void restart();
 };
 
 #if __INKPLATE_PLATFORM__
-  InkPlatePlatform & inkplate_platform = InkPlatePlatform::get_singleton();
+  InkPlatePlatform &inkplate_platform = InkPlatePlatform::get_singleton();
 #else
-  extern InkPlatePlatform & inkplate_platform;
+  extern InkPlatePlatform &inkplate_platform;
 #endif
