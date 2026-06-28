@@ -14,20 +14,18 @@ protected:
 
 public:
   FrameBuffer(int16_t w, int16_t h, int32_t s, uint8_t i)
-      : data_size(s), width(w), height(h), line_size(s / h), init_value(i) {
+    : data_size(s), width(w), height(h), line_size(s / h), init_value(i) {
     ESP_LOGD(TAG,
              "FrameBuffer created with width: %d, height: %d, data_size: %d, line_size: %d, "
              "init_value: %02x",
              (int)width, (int)height, (int)data_size, (int)line_size, (int)init_value);
   }
 
-  // clang-format off
-    inline int16_t       get_width() { return width;      }
-    inline int16_t      get_height() { return height;     }
-    inline int32_t   get_data_size() { return data_size;  }
-    inline int16_t   get_line_size() { return line_size;  }
-    inline uint8_t  get_init_value() { return init_value; }
-  // clang-format on
+  inline int16_t get_width() { return width; }
+  inline int16_t get_height() { return height; }
+  inline int32_t get_data_size() { return data_size; }
+  inline int16_t get_line_size() { return line_size; }
+  inline uint8_t get_init_value() { return init_value; }
 
   void clear() {
     // ESP_LOGD(TAG, "Clear: %08x, with: %02x, size: %d", (int)get_data(), (int)get_init_value(),
@@ -46,5 +44,5 @@ public:
 class FrameBuffer3Bit : public FrameBuffer {
 public:
   FrameBuffer3Bit(int16_t w, int16_t h, int32_t s)
-      : FrameBuffer(w, h, s, static_cast<uint8_t>(0x77)) {}
+    : FrameBuffer(w, h, s, static_cast<uint8_t>(0x77)) {}
 };

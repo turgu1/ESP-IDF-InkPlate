@@ -19,38 +19,39 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "inkplate.hpp"            //Include Inkplate library to the sketch
+#include "inkplate.hpp" //Include Inkplate library to the sketch
 
-#if INKPLATE_5V2
-  #define DEVICE_NAME "Inkplate 5V2"
+#if INKPLATE_5_V2
+#define DEVICE_NAME "Inkplate 5V2"
 #elif INKPLATE_6
-  #define DEVICE_NAME "Inkplate 6"
-#elif INKPLATE_6V2
-  #define DEVICE_NAME "Inkplate 6V2"
+#define DEVICE_NAME "Inkplate 6"
+#elif INKPLATE_6_V2
+#define DEVICE_NAME "Inkplate 6V2"
 #elif INKPLATE_6PLUS
-  #define DEVICE_NAME "Inkplate 6PLUS"
+#define DEVICE_NAME "Inkplate 6PLUS"
 #elif INKPLATE_6PLUS_V2
-  #define DEVICE_NAME "Inkplate 6PLUS V2"
+#define DEVICE_NAME "Inkplate 6PLUS V2"
 #elif INKPLATE_6FLICK
-  #define DEVICE_NAME "Inkplate 6FLICK"
+#define DEVICE_NAME "Inkplate 6FLICK"
 #elif INKPLATE_10
-  #define DEVICE_NAME "Inkplate 10"
+#define DEVICE_NAME "Inkplate 10"
 #elif INKPLATE_10_V2
-  #define DEVICE_NAME "Inkplate 10 V2"
+#define DEVICE_NAME "Inkplate 10 V2"
 #else
-  #error "Unknown device"
+#error "Unknown device"
 #endif
 
-Inkplate display(DisplayMode::INKPLATE_1BIT); // Create an object on Inkplate library and also set library into 1-bit mode (BW)
+Inkplate display(DisplayMode::INKPLATE_1BIT); // Create an object on Inkplate library and also set
+                                              // library into 1-bit mode (BW)
 
 static const char *TAG = "Main";
 
 // Char array where you can store your text that will be scrolled.
 const char text[] = "This is partial update on " DEVICE_NAME " e-paper display! :)";
 #if INKPLATE_6PLUS
-  int max = 999;
+int max = 999;
 #else
-  int max = 9;
+int max = 9;
 #endif
 
 // This variable is used for moving the text (scrolling)

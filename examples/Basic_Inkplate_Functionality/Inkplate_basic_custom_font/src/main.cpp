@@ -27,24 +27,24 @@
 
 #include "inkplate.hpp" //Include Inkplate library to the sketch
 
-#if INKPLATE_5V2
-  #define DEVICE_NAME "Inkplate 5V2"
+#if INKPLATE_5_V2
+#define DEVICE_NAME "Inkplate 5V2"
 #elif INKPLATE_6
-  #define DEVICE_NAME "Inkplate 6"
-#elif INKPLATE_6V2
-  #define DEVICE_NAME "Inkplate 6V2"
+#define DEVICE_NAME "Inkplate 6"
+#elif INKPLATE_6_V2
+#define DEVICE_NAME "Inkplate 6V2"
 #elif INKPLATE_6PLUS
-  #define DEVICE_NAME "Inkplate 6PLUS"
+#define DEVICE_NAME "Inkplate 6PLUS"
 #elif INKPLATE_6PLUS_V2
-  #define DEVICE_NAME "Inkplate 6PLUS V2"
+#define DEVICE_NAME "Inkplate 6PLUS V2"
 #elif INKPLATE_6FLICK
-  #define DEVICE_NAME "Inkplate 6FLICK"
+#define DEVICE_NAME "Inkplate 6FLICK"
 #elif INKPLATE_10
-  #define DEVICE_NAME "Inkplate 10"
+#define DEVICE_NAME "Inkplate 10"
 #elif INKPLATE_10_V2
-  #define DEVICE_NAME "Inkplate 10 V2"
+#define DEVICE_NAME "Inkplate 10 V2"
 #else
-  #error "Unknown device"
+#error "Unknown device"
 #endif
 
 #include "DSEG14Classic_Regular20pt7b.h" //Include second font

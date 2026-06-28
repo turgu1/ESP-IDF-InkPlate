@@ -1,24 +1,24 @@
 /*
-eink_6plus.cpp
-Inkplate 6PLUS V2 ESP-IDF
+   eink_6plus.cpp
+   Inkplate 6PLUS V2 ESP-IDF
 
-Modified by Guy Turcotte
-July 20, 2024
+   Modified by Guy Turcotte
+   July 20, 2024
 
-from the Arduino Library:
+   from the Arduino Library:
 
-David Zovko, Borna Biro, Denis Vajak, Zvonimir Haramustek @ e-radionica.com
-September 24, 2020
-https://github.com/e-radionicacom/Inkplate-6-Arduino-library
+   David Zovko, Borna Biro, Denis Vajak, Zvonimir Haramustek @ e-radionica.com
+   September 24, 2020
+   https://github.com/e-radionicacom/Inkplate-6-Arduino-library
 
-For support, please reach over forums: forum.e-radionica.com/en
-For more info about the product, please check: www.inkplate.io
+   For support, please reach over forums: forum.e-radionica.com/en
+   For more info about the product, please check: www.inkplate.io
 
-This code is released under the GNU Lesser General Public License v3.0:
-https://www.gnu.org/licenses/lgpl-3.0.en.html Please review the LICENSE file included with this
-example. If you have any questions about licensing, please contact techsupport@e-radionica.com
-Distributed as-is; no warranty is given.
-*/
+   This code is released under the GNU Lesser General Public License v3.0:
+   https://www.gnu.org/licenses/lgpl-3.0.en.html Please review the LICENSE file included with this
+   example. If you have any questions about licensing, please contact techsupport@e-radionica.com
+   Distributed as-is; no warranty is given.
+ */
 
 #if INKPLATE_6PLUS_V2
 
@@ -31,22 +31,19 @@ Distributed as-is; no warranty is given.
 
   #include <iostream>
 
-  // clang-format off
   const uint8_t EInk6PLUSV2::WAVEFORM_3BIT[8][9] = {
-      {0, 0, 0, 0, 0, 2, 1, 1, 0}, {0, 0, 2, 1, 1, 1, 2, 1, 0},
-      {0, 2, 2, 2, 1, 1, 2, 1, 0}, {0, 0, 2, 2, 2, 1, 2, 1, 0},
-      {0, 0, 0, 0, 2, 2, 2, 1, 0}, {0, 0, 2, 1, 2, 1, 1, 2, 0},
-      {0, 0, 2, 2, 2, 1, 1, 2, 0}, {0, 0, 0, 0, 2, 2, 2, 2, 0}};
+    { 0, 0, 0, 0, 0, 2, 1, 1, 0 }, { 0, 0, 2, 1, 1, 1, 2, 1, 0 }, { 0, 2, 2, 2, 1, 1, 2, 1, 0 },
+    { 0, 0, 2, 2, 2, 1, 2, 1, 0 }, { 0, 0, 0, 0, 2, 2, 2, 1, 0 }, { 0, 0, 2, 1, 2, 1, 1, 2, 0 },
+    { 0, 0, 2, 2, 2, 1, 1, 2, 0 }, { 0, 0, 0, 0, 2, 2, 2, 2, 0 } };
 
-  const uint8_t EInk6PLUSV2::LUTW[16] = {0xFF, 0xFE, 0xFB, 0xFA, 0xEF, 0xEE, 0xEB, 0xEA,
-                                         0xBF, 0xBE, 0xBB, 0xBA, 0xAF, 0xAE, 0xAB, 0xAA};
+  const uint8_t EInk6PLUSV2::LUTW[16] = { 0xFF, 0xFE, 0xFB, 0xFA, 0xEF, 0xEE, 0xEB, 0xEA,
+                                          0xBF, 0xBE, 0xBB, 0xBA, 0xAF, 0xAE, 0xAB, 0xAA };
 
-  const uint8_t EInk6PLUSV2::LUTB[16] = {0xFF, 0xFD, 0xF7, 0xF5, 0xDF, 0xDD, 0xD7, 0xD5,
-                                         0x7F, 0x7D, 0x77, 0x75, 0x5F, 0x5D, 0x57, 0x55};
-  // clang-format on
+  const uint8_t EInk6PLUSV2::LUTB[16] = { 0xFF, 0xFD, 0xF7, 0xF5, 0xDF, 0xDD, 0xD7, 0xD5,
+                                          0x7F, 0x7D, 0x77, 0x75, 0x5F, 0x5D, 0x57, 0x55 };
 
   bool EInk6PLUSV2::setup() {
-    if (initialized) return true;
+    if (initialized) { return true; }
 
     ESP_LOGD(TAG, "Initializing...");
 
@@ -68,9 +65,9 @@ Distributed as-is; no warranty is given.
       return false;
     }
 
-    io_expander_int.set_direction(VCOM, IOExpander::PinMode::OUTPUT);
-    io_expander_int.set_direction(PWRUP, IOExpander::PinMode::OUTPUT);
-    io_expander_int.set_direction(WAKEUP, IOExpander::PinMode::OUTPUT);
+    io_expander_int.set_direction(VCOM,         IOExpander::PinMode::OUTPUT);
+    io_expander_int.set_direction(PWRUP,        IOExpander::PinMode::OUTPUT);
+    io_expander_int.set_direction(WAKEUP,       IOExpander::PinMode::OUTPUT);
     io_expander_int.set_direction(GPIO0_ENABLE, IOExpander::PinMode::OUTPUT);
     io_expander_int.digital_write(GPIO0_ENABLE, IOExpander::SignalLevel::HIGH);
 
@@ -90,18 +87,18 @@ Distributed as-is; no warranty is given.
     io_expander_int.digital_write(IOExpander::Pin::IOPIN_15, IOExpander::SignalLevel::LOW);
 
     // CONTROL PINS
-    gpio_set_direction(GPIO_NUM_0, GPIO_MODE_OUTPUT);
-    gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_2,  GPIO_MODE_OUTPUT);
     gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
     gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT);
 
-    io_expander_int.set_direction(OE, IOExpander::PinMode::OUTPUT);
+    io_expander_int.set_direction(OE,   IOExpander::PinMode::OUTPUT);
     io_expander_int.set_direction(GMOD, IOExpander::PinMode::OUTPUT);
-    io_expander_int.set_direction(SPV, IOExpander::PinMode::OUTPUT);
+    io_expander_int.set_direction(SPV,  IOExpander::PinMode::OUTPUT);
 
     // DATA PINS
-    gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT); // D0
-    gpio_set_direction(GPIO_NUM_5, GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_4,  GPIO_MODE_OUTPUT); // D0
+    gpio_set_direction(GPIO_NUM_5,  GPIO_MODE_OUTPUT);
     gpio_set_direction(GPIO_NUM_18, GPIO_MODE_OUTPUT);
     gpio_set_direction(GPIO_NUM_19, GPIO_MODE_OUTPUT);
     gpio_set_direction(GPIO_NUM_23, GPIO_MODE_OUTPUT);
@@ -147,7 +144,7 @@ Distributed as-is; no warranty is given.
     ESP_LOGD(TAG, "1bit Update...");
 
     const uint8_t *ptr;
-    uint8_t dram;
+    uint8_t        dram;
 
     Wire::enter();
 
@@ -156,14 +153,12 @@ Distributed as-is; no warranty is given.
       return;
     }
 
-    // clang-format off
-    clean(PixelState::WHITE,      1);
+    clean(PixelState::WHITE,     1);
     clean(PixelState::BLACK,     15);
-    clean(PixelState::DISCHARGE,  1);
-    clean(PixelState::WHITE,      5);
-    clean(PixelState::DISCHARGE,  1);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::WHITE,     5);
+    clean(PixelState::DISCHARGE, 1);
     clean(PixelState::BLACK,     15);
-    // clang-format on
 
     uint8_t *data = frame_buffer.get_data();
 
@@ -223,7 +218,7 @@ Distributed as-is; no warranty is given.
     ESP::delay_microseconds(230);
 
     clean(PixelState::DISCHARGE, 2);
-    clean(PixelState::SKIP, 1);
+    clean(PixelState::SKIP,      1);
 
     vscan_start();
     turn_off();
@@ -243,14 +238,12 @@ Distributed as-is; no warranty is given.
       return;
     }
 
-    // clang-format off
-    clean(PixelState::WHITE,      1);
+    clean(PixelState::WHITE,     1);
     clean(PixelState::BLACK,     15);
-    clean(PixelState::DISCHARGE,  1);
-    clean(PixelState::WHITE,      5);
-    clean(PixelState::DISCHARGE,  1);
+    clean(PixelState::DISCHARGE, 1);
+    clean(PixelState::WHITE,     5);
+    clean(PixelState::DISCHARGE, 1);
     clean(PixelState::BLACK,     15);
-    // clang-format on
 
     uint8_t *data = frame_buffer.get_data();
 
@@ -345,7 +338,7 @@ Distributed as-is; no warranty is given.
     }
 
     clean(PixelState::DISCHARGE, 2);
-    clean(PixelState::SKIP, 1);
+    clean(PixelState::SKIP,      1);
 
     vscan_start();
     turn_off();
@@ -355,7 +348,7 @@ Distributed as-is; no warranty is given.
   }
 
   void EInk6PLUSV2::clean(PixelState pixel_state, uint8_t repeat_count) {
-    if (!turn_on()) return;
+    if (!turn_on()) { return; }
 
     uint32_t send = PIN_LUT[static_cast<uint8_t>(pixel_state)];
 

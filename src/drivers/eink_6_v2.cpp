@@ -1,54 +1,51 @@
 /*
-eink_6v2.cpp
-Inkplate 6V2 ESP-IDF
+   eink_6v2.cpp
+   Inkplate 6V2 ESP-IDF
 
-Modified by Guy Turcotte
-Mars 11, 2026
+   Modified by Guy Turcotte
+   Mars 11, 2026
 
-from the Arduino Library:
+   from the Arduino Library:
 
-David Zovko, Borna Biro, Denis Vajak, Zvonimir Haramustek @ e-radionica.com
-September 24, 2020
-https://github.com/e-radionicacom/Inkplate-6-Arduino-library
+   David Zovko, Borna Biro, Denis Vajak, Zvonimir Haramustek @ e-radionica.com
+   September 24, 2020
+   https://github.com/e-radionicacom/Inkplate-6-Arduino-library
 
-For support, please reach over forums: forum.e-radionica.com/en
-For more info about the product, please check: www.inkplate.io
+   For support, please reach over forums: forum.e-radionica.com/en
+   For more info about the product, please check: www.inkplate.io
 
-This code is released under the GNU Lesser General Public License v3.0:
-https://www.gnu.org/licenses/lgpl-3.0.en.html Please review the LICENSE file included with this
-example. If you have any questions about licensing, please contact techsupport@e-radionica.com
-Distributed as-is; no warranty is given.
-*/
+   This code is released under the GNU Lesser General Public License v3.0:
+   https://www.gnu.org/licenses/lgpl-3.0.en.html Please review the LICENSE file included with this
+   example. If you have any questions about licensing, please contact techsupport@e-radionica.com
+   Distributed as-is; no warranty is given.
+ */
 
-#if INKPLATE_6V2
+#if INKPLATE_6_V2
 
   #define __EINK6V2__ 1
-  #include "eink_6v2.hpp"
+  #include "eink_6_v2.hpp"
 
   #include "esp.hpp"
   #include "esp_log.h"
 
-  // #include <iostream>
+// #include <iostream>
 
-  // clang-format off
   const uint8_t EInk6V2::WAVEFORM_3BIT[8][9] = {
-      {0, 0, 0, 0, 1, 1, 1, 1, 0}, {0, 0, 0, 1, 1, 1, 1, 0, 0}, 
-      {1, 1, 1, 1, 0, 2, 1, 0, 0}, {1, 1, 1, 2, 2, 1, 1, 0, 0},
-      {1, 1, 1, 1, 2, 2, 1, 0, 0}, {0, 1, 1, 1, 2, 2, 1, 0, 0},
-      {0, 0, 0, 0, 1, 1, 2, 0, 0}, {0, 0, 0, 0, 0, 0, 2, 0, 0}};
+    { 0, 0, 0, 0, 1, 1, 1, 1, 0 }, { 0, 0, 0, 1, 1, 1, 1, 0, 0 }, { 1, 1, 1, 1, 0, 2, 1, 0, 0 },
+    { 1, 1, 1, 2, 2, 1, 1, 0, 0 }, { 1, 1, 1, 1, 2, 2, 1, 0, 0 }, { 0, 1, 1, 1, 2, 2, 1, 0, 0 },
+    { 0, 0, 0, 0, 1, 1, 2, 0, 0 }, { 0, 0, 0, 0, 0, 0, 2, 0, 0 } };
 
-  const uint8_t EInk6V2::LUT2[16] = {0xAA, 0xA9, 0xA6, 0xA5, 0x9A, 0x99, 0x96, 0x95,
-                                     0x6A, 0x69, 0x66, 0x65, 0x5A, 0x59, 0x56, 0x55};
+  const uint8_t EInk6V2::LUT2[16] = { 0xAA, 0xA9, 0xA6, 0xA5, 0x9A, 0x99, 0x96, 0x95,
+                                      0x6A, 0x69, 0x66, 0x65, 0x5A, 0x59, 0x56, 0x55 };
 
-  const uint8_t EInk6V2::LUTW[16] = {0xFF, 0xFE, 0xFB, 0xFA, 0xEF, 0xEE, 0xEB, 0xEA,
-                                     0xBF, 0xBE, 0xBB, 0xBA, 0xAF, 0xAE, 0xAB, 0xAA};
+  const uint8_t EInk6V2::LUTW[16] = { 0xFF, 0xFE, 0xFB, 0xFA, 0xEF, 0xEE, 0xEB, 0xEA,
+                                      0xBF, 0xBE, 0xBB, 0xBA, 0xAF, 0xAE, 0xAB, 0xAA };
 
-  const uint8_t EInk6V2::LUTB[16] = {0xFF, 0xFD, 0xF7, 0xF5, 0xDF, 0xDD, 0xD7, 0xD5,
-                                     0x7F, 0x7D, 0x77, 0x75, 0x5F, 0x5D, 0x57, 0x55};
-  // clang-format on
+  const uint8_t EInk6V2::LUTB[16] = { 0xFF, 0xFD, 0xF7, 0xF5, 0xDF, 0xDD, 0xD7, 0xD5,
+                                      0x7F, 0x7D, 0x77, 0x75, 0x5F, 0x5D, 0x57, 0x55 };
 
   bool EInk6V2::setup() {
-    if (initialized) return true;
+    if (initialized) { return true; }
 
     // esp_log_level_set(TAG, ESP_LOG_DEBUG);
     // esp_log_level_set("EInk", ESP_LOG_DEBUG);
@@ -73,8 +70,8 @@ Distributed as-is; no warranty is given.
       return false;
     }
 
-    io_expander_int.set_direction(VCOM, IOExpander::PinMode::OUTPUT);
-    io_expander_int.set_direction(PWRUP, IOExpander::PinMode::OUTPUT);
+    io_expander_int.set_direction(VCOM,   IOExpander::PinMode::OUTPUT);
+    io_expander_int.set_direction(PWRUP,  IOExpander::PinMode::OUTPUT);
     io_expander_int.set_direction(WAKEUP, IOExpander::PinMode::OUTPUT);
 
     io_expander_int.set_direction(GPIO0_ENABLE, IOExpander::PinMode::OUTPUT);
@@ -94,14 +91,14 @@ Distributed as-is; no warranty is given.
     io_expander_int.digital_write(IOExpander::Pin::IOPIN_15, IOExpander::SignalLevel::LOW);
 
     // CONTROL PINS
-    gpio_set_direction(GPIO_NUM_0, GPIO_MODE_OUTPUT);
-    gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_2,  GPIO_MODE_OUTPUT);
     gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
     gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT);
 
-    io_expander_int.set_direction(OE, IOExpander::PinMode::OUTPUT);
+    io_expander_int.set_direction(OE,   IOExpander::PinMode::OUTPUT);
     io_expander_int.set_direction(GMOD, IOExpander::PinMode::OUTPUT);
-    io_expander_int.set_direction(SPV, IOExpander::PinMode::OUTPUT);
+    io_expander_int.set_direction(SPV,  IOExpander::PinMode::OUTPUT);
 
     #if DMA_ENABLE
       if (i2s_comms.is_ready()) { // instanciated through the EInk constructor
@@ -135,10 +132,9 @@ Distributed as-is; no warranty is given.
 
     for (auto j = 0; j < 9; j++) {
       for (auto i = 0; i < 256; i++) {
-        GLUT[(j << 8) + i] =
-            (WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j]);
+        GLUT[(j << 8) + i] = (WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j]);
         GLUT2[(j << 8) + i] =
-            ((WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j])) << 4;
+          ((WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j])) << 4;
       }
     }
 
@@ -169,17 +165,15 @@ Distributed as-is; no warranty is given.
 
       ESP_LOGD(TAG, "Cleaning display...");
 
-      // clang-format off
-      clean(PixelState::WHITE,      1);
+      clean(PixelState::WHITE,     1);
       clean(PixelState::BLACK,     18);
-      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::DISCHARGE, 1);
       clean(PixelState::WHITE,     18);
-      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::DISCHARGE, 1);
       clean(PixelState::BLACK,     18);
-      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::DISCHARGE, 1);
       clean(PixelState::WHITE,     18);
-      clean(PixelState::DISCHARGE,  1);
-      // clang-format on
+      clean(PixelState::DISCHARGE, 1);
 
       // i2s_comms.show_clocks();
 
@@ -199,10 +193,10 @@ Distributed as-is; no warranty is given.
           for (auto n = 0; n < (WIDTH / 4); n += 4) {
             uint8_t dram1      = *ptr--;
             uint8_t dram2      = *ptr--;
-            line_buffer[n]     = LUTB[(dram2 >> 4) & 0x0F]; // i + 2;
-            line_buffer[n + 1] = LUTB[dram2 & 0x0F];        // i + 3;
+            line_buffer[n]     = LUTB[(dram2 >> 4) & 0x0F];// i + 2;
+            line_buffer[n + 1] = LUTB[dram2 & 0x0F];    // i + 3;
             line_buffer[n + 2] = LUTB[(dram1 >> 4) & 0x0F]; // i;
-            line_buffer[n + 3] = LUTB[dram1 & 0x0F];        // i + 1;
+            line_buffer[n + 3] = LUTB[dram1 & 0x0F];    // i + 1;
           }
 
           i2s_comms.send_data();
@@ -225,10 +219,10 @@ Distributed as-is; no warranty is given.
           for (auto n = 0; n < (WIDTH / 4); n += 4) {
             uint8_t dram1      = *ptr--;
             uint8_t dram2      = *ptr--;
-            line_buffer[n]     = LUT2[(dram2 >> 4) & 0x0F]; // i + 2;
-            line_buffer[n + 1] = LUT2[dram2 & 0x0F];        // i + 3;
+            line_buffer[n]     = LUT2[(dram2 >> 4) & 0x0F];// i + 2;
+            line_buffer[n + 1] = LUT2[dram2 & 0x0F];    // i + 3;
             line_buffer[n + 2] = LUT2[(dram1 >> 4) & 0x0F]; // i;
-            line_buffer[n + 3] = LUT2[dram1 & 0x0F];        // i + 1;
+            line_buffer[n + 3] = LUT2[dram1 & 0x0F];    // i + 1;
           }
 
           i2s_comms.send_data();
@@ -247,7 +241,7 @@ Distributed as-is; no warranty is given.
         for (auto i = 0; i < HEIGHT; i++) {
 
           for (auto n = 0; n < (WIDTH / 4); n += 4) {
-            line_buffer[n]     = 0; // i + 2;
+            line_buffer[n]     = 0;// i + 2;
             line_buffer[n + 1] = 0; // i + 3;
             line_buffer[n + 2] = 0; // i;
             line_buffer[n + 3] = 0; // i + 1;
@@ -281,17 +275,15 @@ Distributed as-is; no warranty is given.
         return;
       }
 
-      // clang-format off
-      clean(PixelState::WHITE,      1);
+      clean(PixelState::WHITE,     1);
       clean(PixelState::BLACK,     18);
-      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::DISCHARGE, 1);
       clean(PixelState::WHITE,     18);
-      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::DISCHARGE, 1);
       clean(PixelState::BLACK,     18);
-      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::DISCHARGE, 1);
       clean(PixelState::WHITE,     18);
-      clean(PixelState::DISCHARGE,  1);
-      // clang-format on
+      clean(PixelState::DISCHARGE, 1);
 
       uint8_t *data = frame_buffer.get_data();
 
@@ -365,7 +357,7 @@ Distributed as-is; no warranty is given.
       volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
       i2s_comms.init_lldesc();
 
-      if (line_buffer == nullptr) return;
+      if (line_buffer == nullptr) { return; }
 
       for (auto k = 0; k < 6; k++) {
 
@@ -389,7 +381,7 @@ Distributed as-is; no warranty is given.
       }
 
       clean(PixelState::DISCHARGE, 2);
-      clean(PixelState::SKIP, 1);
+      clean(PixelState::SKIP,      1);
 
       vscan_start();
       turn_off();
@@ -429,8 +421,8 @@ Distributed as-is; no warranty is given.
       ESP_LOGD(TAG, "1bit Update...");
 
       const uint8_t *ptr;
-      uint32_t send;
-      uint8_t dram;
+      uint32_t       send;
+      uint8_t        dram;
 
       Wire::enter();
 
@@ -439,17 +431,15 @@ Distributed as-is; no warranty is given.
         return;
       }
 
-      // clang-format off
-      clean(PixelState::WHITE,      1);
+      clean(PixelState::WHITE,     1);
       clean(PixelState::BLACK,     18);
-      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::DISCHARGE, 1);
       clean(PixelState::WHITE,     18);
-      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::DISCHARGE, 1);
       clean(PixelState::BLACK,     18);
-      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::DISCHARGE, 1);
       clean(PixelState::WHITE,     18);
-      clean(PixelState::DISCHARGE,  1);
-      // clang-format on
+      clean(PixelState::DISCHARGE, 1);
 
       uint8_t *data = frame_buffer.get_data();
 
@@ -549,17 +539,15 @@ Distributed as-is; no warranty is given.
         return;
       }
 
-      // clang-format off
-      clean(PixelState::WHITE,      1);
+      clean(PixelState::WHITE,     1);
       clean(PixelState::BLACK,     18);
-      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::DISCHARGE, 1);
       clean(PixelState::WHITE,     18);
-      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::DISCHARGE, 1);
       clean(PixelState::BLACK,     18);
-      clean(PixelState::DISCHARGE,  1);
+      clean(PixelState::DISCHARGE, 1);
       clean(PixelState::WHITE,     18);
-      clean(PixelState::DISCHARGE,  1);
-      // clang-format on
+      clean(PixelState::DISCHARGE, 1);
 
       uint8_t *data = frame_buffer.get_data();
 
@@ -657,7 +645,7 @@ Distributed as-is; no warranty is given.
       }
 
       clean(PixelState::DISCHARGE, 2);
-      clean(PixelState::SKIP, 1);
+      clean(PixelState::SKIP,      1);
 
       vscan_start();
       turn_off();

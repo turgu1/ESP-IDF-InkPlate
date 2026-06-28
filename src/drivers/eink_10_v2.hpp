@@ -20,9 +20,11 @@
    Distributed as-is; no warranty is given.
  */
 
-#if INKPLATE_10
+#if INKPLATE_10_V2
 
   #pragma once
+
+  #define DMA 1
 
   #include <cinttypes>
   #include <cstring>
@@ -41,17 +43,22 @@
  * @brief Low level e-Ink display
  *
  * This class implements the low level methods required to control
- * and access the e-ink display of the ERadionica InkPlate-10 device.
+ * and access the e-ink display of the Soldered InkPlate-10 V2 device.
  *
  * This is a singleton. It cannot be instanciated elsewhere. It is not
  * instanciated in the heap. This is reinforced by the C++ construction
  * below. It also cannot be copied through the NonCopyable derivation.
  */
 
-  class EInk10 : public EInk, NonCopyable {
+  class EInk10V2 : public EInk, NonCopyable {
     public:
-      EInk10(IOExpander &io_expander_i, IOExpander &io_expander_e)
-        : EInk(io_expander_i), io_expander_ext(io_expander_e) {} // Private constructor
+      #if DMA_ENABLE
+        EInk10V2(IOExpander &io_expander_i, IOExpander &io_expander_e)
+          : EInk(io_expander_i, WIDTH), io_expander_ext(io_expander_e) {} // Private constructor
+      #else
+        EInk10V2(IOExpander &io_expander_i, IOExpander &io_expander_e)
+          : EInk(io_expander_i), io_expander_ext(io_expander_e) {} // Private constructor
+      #endif
 
       static const uint16_t WIDTH            = 1200;                        // In pixels
       static const uint16_t HEIGHT           = 825;                         // In pixels
@@ -85,7 +92,7 @@
       void partial_update(FrameBuffer1Bit &frame_buffer, bool force = false);
 
     private:
-      static constexpr char const *TAG = "EInk10";
+      static constexpr char const *TAG = "EInk10V2";
 
       IOExpander &io_expander_ext;
 

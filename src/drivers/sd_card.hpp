@@ -6,9 +6,9 @@
 #include "sdmmc_cmd.h"
 
 #if PCAL6416
-  #include "pcal6416.hpp"
+#include "pcal6416.hpp"
 #else
-  #include "mcp23017.hpp"
+#include "mcp23017.hpp"
 #endif
 
 class SDCard {
@@ -30,12 +30,12 @@ public:
 private:
   static constexpr char const *TAG = "SDCard";
 
-  #if INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
-    static constexpr IOExpander::Pin SD_POWER = IOExpander::Pin::IOPIN_13;
-  #endif
-  #if INKPLATE_6V2 || INKPLATE_5V2
-    static constexpr IOExpander::Pin SD_POWER = IOExpander::Pin::IOPIN_10;
-  #endif
+#if INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
+  static constexpr IOExpander::Pin SD_POWER = IOExpander::Pin::IOPIN_13;
+#endif
+#if INKPLATE_6_V2 || INKPLATE_10_V2 || INKPLATE_5_V2
+  static constexpr IOExpander::Pin SD_POWER = IOExpander::Pin::IOPIN_10;
+#endif
 
   static constexpr gpio_num_t PIN_NUM_MISO = GPIO_NUM_12;
   static constexpr gpio_num_t PIN_NUM_MOSI = GPIO_NUM_13;
@@ -43,9 +43,7 @@ private:
   static constexpr gpio_num_t PIN_NUM_CS   = GPIO_NUM_15;
 
   IOExpander &io_expander;
-  enum class SDCardState : uint8_t {
-    UNINITIALIZED, INITIALIZED, FAILED
-  };
+  enum class SDCardState : uint8_t { UNINITIALIZED, INITIALIZED, FAILED };
   SDCardState state{SDCardState::UNINITIALIZED};
   sdmmc_card_t *card{nullptr};
 };

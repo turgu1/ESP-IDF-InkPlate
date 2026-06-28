@@ -8,25 +8,32 @@
 
 #include <cstring>
 
-Wire Wire::singleton;
+Wire              Wire::singleton;
 SemaphoreHandle_t Wire::mutex = nullptr;
 StaticSemaphore_t Wire::mutex_buffer;
 
 void Wire::setup() {
   if (!initialized) {
 
-    ESP_LOGD(TAG, "Initializing...");
+    ESP_LOGW(TAG, "Initializing...");
+
+    // // Generate a bitmask for GPIO 21 and GPIO 22
+    // uint64_t pin_mask = (1ULL << GPIO_NUM_21) | (1ULL << GPIO_NUM_22);
+
+    // printf("\n--- DUMPING I2C GPIO STATUS BEFORE INIT ---\n");
+    // gpio_dump_io_configuration(stdout, pin_mask);
+    // printf("-------------------------------------------\n\n");
 
     mutex = xSemaphoreCreateMutexStatic(&mutex_buffer);
 
     i2c_master_bus_config_t i2c_mst_config;
 
     i2c_mst_config.clk_source        = I2C_CLK_SRC_DEFAULT;
-    i2c_mst_config.i2c_port          = 0;
+    i2c_mst_config.i2c_port          = I2C_NUM_1;
     i2c_mst_config.scl_io_num        = GPIO_NUM_22;
     i2c_mst_config.sda_io_num        = GPIO_NUM_21;
     i2c_mst_config.glitch_ignore_cnt = 7;
-    #if INKPLATE_5V2
+    #if INKPLATE_5_V2
       i2c_mst_config.flags.enable_internal_pullup = true;
     #else
       i2c_mst_config.flags.enable_internal_pullup = false;

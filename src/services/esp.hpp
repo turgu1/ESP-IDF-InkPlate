@@ -18,7 +18,7 @@
 static const uint8_t HIGH = 1;
 static const uint8_t LOW  = 0;
 
-#define NOP() asm volatile("nop")
+#define NOP() asm volatile ("nop")
 
 /**
  * @brief ESP-IDF support methods
@@ -55,7 +55,7 @@ public:
     vTaskDelay(milliseconds / portTICK_PERIOD_MS);
 
     uint32_t remainder_usec = (milliseconds % portTICK_PERIOD_MS) * 1000;
-    if (remainder_usec) delay_microseconds(remainder_usec);
+    if (remainder_usec) { delay_microseconds(remainder_usec); }
   }
 
   static void *ps_malloc(uint32_t size) {
@@ -69,14 +69,14 @@ public:
     return mem;
   }
 
-  // clang-format off
   static void show_heaps_info() {
-    char * task_name = pcTaskGetName(nullptr);
+    char *task_name = pcTaskGetName(nullptr);
     ESP_LOGD(TAG, "%s +----- HEAPS/STACK DATA -----+", task_name);
-    ESP_LOGD(TAG, "%s | Total heap:        %7d |",     task_name,    heap_caps_get_total_size(MALLOC_CAP_8BIT));
-    ESP_LOGD(TAG, "%s | Free heap:         %7d |",     task_name,     heap_caps_get_free_size(MALLOC_CAP_8BIT));
-    ESP_LOGD(TAG, "%s | Free stack:        %7d |",     task_name, uxTaskGetStackHighWaterMark(nullptr        ));
+    ESP_LOGD(TAG, "%s | Total heap:        %7d |",     task_name,
+             heap_caps_get_total_size(MALLOC_CAP_8BIT));
+    ESP_LOGD(TAG, "%s | Free heap:         %7d |", task_name,
+             heap_caps_get_free_size(MALLOC_CAP_8BIT));
+    ESP_LOGD(TAG, "%s | Free stack:        %7d |",     task_name, uxTaskGetStackHighWaterMark(nullptr));
     ESP_LOGD(TAG, "%s +----------------------------+", task_name);
   }
-  // clang-format on
 };

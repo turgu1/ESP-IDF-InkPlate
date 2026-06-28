@@ -1,4 +1,4 @@
-#if (INKPLATE_6 && DMA_ENABLE) || INKPLATE_5V2 || (INKPLATE_6V2 && DMA_ENABLE) || INKPLATE_6FLICK
+#if ((INKPLATE_6 || INKPLATE_6_V2 || INKPLATE_10_V2) && DMA_ENABLE) || INKPLATE_5_V2 || INKPLATE_6FLICK
 
   #define __I2S_COMMS__ 1
 
@@ -6,23 +6,23 @@
 
   #define SPH 0x02 // GPIO33
   #define SPH_SET                                                                                  \
-    {                                                                                              \
-      GPIO.out1_w1ts.val = SPH;                                                                    \
-    }
+          {                                                                                              \
+            GPIO.out1_w1ts.val = SPH;                                                                    \
+          }
   #define SPH_CLEAR                                                                                \
-    {                                                                                              \
-      GPIO.out1_w1tc.val = SPH;                                                                    \
-    }
+          {                                                                                              \
+            GPIO.out1_w1tc.val = SPH;                                                                    \
+          }
 
   #define CKV 0x01
   #define CKV_SET                                                                                  \
-    {                                                                                              \
-      GPIO.out1_w1ts.val = CKV;                                                                    \
-    }
+          {                                                                                              \
+            GPIO.out1_w1ts.val = CKV;                                                                    \
+          }
   #define CKV_CLEAR                                                                                \
-    {                                                                                              \
-      GPIO.out1_w1tc.val = CKV;                                                                    \
-    }
+          {                                                                                              \
+            GPIO.out1_w1tc.val = CKV;                                                                    \
+          }
 
   void I2SComms::init(uint8_t clockDivider) {
 
@@ -146,9 +146,9 @@
   }
 
   void I2SComms::setup_pins() {
-    set_pin(0, I2S1O_BCK_OUT_IDX, 0);
-    set_pin(4, I2S1O_DATA_OUT0_IDX, 0);
-    set_pin(5, I2S1O_DATA_OUT1_IDX, 0);
+    set_pin(0,  I2S1O_BCK_OUT_IDX,   0);
+    set_pin(4,  I2S1O_DATA_OUT0_IDX, 0);
+    set_pin(5,  I2S1O_DATA_OUT1_IDX, 0);
     set_pin(18, I2S1O_DATA_OUT2_IDX, 0);
     set_pin(19, I2S1O_DATA_OUT3_IDX, 0);
     set_pin(23, I2S1O_DATA_OUT4_IDX, 0);
@@ -159,52 +159,52 @@
 
   void I2SComms::set_pin(uint32_t pin, uint32_t function, uint32_t inv) {
     // Check if valid pin is selected
-    if (pin > 39) return;
+    if (pin > 39) { return; }
 
     // Fast GPIO pin to MUX (maybe there is a better way to do this?).
-    const uint32_t io_mux[] = {IO_MUX_GPIO0_REG,
-                               IO_MUX_GPIO1_REG,
-                               IO_MUX_GPIO2_REG,
-                               IO_MUX_GPIO3_REG,
-                               IO_MUX_GPIO4_REG,
-                               IO_MUX_GPIO5_REG,
-                               IO_MUX_GPIO6_REG,
-                               IO_MUX_GPIO7_REG,
-                               IO_MUX_GPIO8_REG,
-                               IO_MUX_GPIO9_REG,
-                               IO_MUX_GPIO10_REG,
-                               IO_MUX_GPIO11_REG,
-                               IO_MUX_GPIO12_REG,
-                               IO_MUX_GPIO13_REG,
-                               IO_MUX_GPIO14_REG,
-                               IO_MUX_GPIO15_REG,
-                               IO_MUX_GPIO16_REG,
-                               IO_MUX_GPIO17_REG,
-                               IO_MUX_GPIO18_REG,
-                               IO_MUX_GPIO19_REG,
-                               IO_MUX_GPIO20_REG,
-                               IO_MUX_GPIO21_REG,
-                               IO_MUX_GPIO22_REG,
-                               IO_MUX_GPIO23_REG,
-                               IO_MUX_GPIO24_REG,
-                               IO_MUX_GPIO25_REG,
-                               IO_MUX_GPIO26_REG,
-                               IO_MUX_GPIO27_REG,
-                               0,
-                               0,
-                               0,
-                               0,
-                               IO_MUX_GPIO32_REG,
-                               IO_MUX_GPIO33_REG,
-                               IO_MUX_GPIO34_REG,
-                               IO_MUX_GPIO35_REG,
-                               IO_MUX_GPIO36_REG,
-                               IO_MUX_GPIO37_REG,
-                               IO_MUX_GPIO38_REG,
-                               IO_MUX_GPIO39_REG};
+    const uint32_t io_mux[] = { IO_MUX_GPIO0_REG,
+                                IO_MUX_GPIO1_REG,
+                                IO_MUX_GPIO2_REG,
+                                IO_MUX_GPIO3_REG,
+                                IO_MUX_GPIO4_REG,
+                                IO_MUX_GPIO5_REG,
+                                IO_MUX_GPIO6_REG,
+                                IO_MUX_GPIO7_REG,
+                                IO_MUX_GPIO8_REG,
+                                IO_MUX_GPIO9_REG,
+                                IO_MUX_GPIO10_REG,
+                                IO_MUX_GPIO11_REG,
+                                IO_MUX_GPIO12_REG,
+                                IO_MUX_GPIO13_REG,
+                                IO_MUX_GPIO14_REG,
+                                IO_MUX_GPIO15_REG,
+                                IO_MUX_GPIO16_REG,
+                                IO_MUX_GPIO17_REG,
+                                IO_MUX_GPIO18_REG,
+                                IO_MUX_GPIO19_REG,
+                                IO_MUX_GPIO20_REG,
+                                IO_MUX_GPIO21_REG,
+                                IO_MUX_GPIO22_REG,
+                                IO_MUX_GPIO23_REG,
+                                IO_MUX_GPIO24_REG,
+                                IO_MUX_GPIO25_REG,
+                                IO_MUX_GPIO26_REG,
+                                IO_MUX_GPIO27_REG,
+                                0,
+                                0,
+                                0,
+                                0,
+                                IO_MUX_GPIO32_REG,
+                                IO_MUX_GPIO33_REG,
+                                IO_MUX_GPIO34_REG,
+                                IO_MUX_GPIO35_REG,
+                                IO_MUX_GPIO36_REG,
+                                IO_MUX_GPIO37_REG,
+                                IO_MUX_GPIO38_REG,
+                                IO_MUX_GPIO39_REG };
 
     // Wrong pin selected? Return!
-    if (io_mux[pin] == -1) return;
+    if (io_mux[pin] == -1) { return; }
 
     // Setup GPIO Matrix for selected pin signal
     GPIO.func_out_sel_cfg[pin].func_sel = function; // Set the pin function

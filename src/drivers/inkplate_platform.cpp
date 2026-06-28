@@ -14,12 +14,12 @@ InkPlatePlatform InkPlatePlatform::singleton;
 
 bool
 #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
-  InkPlatePlatform::setup(bool sd_card_init, TouchScreen::ISRHandlerPtr touch_screen_handler)
+InkPlatePlatform::setup(bool sd_card_init, TouchScreen::ISRHandlerPtr touch_screen_handler)
 #else
-  InkPlatePlatform::setup(bool sd_card_init)
+InkPlatePlatform::setup(bool sd_card_init)
 #endif
 {
-  wire.setup();
+  wire.setup(); 
 
   // Setup the display
   if (!e_ink.setup()) {
@@ -34,26 +34,24 @@ bool
   }
 
   #if EXTENDED_CASE && (INKPLATE_6 || INKPLATE_10)
-    // Setup Press keys
-    if (!press_keys.setup()) {
-      ESP_LOGE(TAG, "PressKeys setup not completed!");
-      return false;
-    }
+  if (!press_keys.setup()) {
+    ESP_LOGE(TAG, "PressKeys setup not completed!");
+    return false;
+  }
   #elif INKPLATE_6 || INKPLATE_10
-    // Setup Touch keys
-    if (!touch_keys.setup()) {
-      ESP_LOGE(TAG, "TouchKeys setup not completed!");
-      return false;
-    }
+  if (!touch_keys.setup()) {
+    ESP_LOGE(TAG, "TouchKeys setup not completed!");
+    return false;
+  }
   #elif INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
-    if (!touch_screen.setup(true, touch_screen_handler)) {
-      ESP_LOGE(TAG, "TouchScreen setup not completed!");
-      return false;
-    }
-    if (!front_light.setup()) {
-      ESP_LOGE(TAG, "FrontLight setup not completed!");
-      return false;
-    }
+  if (!touch_screen.setup(true, touch_screen_handler)) {
+    ESP_LOGE(TAG, "TouchScreen setup not completed!");
+    return false;
+  }
+  if (!front_light.setup()) {
+    ESP_LOGE(TAG, "FrontLight setup not completed!");
+    return false;
+  }
   #endif
 
   if (!rtc.setup()) {
@@ -118,8 +116,8 @@ void InkPlatePlatform::deep_sleep(gpio_num_t gpio_num, int level) {
   }
 
   #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
-    touch_screen.shutdown();
-    front_light.disable();
+  touch_screen.shutdown();
+  front_light.disable();
   #endif
 
   sd_card.deepSleep();
@@ -133,8 +131,8 @@ void InkPlatePlatform::restart() {
   esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
 
   #if INKPLATE_6PLUS || INKPLATE_6PLUS_V2 || INKPLATE_6FLICK
-    touch_screen.shutdown();
-    front_light.disable();
+  touch_screen.shutdown();
+  front_light.disable();
   #endif
 
   sd_card.deepSleep();

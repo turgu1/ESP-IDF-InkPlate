@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16.0)
 
-set(DEVICE "INKPLATE_6V2")
+set(DEVICE "INKPLATE_6_V2")
 
 include("../SetupApp.txt")
 
