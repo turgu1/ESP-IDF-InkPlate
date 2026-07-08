@@ -133,12 +133,23 @@
     d_memory_new->clear();
     memset(p_buffer, 0, BITMAP_SIZE_1BIT * 2);
 
-    for (int i = 0; i < 9; ++i) {
-      for (uint32_t j = 0; j < 256; ++j) {
-        uint8_t z         = (WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i]);
-        GLUT[i * 256 + j] = PIN_LUT[z];
-        z = ((WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i])) << 4;
-        GLUT2[i * 256 + j] = PIN_LUT[z];
+    // for (int i = 0; i < 9; ++i) {
+    //   for (uint32_t j = 0; j < 256; ++j) {
+    //     uint8_t z         = (WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i]);
+    //     GLUT[i * 256 + j] = PIN_LUT[z];
+    //     z = ((WAVEFORM_3BIT[j & 0x07][i] << 2) | (WAVEFORM_3BIT[(j >> 4) & 0x07][i])) << 4;
+    //     GLUT2[i * 256 + j] = PIN_LUT[z];
+    //   }
+    // }
+
+    for (int j = 0; j < 9; ++j) {
+      for (uint32_t i = 0; i < 256; ++i) {
+        uint8_t z = (WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j]);
+        GLUT[j * 256 + i] = ((z & 0b00000011) << 4) | (((z & 0b00001100) >> 2) << 18) |
+                            (((z & 0b00010000) >> 4) << 23) | (((z & 0b11100000) >> 5) << 25);
+        z = ((WAVEFORM_3BIT[i & 0x07][j] << 2) | (WAVEFORM_3BIT[(i >> 4) & 0x07][j])) << 4;
+        GLUT2[j * 256 + i] = ((z & 0b00000011) << 4) | (((z & 0b00001100) >> 2) << 18) |
+                             (((z & 0b00010000) >> 4) << 23) | (((z & 0b11100000) >> 5) << 25);
       }
     }
 
@@ -181,14 +192,14 @@
         dram = *--ptr;
 
         hscan_start(PIN_LUT[LUTW[(dram >> 4) & 0x0F]]);
-        GPIO.out_w1ts = CL | PIN_LUT[LUTW[dram & 0x0F]];
+        GPIO.out_w1ts = CL | PIN_LUT[LUTB[dram & 0x0F]];
         GPIO.out_w1tc = CL | DATA;
 
         for (int j = 0; j < (LINE_SIZE_1BIT - 1); ++j) {
           dram          = *--ptr;
-          GPIO.out_w1ts = CL | PIN_LUT[LUTW[(dram >> 4) & 0x0F]];
+          GPIO.out_w1ts = CL | PIN_LUT[LUTB[(dram >> 4) & 0x0F]];
           GPIO.out_w1tc = CL | DATA;
-          GPIO.out_w1ts = CL | PIN_LUT[LUTW[dram & 0x0F]];
+          GPIO.out_w1ts = CL | PIN_LUT[LUTB[dram & 0x0F]];
           GPIO.out_w1tc = CL | DATA;
         }
 
