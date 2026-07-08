@@ -70,9 +70,9 @@
       return false;
     }
 
-    io_expander_int.set_direction(VCOM,   IOExpander::PinMode::OUTPUT);
-    io_expander_int.set_direction(PWRUP,  IOExpander::PinMode::OUTPUT);
-    io_expander_int.set_direction(WAKEUP, IOExpander::PinMode::OUTPUT);
+    io_expander_int.set_direction(VCOM,         IOExpander::PinMode::OUTPUT);
+    io_expander_int.set_direction(PWRUP,        IOExpander::PinMode::OUTPUT);
+    io_expander_int.set_direction(WAKEUP,       IOExpander::PinMode::OUTPUT);
 
     io_expander_int.set_direction(GPIO0_ENABLE, IOExpander::PinMode::OUTPUT);
     io_expander_int.digital_write(GPIO0_ENABLE, IOExpander::SignalLevel::HIGH);
@@ -162,7 +162,7 @@
     clean(PixelState::DISCHARGE, 1);
     clean(PixelState::WHITE,     11);
 
-    uint8_t *data = frame_buffer.get_data();
+    uint8_t *         data = frame_buffer.get_data();
 
     volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
 
@@ -279,7 +279,7 @@
     clean(PixelState::DISCHARGE, 1);
     clean(PixelState::WHITE,     11);
 
-    uint8_t *data = frame_buffer.get_data();
+    uint8_t *         data = frame_buffer.get_data();
 
     volatile uint8_t *line_buffer = i2s_comms.get_line_buffer();
 
@@ -340,7 +340,7 @@
     uint8_t *odata = d_memory_new->get_data();
 
     uint32_t n   = BITMAP_SIZE_1BIT * 2 - 1;
-    uint16_t pos = BITMAP_SIZE_1BIT - 1;
+    uint32_t pos = BITMAP_SIZE_1BIT - 1;
 
     for (int i = 0; i < HEIGHT; i++) {
       for (int j = 0; j < LINE_SIZE_1BIT; j++) {
