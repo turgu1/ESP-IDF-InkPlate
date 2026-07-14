@@ -191,7 +191,7 @@
 
         dram = *--ptr;
 
-        hscan_start(PIN_LUT[LUTW[(dram >> 4) & 0x0F]]);
+        hscan_start(PIN_LUT[LUTB[(dram >> 4) & 0x0F]]);
         GPIO.out_w1ts = CL | PIN_LUT[LUTB[dram & 0x0F]];
         GPIO.out_w1tc = CL | DATA;
 
